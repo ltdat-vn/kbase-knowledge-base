@@ -40,7 +40,7 @@ public class AiChatServiceImpl implements AiChatService {
     @Value("${kbase.ai.gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${kbase.ai.gemini.model:gemini-1.5-flash}")
+    @Value("${kbase.ai.gemini.model:gemini-3.6-flash}")
     private String geminiModel;
 
     private static final Pattern WORD_SPLITTER = Pattern.compile("[\\s,;:.?!()\"'\\[\\]{}]+");
