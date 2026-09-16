@@ -156,18 +156,37 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <button
-            onClick={onBack}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onBack();
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
-              fontSize: '0.8rem',
-              color: '#64748b',
-              background: 'none',
-              border: 'none',
+              fontSize: '0.82rem',
+              fontWeight: 500,
+              color: '#475569',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: 8,
+              padding: '6px 12px',
               cursor: 'pointer',
-              marginBottom: 8,
-              padding: 0,
+              marginBottom: 12,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f8fafc';
+              e.currentTarget.style.color = '#0f172a';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#ffffff';
+              e.currentTarget.style.color = '#475569';
+              e.currentTarget.style.borderColor = '#e2e8f0';
             }}
           >
             <ArrowLeft size={14} /> Quay lại danh sách dự án

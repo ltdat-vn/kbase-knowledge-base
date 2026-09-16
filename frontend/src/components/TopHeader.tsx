@@ -23,6 +23,7 @@ interface TopHeaderProps {
   onOpenUpload?: () => void;
   onQuickLogin: (role: 'admin' | 'owner' | 'user') => void;
   onOpenAuth: () => void;
+  onBreadcrumbClick?: (index: number) => void;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
@@ -36,6 +37,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   onOpenUpload,
   onQuickLogin,
   onOpenAuth,
+  onBreadcrumbClick,
 }) => {
   return (
     <header
@@ -52,19 +54,31 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     >
       {/* Left: Breadcrumbs */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem' }}>
-        {breadcrumbPath.map((item, idx) => (
-          <React.Fragment key={idx}>
-            {idx > 0 && <ChevronRight size={14} color="#94a3b8" />}
-            <span
-              style={{
-                fontWeight: idx === breadcrumbPath.length - 1 ? 600 : 400,
-                color: idx === breadcrumbPath.length - 1 ? '#0f172a' : '#64748b',
-              }}
-            >
-              {item}
-            </span>
-          </React.Fragment>
-        ))}
+        {breadcrumbPath.map((item, idx) => {
+          const isLast = idx === breadcrumbPath.length - 1;
+          return (
+            <React.Fragment key={idx}>
+              {idx > 0 && <ChevronRight size={14} color="#94a3b8" />}
+              <span
+                onClick={() => !isLast && onBreadcrumbClick && onBreadcrumbClick(idx)}
+                style={{
+                  fontWeight: isLast ? 600 : 400,
+                  color: isLast ? '#0f172a' : '#64748b',
+                  cursor: isLast ? 'default' : 'pointer',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLast) e.currentTarget.style.color = '#0f172a';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isLast) e.currentTarget.style.color = '#64748b';
+                }}
+              >
+                {item}
+              </span>
+            </React.Fragment>
+          );
+        })}
       </div>
 
       {/* Center: Search Bar with Ctrl+K shortcut */}

@@ -57,10 +57,10 @@ export const App: React.FC = () => {
     try {
       const projs = await projectApi.getAll();
       setProjects(projs);
-      if (selectedProject) {
-        const refreshed = projs.find((p) => p.id === selectedProject.id);
-        if (refreshed) setSelectedProject(refreshed);
-      }
+      setSelectedProject((curr) => {
+        if (!curr) return null;
+        return projs.find((p) => p.id === curr.id) || null;
+      });
     } catch (err) {
       console.error('Failed to load projects', err);
     }
@@ -161,9 +161,15 @@ export const App: React.FC = () => {
           setSearchQuery={setSearchQuery}
           isAiDrawerOpen={isAiDrawerOpen}
           setIsAiDrawerOpen={setIsAiDrawerOpen}
-          onOpenCreateProject={currentUser ? () => setIsCreateProjectOpen(true) : undefined}
+          onOpenCreateProject={!selectedProject && currentUser ? () => setIsCreateProjectOpen(true) : undefined}
           onQuickLogin={handleQuickLogin}
           onOpenAuth={() => setIsAuthOpen(true)}
+          onBreadcrumbClick={(idx) => {
+            if (idx <= 1) {
+              setSelectedProject(null);
+              setActiveTab('projects');
+            }
+          }}
         />
 
         {/* Scrollable Main Body */}
