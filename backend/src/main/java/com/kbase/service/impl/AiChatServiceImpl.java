@@ -11,19 +11,37 @@ import com.kbase.repository.ProjectMemberRepository;
 import com.kbase.repository.ProjectRepository;
 import com.kbase.service.AiChatService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AiChatServiceImpl implements AiChatService {
 
     private final DocumentRepository documentRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ObjectMapper objectMapper;
+
+    @Value("${kbase.ai.gemini.api-key:}")
+    private String geminiApiKey;
+
+    @Value("${kbase.ai.gemini.model:gemini-1.5-flash}")
+    private String geminiModel;
 
     private static final Pattern WORD_SPLITTER = Pattern.compile("[\\s,;:.?!()\"'\\[\\]{}]+");
     private static final Set<String> STOP_WORDS = Set.of(
@@ -106,6 +124,34 @@ public class AiChatServiceImpl implements AiChatService {
         scoredDocs.sort((a, b) -> Double.compare(b.score, a.score));
 
         List<ChatResponse.SourceReference> references = new ArrayList<>();
+        int topCount = Math.min(scoredDocs.size(), 3);
+        for (int i = 0; i < topCount; i++) {
+            ScoredDoc sd = scoredDocs.get(i);
+            references.add(ChatResponse.SourceReference.builder()
+                    .documentId(sd.doc.getId())
+                    .documentTitle(sd.doc.getTitle())
+                    .originalFilename(sd.doc.getOriginalFilename())
+                    .snippet(sd.snippet)
+                    .score(Math.round(sd.score * 10.0) / 10.0)
+                    .build());
+        }
+
+        // 1. Thử gọi Google Gemini nếu có API key
+        if (geminiApiKey != null && !geminiApiKey.isBlank()) {
+            String contextText = buildGeminiContext(documents, scoredDocs);
+            String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, project.getName());
+            if (geminiAnswer != null && !geminiAnswer.isBlank()) {
+                log.info("Trả lời câu hỏi thành công bằng Google Gemini model {}", geminiModel);
+                return ChatResponse.builder()
+                        .question(request.getQuestion())
+                        .answer(geminiAnswer)
+                        .projectId(projectId)
+                        .references(references)
+                        .build();
+            }
+        }
+
+        // 2. Fallback sang bộ máy phân tích nội bộ (Local RAG)
         StringBuilder answerBuilder = new StringBuilder();
 
         if (scoredDocs.isEmpty()) {
@@ -124,18 +170,6 @@ public class AiChatServiceImpl implements AiChatService {
             }
         } else {
             answerBuilder.append("Dựa trên các tài liệu trong dự án **").append(project.getName()).append("**, dưới đây là câu trả lời được tổng hợp:\n\n");
-
-            int topCount = Math.min(scoredDocs.size(), 3);
-            for (int i = 0; i < topCount; i++) {
-                ScoredDoc sd = scoredDocs.get(i);
-                references.add(ChatResponse.SourceReference.builder()
-                        .documentId(sd.doc.getId())
-                        .documentTitle(sd.doc.getTitle())
-                        .originalFilename(sd.doc.getOriginalFilename())
-                        .snippet(sd.snippet)
-                        .score(Math.round(sd.score * 10.0) / 10.0)
-                        .build());
-            }
 
             // Tổng hợp thông tin từ tài liệu khớp nhất
             ScoredDoc topMatch = scoredDocs.get(0);
@@ -156,6 +190,85 @@ public class AiChatServiceImpl implements AiChatService {
                 .projectId(projectId)
                 .references(references)
                 .build();
+    }
+
+    private String buildGeminiContext(List<Document> allDocs, List<ScoredDoc> scoredDocs) {
+        StringBuilder sb = new StringBuilder();
+        if (!scoredDocs.isEmpty()) {
+            int limit = Math.min(scoredDocs.size(), 3);
+            for (int i = 0; i < limit; i++) {
+                Document doc = scoredDocs.get(i).doc;
+                sb.append("--- TÀI LIỆU: ").append(doc.getTitle()).append(" (Tên tệp: ").append(doc.getOriginalFilename()).append(") ---\n");
+                if (doc.getTextContent() != null && !doc.getTextContent().isBlank()) {
+                    String snippet = doc.getTextContent();
+                    if (snippet.length() > 3000) snippet = snippet.substring(0, 3000) + "...";
+                    sb.append(snippet).append("\n\n");
+                } else if (doc.getSummary() != null) {
+                    sb.append(doc.getSummary()).append("\n\n");
+                }
+            }
+        } else {
+            for (Document doc : allDocs) {
+                sb.append("• ").append(doc.getTitle()).append(" - ").append(doc.getOriginalFilename());
+                if (doc.getSummary() != null) sb.append(": ").append(doc.getSummary());
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    private String callGeminiApi(String question, String context, String projectName) {
+        try {
+            String prompt = String.format("""
+                    Bạn là Trợ lý AI chuyên gia của hệ thống KBase.
+                    Hãy trả lời câu hỏi của người dùng bằng Tiếng Việt dựa trên ngữ cảnh tài liệu dự án "%s" dưới đây.
+                    
+                    Yêu cầu:
+                    1. Trình bày rõ ràng, mạch lạc, có cấu trúc bằng định dạng Markdown (tiêu đề, in đậm, danh sách gạch đầu dòng).
+                    2. Dựa sát vào thông tin có trong ngữ cảnh tài liệu. Nếu tài liệu không đề cập đến nội dung câu hỏi, hãy nói rõ là tài liệu dự án hiện chưa có thông tin này.
+                    
+                    ---
+                    [NGỮ CẢNH TÀI LIỆU DỰ ÁN]:
+                    %s
+                    ---
+                    [CÂU HỎI]:
+                    %s
+                    """, projectName, context, question);
+
+            Map<String, Object> part = Map.of("text", prompt);
+            Map<String, Object> content = Map.of("parts", List.of(part));
+            Map<String, Object> requestBody = Map.of("contents", List.of(content));
+
+            String jsonPayload = objectMapper.writeValueAsString(requestBody);
+
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiApiKey;
+
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(20))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+            if (response.statusCode() == 200) {
+                JsonNode rootNode = objectMapper.readTree(response.body());
+                JsonNode textNode = rootNode.at("/candidates/0/content/parts/0/text");
+                if (!textNode.isMissingNode() && !textNode.asText().isBlank()) {
+                    return textNode.asText();
+                }
+            } else {
+                log.warn("Gemini API phản hồi mã lỗi: {}, nội dung: {}", response.statusCode(), response.body());
+            }
+        } catch (Exception e) {
+            log.warn("Lỗi khi kết nối Google Gemini API, tự động chuyển về chế độ nội bộ: {}", e.getMessage());
+        }
+        return null;
     }
 
     private int countOccurrences(String text, String term) {

@@ -36,6 +36,9 @@ kbase:
   ai:
     service-url: http://localhost:8000
     mock-fallback: true
+    gemini:
+      api-key: ${GEMINI_API_KEY:}
+      model: gemini-1.5-flash
 
 ---
 # Dev Profile with H2
