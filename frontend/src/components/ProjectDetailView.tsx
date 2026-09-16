@@ -145,15 +145,9 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     TEXT: 'Văn Bản / Code',
   };
 
-  // Mock status distribution for realistic SaaS look like reference image
-  const getDocStatus = (docId: number) => {
-    if (docId % 3 === 0) {
-      return { label: 'Bản nháp', className: 'badge-status-draft', dotColor: '#f59e0b' };
-    }
-    if (docId % 3 === 1) {
-      return { label: 'Hoạt động', className: 'badge-status-active', dotColor: '#10b981' };
-    }
-    return { label: 'Đang duyệt', className: 'badge-status-review', dotColor: '#3b82f6' };
+  // Status indicator: Hoạt động (Active) for uploaded files
+  const getDocStatus = (_docId: number) => {
+    return { label: 'Hoạt động', className: 'badge-status-active', dotColor: '#10b981' };
   };
 
   return (
