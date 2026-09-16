@@ -1,0 +1,19 @@
+# Build Directories
+backend/target/
+frontend/dist/
+frontend/node_modules/
+
+# Uploaded Files during testing
+uploads/project_*
+backend/uploads/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
