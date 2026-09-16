@@ -137,16 +137,18 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
       {/* Panel Header */}
       <div
         style={{
-          padding: '16px 20px',
+          padding: '12px 16px',
           borderBottom: '1px solid #eaecf0',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           background: '#ffffff',
           flexShrink: 0,
+          minHeight: 58,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* Left Side: Bot Brand */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
           <div
             style={{
               width: 32,
@@ -158,37 +160,59 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
               justifyContent: 'center',
               color: '#ffffff',
               boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
+              flexShrink: 0,
             }}
           >
             <Sparkles size={16} />
           </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
-                Trợ Lý AI (Gemini)
-              </h3>
+
+          <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'nowrap' }}>
+              <span
+                style={{
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  color: '#0f172a',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Trợ Lý AI
+              </span>
               <span
                 style={{
                   fontSize: '0.68rem',
-                  padding: '1px 6px',
+                  padding: '1px 7px',
                   borderRadius: 9999,
                   background: '#ecfdf5',
                   color: '#059669',
                   border: '1px solid #a7f3d0',
                   fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
               >
-                RAG Sẵn Sàng
+                Gemini RAG
               </span>
             </div>
-            <p style={{ fontSize: '0.72rem', color: '#64748b' }}>
-              {currentProject ? currentProject.name : 'Chọn dự án để hỏi'}
-            </p>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                color: '#64748b',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: 160,
+              }}
+              title={currentProject ? currentProject.name : 'Chưa chọn dự án'}
+            >
+              {currentProject ? currentProject.name : 'Chưa chọn dự án'}
+            </span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Project selector if not in locked drawer or multiple projects */}
+        {/* Right Side Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {/* Project selector if multiple projects */}
           {projects.length > 1 && (
             <select
               value={selectedProjectId || ''}
@@ -200,9 +224,12 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
                 border: '1px solid #e2e8f0',
                 background: '#f8fafc',
                 color: '#334155',
-                maxWidth: 130,
+                maxWidth: 110,
                 outline: 'none',
+                cursor: 'pointer',
+                textOverflow: 'ellipsis',
               }}
+              title="Chọn dự án để hỏi"
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -217,7 +244,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
             onClick={() => setMessages([messages[0]])}
             className="btn btn-secondary btn-sm"
             title="Xóa lịch sử hội thoại"
-            style={{ width: 30, height: 30, padding: 0, borderRadius: 6 }}
+            style={{ width: 32, height: 32, padding: 0, borderRadius: 8 }}
           >
             <Trash2 size={14} />
           </button>
@@ -228,9 +255,9 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
               onClick={onCloseDrawer}
               className="btn btn-secondary btn-sm"
               title="Đóng bảng AI"
-              style={{ width: 30, height: 30, padding: 0, borderRadius: 6 }}
+              style={{ width: 32, height: 32, padding: 0, borderRadius: 8 }}
             >
-              <X size={14} />
+              <X size={15} />
             </button>
           )}
         </div>
