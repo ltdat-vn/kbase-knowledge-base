@@ -40,7 +40,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
     {
       id: 'welcome',
       sender: 'bot',
-      text: 'Hello! I am your KBase AI Knowledge Assistant. Ask me anything about the documents, architectural guidelines, or uploaded recordings in your project.',
+      text: 'Xin chào! Tôi là Trợ Lý Trí Tuệ Nhân Tạo KBase. Hãy đặt câu hỏi cho tôi về tài liệu đặc tả, hướng dẫn kiến trúc hoặc các tệp tin trong dự án của bạn.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -88,7 +88,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: 'Sorry, I encountered an error searching documents: ' + (err.response?.data?.message || err.message),
+        text: 'Rất tiếc, đã xảy ra lỗi khi tìm kiếm và phân tích tài liệu: ' + (err.response?.data?.message || err.message),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -100,9 +100,9 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
   const currentProject = projects.find((p) => p.id === selectedProjectId);
 
   const samplePrompts = [
-    'What is the technology stack of KBase?',
-    'Explain the security roles and permissions',
-    'What document and media formats are supported?',
+    'Công nghệ và kiến trúc của hệ thống KBase gồm những gì?',
+    'Giải thích phân quyền người dùng (Admin, Owner, User)',
+    'Hệ thống hỗ trợ những định dạng tài liệu và media nào?',
   ];
 
   return (
@@ -124,13 +124,13 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>AI Knowledge Chatbot</h2>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Trợ Lý Tri Thức AI</h2>
               <span className="badge" style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#22d3ee', border: '1px solid rgba(6, 182, 212, 0.3)' }}>
-                RAG Assisted
+                Hỗ Trợ RAG
               </span>
             </div>
             <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-              Answers questions synthesized directly from project documentation with cited references
+              Tổng hợp câu trả lời trực tiếp từ tài liệu dự án kèm nguồn trích dẫn chứng cứ cụ thể
             </p>
           </div>
         </div>
@@ -147,7 +147,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} ({p.documentCount} docs)
+                  {p.name} ({p.documentCount} tài liệu)
                 </option>
               ))}
             </select>
@@ -156,7 +156,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
           <button
             onClick={() => setMessages([messages[0]])}
             className="btn btn-secondary btn-sm"
-            title="Clear Chat History"
+            title="Xóa lịch sử hội thoại"
             style={{ padding: '6px 10px' }}
           >
             <Trash2 size={15} />
@@ -218,7 +218,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
                   <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#93c5fd', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Sparkles size={14} color="#60a5fa" />
-                      Cited Source Documents ({m.references.length}):
+                      Tài liệu trích dẫn tham khảo ({m.references.length}):
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 8 }}>
@@ -247,7 +247,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
                               target="_blank"
                               rel="noreferrer"
                               className="btn btn-secondary btn-sm"
-                              title="Download cited document"
+                              title="Tải tài liệu trích dẫn"
                               style={{ padding: '3px 7px', fontSize: '0.7rem' }}
                             >
                               <Download size={13} />
@@ -287,7 +287,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
             <div style={{ background: 'rgba(30, 41, 59, 0.75)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
               <Loader2 size={18} className="spin" color="#818cf8" />
               <span style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                Analyzing documents in {currentProject?.name || 'project'}...
+                Đang tra cứu và phân tích tài liệu trong {currentProject?.name || 'dự án'}...
               </span>
             </div>
           </div>
@@ -299,7 +299,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
       {/* Suggested Quick Questions */}
       <div style={{ padding: '10px 24px', background: 'rgba(15, 23, 42, 0.5)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto' }}>
         <span style={{ fontSize: '0.75rem', color: '#9ca3af', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <HelpCircle size={14} /> Suggestions:
+          <HelpCircle size={14} /> Gợi ý câu hỏi:
         </span>
         {samplePrompts.map((prompt, i) => (
           <button
@@ -327,8 +327,8 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
             type="text"
             placeholder={
               selectedProjectId
-                ? `Ask about any file in ${currentProject?.name || 'this project'}...`
-                : 'Select a project above to start asking questions...'
+                ? `Hỏi bất kỳ điều gì về tài liệu trong ${currentProject?.name || 'dự án này'}...`
+                : 'Vui lòng chọn một dự án ở trên để bắt đầu đặt câu hỏi...'
             }
             disabled={!selectedProjectId || loading}
             className="input-field"

@@ -6,7 +6,6 @@ import {
   Shield,
   FolderGit2,
   Bot,
-  Database,
   ExternalLink,
   User as UserIcon,
 } from 'lucide-react';
@@ -50,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               KBase
             </h1>
             <span style={{ fontSize: '0.7rem', color: '#9ca3af', display: 'block', marginTop: -4 }}>
-              Enterprise Knowledge Base
+              Cơ Sở Tri Thức Dự Án & AI
             </span>
           </div>
         </div>
@@ -67,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               onClick={() => setActiveTab('projects')}
             >
-              <FolderGit2 size={16} /> Projects
+              <FolderGit2 size={16} /> Dự Án
             </button>
             <button
               className="btn btn-sm"
@@ -78,7 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               onClick={() => setActiveTab('chat')}
             >
-              <Bot size={16} /> AI Chatbot
+              <Bot size={16} /> Trợ Lý AI
             </button>
             {user.role === 'ROLE_ADMIN' && (
               <button
@@ -90,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }}
                 onClick={() => setActiveTab('admin')}
               >
-                <Shield size={16} /> Admin Panel
+                <Shield size={16} /> Quản Trị Hệ Thống
               </button>
             )}
           </nav>
@@ -104,10 +103,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             target="_blank"
             rel="noreferrer"
             className="btn btn-secondary btn-sm"
-            title="Open Swagger OpenAPI Documentation"
+            title="Mở tài liệu Swagger OpenAPI"
             style={{ fontSize: '0.78rem', color: '#93c5fd' }}
           >
-            <ExternalLink size={14} /> Swagger API
+            <ExternalLink size={14} /> Tài Liệu Swagger API
           </a>
 
           {user ? (
@@ -116,14 +115,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user.fullName}</div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
                   <span className={`badge ${user.role === 'ROLE_ADMIN' ? 'badge-admin' : user.role === 'ROLE_OWNER' ? 'badge-owner' : 'badge-user'}`}>
-                    {user.role.replace('ROLE_', '')}
+                    {user.role === 'ROLE_ADMIN' ? 'QUẢN TRỊ' : user.role === 'ROLE_OWNER' ? 'CHỦ DỰ ÁN' : 'NGƯỜI DÙNG'}
                   </span>
                 </div>
               </div>
               <button
                 onClick={onLogout}
                 className="btn btn-secondary btn-sm"
-                title="Log Out"
+                title="Đăng xuất"
                 style={{ padding: 8 }}
               >
                 <LogOut size={16} />
@@ -139,7 +138,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button onClick={() => onQuickLogin('user')} className="btn btn-sm" style={{ padding: '3px 7px', fontSize: '0.72rem', background: '#059669', color: '#fff' }}>User</button>
               </div>
               <button onClick={onOpenAuth} className="btn btn-primary btn-sm">
-                <UserIcon size={15} /> Sign In
+                <UserIcon size={15} /> Đăng Nhập
               </button>
             </div>
           )}

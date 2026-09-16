@@ -1,0 +1,3 @@
+@echo off
+echo Opening pgAdmin 4 (PostgreSQL Management Tool)...
+start "" "%~dp0pgsql\pgAdmin 4\runtime\pgAdmin4.exe"

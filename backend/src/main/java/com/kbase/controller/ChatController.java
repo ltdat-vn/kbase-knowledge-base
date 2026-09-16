@@ -20,15 +20,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "BearerAuth")
-@Tag(name = "AI Chatbot", description = "Endpoints for conversational Q&A over project knowledge base with source document references")
+@Tag(name = "4. Trợ lý AI Chatbot (AI Assistant)", description = "Các endpoint hỏi đáp thông minh trích dẫn tài liệu trong dự án")
 public class ChatController {
 
     private final AiChatService aiChatService;
     private final AuthService authService;
 
     @PostMapping("/ask")
-    @Operation(summary = "Ask a question about project documents",
-               description = "Analyzes all uploaded documents in the project and synthesizes an intelligent answer with source citations")
+    @Operation(summary = "Đặt câu hỏi cho AI về tài liệu dự án",
+               description = "Phân tích toàn bộ tài liệu đã tải lên trong dự án và tổng hợp câu trả lời thông minh kèm trích dẫn nguồn")
     public ResponseEntity<ChatResponse> askQuestion(@Valid @RequestBody ChatRequest request) {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(aiChatService.askQuestion(request, currentUser));

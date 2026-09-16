@@ -23,67 +23,67 @@ import java.util.Map;
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "BearerAuth")
-@Tag(name = "Projects", description = "Endpoints for managing workspace projects and member collaborations")
+@Tag(name = "2. Quản lý Dự án (Projects)", description = "Các endpoint tạo dự án, quản lý không gian làm việc và mời thành viên")
 public class ProjectController {
 
     private final ProjectService projectService;
     private final AuthService authService;
 
     @GetMapping
-    @Operation(summary = "List accessible projects", description = "Returns all projects the user owns, is a member of, or all projects if Admin")
+    @Operation(summary = "Lấy danh sách dự án có quyền truy cập", description = "Trả về tất cả dự án người dùng sở hữu, tham gia, hoặc toàn bộ nếu là Admin")
     public ResponseEntity<List<ProjectDto>> getProjects() {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(projectService.getProjectsForUser(currentUser));
     }
 
     @PostMapping
-    @Operation(summary = "Create a new project", description = "Allows project owners or admins to create a new project workspace")
+    @Operation(summary = "Tạo dự án mới", description = "Cho phép chủ dự án (Owner) hoặc Admin tạo không gian làm việc dự án mới")
     public ResponseEntity<ProjectDto> createProject(@Valid @RequestBody CreateProjectRequest request) {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request, currentUser));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get project details by ID", description = "Retrieves details of a specific project")
+    @Operation(summary = "Lấy chi tiết dự án theo ID", description = "Truy xuất thông tin chi tiết của dự án")
     public ResponseEntity<ProjectDto> getProjectById(@PathVariable Long id) {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(projectService.getProjectById(id, currentUser));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update project information", description = "Allows project owner or admin to update name and description")
+    @Operation(summary = "Cập nhật thông tin dự án", description = "Cho phép chủ dự án hoặc Admin đổi tên và mô tả dự án")
     public ResponseEntity<ProjectDto> updateProject(@PathVariable Long id, @Valid @RequestBody CreateProjectRequest request) {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(projectService.updateProject(id, request, currentUser));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a project", description = "Removes a project and all associated files and memberships")
+    @Operation(summary = "Xóa dự án", description = "Xóa dự án cùng toàn bộ tệp tin và thành viên liên kết")
     public ResponseEntity<Map<String, String>> deleteProject(@PathVariable Long id) {
         User currentUser = authService.getCurrentUser();
         projectService.deleteProject(id, currentUser);
-        return ResponseEntity.ok(Map.of("message", "Project deleted successfully"));
+        return ResponseEntity.ok(Map.of("message", "Đã xóa dự án thành công"));
     }
 
     @GetMapping("/{id}/members")
-    @Operation(summary = "List project members", description = "Retrieves the list of members assigned to the project")
+    @Operation(summary = "Danh sách thành viên trong dự án", description = "Lấy danh sách các cộng tác viên tham gia vào dự án")
     public ResponseEntity<List<ProjectMemberDto>> getProjectMembers(@PathVariable Long id) {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(projectService.getProjectMembers(id, currentUser));
     }
 
     @PostMapping("/{id}/members")
-    @Operation(summary = "Invite a member to the project", description = "Adds a registered user to the project with an assigned role")
+    @Operation(summary = "Mời thành viên vào dự án", description = "Thêm một người dùng đã đăng ký vào dự án với vai trò được chỉ định")
     public ResponseEntity<ProjectMemberDto> inviteMember(@PathVariable Long id, @Valid @RequestBody InviteMemberRequest request) {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.inviteMember(id, request, currentUser));
     }
 
     @DeleteMapping("/{id}/members/{userId}")
-    @Operation(summary = "Remove a member from the project", description = "Removes a user's access from the project")
+    @Operation(summary = "Xóa thành viên khỏi dự án", description = "Gỡ quyền truy cập của người dùng khỏi dự án")
     public ResponseEntity<Map<String, String>> removeMember(@PathVariable Long id, @PathVariable Long userId) {
         User currentUser = authService.getCurrentUser();
         projectService.removeMember(id, userId, currentUser);
-        return ResponseEntity.ok(Map.of("message", "Member removed successfully"));
+        return ResponseEntity.ok(Map.of("message", "Đã xóa thành viên khỏi dự án thành công"));
     }
 }

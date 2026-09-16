@@ -18,48 +18,48 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "BearerAuth")
-@Tag(name = "Users & Administration", description = "Endpoints for managing user accounts, roles, and administrative statistics")
+@Tag(name = "5. Quản trị Người dùng & Hệ thống (Admin)", description = "Các endpoint quản trị tài khoản, thay đổi quyền hạn và theo dõi số liệu thống kê")
 public class UserController {
 
     private final UserService userService;
 
     @GetMapping("/api/users")
-    @Operation(summary = "List all registered users", description = "Returns all users for team invitations and collaboration")
+    @Operation(summary = "Danh sách tất cả người dùng", description = "Trả về toàn bộ người dùng đã đăng ký để mời vào dự án")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/api/users/{id}")
-    @Operation(summary = "Get user details by ID", description = "Retrieves user profile details")
+    @Operation(summary = "Lấy thông tin người dùng theo ID", description = "Truy xuất thông tin hồ sơ của người dùng")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @PutMapping("/api/admin/users/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Update user role (Admin)", description = "Changes user role to ADMIN, OWNER, or USER")
+    @Operation(summary = "Cập nhật vai trò người dùng (Admin)", description = "Thay đổi vai trò người dùng thành ADMIN, OWNER hoặc USER")
     public ResponseEntity<UserDto> updateUserRole(@PathVariable Long id, @RequestParam Role role) {
         return ResponseEntity.ok(userService.updateUserRole(id, role));
     }
 
     @PutMapping("/api/admin/users/{id}/toggle-status")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Toggle user enabled/disabled status (Admin)", description = "Enables or disables a user account")
+    @Operation(summary = "Bật/Tắt trạng thái tài khoản (Admin)", description = "Khóa hoặc kích hoạt lại tài khoản người dùng")
     public ResponseEntity<UserDto> toggleUserStatus(@PathVariable Long id) {
         return ResponseEntity.ok(userService.toggleUserStatus(id));
     }
 
     @DeleteMapping("/api/admin/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Delete user account (Admin)", description = "Permanently deletes a user account")
+    @Operation(summary = "Xóa tài khoản người dùng (Admin)", description = "Xóa vĩnh viễn tài khoản người dùng khỏi hệ thống")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
+        return ResponseEntity.ok(Map.of("message", "Đã xóa người dùng thành công"));
     }
 
     @GetMapping("/api/admin/stats")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "System statistics (Admin)", description = "Retrieves total users, projects, documents, and disk storage usage")
+    @Operation(summary = "Thống kê hệ thống (Admin)", description = "Lấy tổng số người dùng, dự án, tài liệu và dung lượng lưu trữ trên đĩa")
     public ResponseEntity<SystemStatsDto> getSystemStats() {
         return ResponseEntity.ok(userService.getSystemStats());
     }

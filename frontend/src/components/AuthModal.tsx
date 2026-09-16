@@ -39,7 +39,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Authentication failed');
+      setError(err.response?.data?.message || err.message || 'Xác thực không thành công. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }}
             onClick={() => { setTab('login'); setError(null); }}
           >
-            <LogIn size={18} /> Sign In
+            <LogIn size={18} /> Đăng Nhập
           </button>
           <button
             style={{
@@ -98,7 +98,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }}
             onClick={() => { setTab('register'); setError(null); }}
           >
-            <UserPlus size={18} /> Create Account
+            <UserPlus size={18} /> Đăng Ký Tài Khoản
           </button>
         </div>
 
@@ -123,33 +123,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {tab === 'register' && (
             <>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Full Name</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Họ và Tên *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. John Doe"
+                  placeholder="Ví dụ: Nguyễn Văn A"
                   className="input-field"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Account Role</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Vai Trò Tài Khoản *</label>
                 <select
                   className="input-field"
                   value={role}
                   onChange={(e) => setRole(e.target.value as UserRole)}
                 >
-                  <option value="ROLE_USER">User (Uploads docs, asks AI questions)</option>
-                  <option value="ROLE_OWNER">Owner (Creates projects, invites team)</option>
-                  <option value="ROLE_ADMIN">Admin (Manages all users & projects)</option>
+                  <option value="ROLE_USER">Người Dùng (User - Tải tài liệu, hỏi đáp AI)</option>
+                  <option value="ROLE_OWNER">Chủ Dự Án (Owner - Tạo dự án, mời thành viên)</option>
+                  <option value="ROLE_ADMIN">Quản Trị Viên (Admin - Toàn quyền quản trị)</option>
                 </select>
               </div>
             </>
           )}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Email Address</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Địa Chỉ Email *</label>
             <input
               type="email"
               required
@@ -161,7 +161,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Password</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Mật Khẩu *</label>
             <input
               type="password"
               required
@@ -173,14 +173,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', marginTop: 8 }}>
-            {loading ? 'Processing...' : tab === 'login' ? 'Sign In' : 'Create Account'}
+            {loading ? 'Đang xử lý...' : tab === 'login' ? 'Đăng Nhập Ngay' : 'Tạo Tài Khoản Mới'}
           </button>
         </form>
 
         {/* Quick Demo Login Preset Buttons */}
         <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <div style={{ fontSize: '0.75rem', color: '#9ca3af', textAlign: 'center', marginBottom: 10 }}>
-            Or instantly log in with pre-seeded test accounts:
+            Hoặc đăng nhập nhanh bằng các tài khoản mẫu:
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             <button
@@ -189,7 +189,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               style={{ flexDirection: 'column', gap: 4, padding: '10px 4px' }}
             >
               <Shield size={16} color="#c084fc" />
-              <span style={{ fontSize: '0.75rem' }}>Admin</span>
+              <span style={{ fontSize: '0.75rem' }}>Quản Trị (Admin)</span>
             </button>
             <button
               onClick={() => { onQuickLogin('owner'); onClose(); }}
@@ -197,7 +197,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               style={{ flexDirection: 'column', gap: 4, padding: '10px 4px' }}
             >
               <Briefcase size={16} color="#38bdf8" />
-              <span style={{ fontSize: '0.75rem' }}>Owner</span>
+              <span style={{ fontSize: '0.75rem' }}>Chủ Dự Án (Owner)</span>
             </button>
             <button
               onClick={() => { onQuickLogin('user'); onClose(); }}
@@ -205,7 +205,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               style={{ flexDirection: 'column', gap: 4, padding: '10px 4px' }}
             >
               <UserIcon size={16} color="#34d399" />
-              <span style={{ fontSize: '0.75rem' }}>User</span>
+              <span style={{ fontSize: '0.75rem' }}>Thành Viên (User)</span>
             </button>
           </div>
         </div>

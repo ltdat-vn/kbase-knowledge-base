@@ -33,7 +33,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       setName('');
       setDescription('');
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to create project');
+      setError(err.response?.data?.message || err.message || 'Không thể tạo dự án. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -60,10 +60,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         </button>
 
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <FolderPlus size={22} color="#818cf8" /> Create New Project
+          <FolderPlus size={22} color="#818cf8" /> Tạo Không Gian Dự Án Mới
         </h2>
         <p style={{ fontSize: '0.82rem', color: '#9ca3af', marginBottom: 20 }}>
-          Create a workspace to organize team documents, tutorials, videos, and specifications.
+          Thiết lập dự án để lưu trữ, tổ chức tài liệu kỹ thuật, video hướng dẫn và tài liệu đặc tả của nhóm.
         </p>
 
         {error && (
@@ -85,11 +85,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Project Name *</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Tên Dự Án *</label>
             <input
               type="text"
               required
-              placeholder="e.g. Mobile App Redesign 2026"
+              placeholder="Ví dụ: Nền Tảng Kỹ Thuật Số FPT 2026"
               className="input-field"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -97,10 +97,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Project Description</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Mô Tả Dự Án</label>
             <textarea
               rows={3}
-              placeholder="Describe the project objectives, scope, and key deliverables..."
+              placeholder="Mô tả mục tiêu, phạm vi dự án, đối tượng áp dụng và định hướng kỹ thuật..."
               className="input-field"
               style={{ resize: 'vertical' }}
               value={description}
@@ -110,10 +110,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 10 }}>
             <button type="button" onClick={onClose} disabled={loading} className="btn btn-secondary">
-              Cancel
+              Hủy
             </button>
             <button type="submit" disabled={loading || !name.trim()} className="btn btn-primary">
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? 'Đang tạo...' : 'Tạo Dự Án'}
             </button>
           </div>
         </form>

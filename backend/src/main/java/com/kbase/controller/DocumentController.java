@@ -27,7 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
-@Tag(name = "Documents", description = "Endpoints for uploading, searching, viewing, and downloading project documents and media")
+@Tag(name = "3. Quản lý Tài liệu & Tệp tin (Documents)", description = "Các endpoint tải lên, tìm kiếm, xem trước, tải về tài liệu và video dự án")
 public class DocumentController {
 
     private final DocumentService documentService;
@@ -35,12 +35,12 @@ public class DocumentController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "BearerAuth")
-    @Operation(summary = "Upload a document, video, or file", description = "Uploads files (PDF, Word, Excel, PPT, TXT, Images, Videos) and links them to a project")
+    @Operation(summary = "Tải lên tài liệu, video hoặc hình ảnh", description = "Tải lên tệp tin (PDF, Word, Excel, PPT, TXT, Ảnh, Video) gắn liền vào dự án")
     public ResponseEntity<DocumentDto> uploadDocument(
-            @Parameter(description = "ID of the target project", required = true) @RequestParam("projectId") Long projectId,
-            @Parameter(description = "The file payload", required = true) @RequestParam("file") MultipartFile file,
-            @Parameter(description = "Optional custom document title") @RequestParam(value = "title", required = false) String title,
-            @Parameter(description = "Optional document summary/notes") @RequestParam(value = "summary", required = false) String summary) {
+            @Parameter(description = "Mã ID của dự án mục tiêu", required = true) @RequestParam("projectId") Long projectId,
+            @Parameter(description = "Dữ liệu tệp tin đính kèm", required = true) @RequestParam("file") MultipartFile file,
+            @Parameter(description = "Tiêu đề tùy chỉnh cho tài liệu") @RequestParam(value = "title", required = false) String title,
+            @Parameter(description = "Tóm tắt / ghi chú cho tài liệu") @RequestParam(value = "summary", required = false) String summary) {
 
         User currentUser = authService.getCurrentUser();
         DocumentDto uploaded = documentService.uploadDocument(projectId, file, title, summary, currentUser);
@@ -49,7 +49,7 @@ public class DocumentController {
 
     @GetMapping("/project/{projectId}")
     @SecurityRequirement(name = "BearerAuth")
-    @Operation(summary = "List documents in a project", description = "Returns all documents belonging to a project, optionally filtered by category")
+    @Operation(summary = "Danh sách tài liệu trong dự án", description = "Trả về tất cả tài liệu thuộc về dự án, có thể lọc theo danh mục")
     public ResponseEntity<List<DocumentDto>> getDocumentsByProject(
             @PathVariable Long projectId,
             @RequestParam(value = "category", required = false) FileCategory category) {
@@ -60,7 +60,7 @@ public class DocumentController {
 
     @GetMapping("/search")
     @SecurityRequirement(name = "BearerAuth")
-    @Operation(summary = "Search documents in a project", description = "Searches documents by title, original filename, summary, or extracted text")
+    @Operation(summary = "Tìm kiếm tài liệu trong dự án", description = "Tìm kiếm theo tiêu đề, tên file gốc, tóm tắt hoặc nội dung văn bản bên trong file")
     public ResponseEntity<List<DocumentDto>> searchDocuments(
             @RequestParam("projectId") Long projectId,
             @RequestParam(value = "query", required = false) String query) {
@@ -71,16 +71,15 @@ public class DocumentController {
 
     @GetMapping("/{id}")
     @SecurityRequirement(name = "BearerAuth")
-    @Operation(summary = "Get document metadata", description = "Retrieves metadata for a specific document")
+    @Operation(summary = "Lấy siêu dữ liệu tài liệu theo ID", description = "Truy xuất thông tin chi tiết của một tài liệu")
     public ResponseEntity<DocumentDto> getDocumentById(@PathVariable Long id) {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(documentService.getDocumentById(id, currentUser));
     }
 
     @GetMapping("/download/{id}")
-    @Operation(summary = "Download a file", description = "Streams the raw file as an attachment download")
+    @Operation(summary = "Tải về tệp tin", description = "Truyền luồng dữ liệu file dưới dạng tệp đính kèm để người dùng tải về")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
-        // Can be downloaded directly via link
         Document doc = documentService.getDocumentEntity(id, null);
         Resource resource = documentService.getFileResource(id, null);
 
@@ -93,7 +92,7 @@ public class DocumentController {
     }
 
     @GetMapping("/preview/{id}")
-    @Operation(summary = "Preview a file inline", description = "Streams the file inline for viewing (images, videos, PDFs, text)")
+    @Operation(summary = "Xem trước tệp tin trực tuyến", description = "Truyền luồng dữ liệu để hiển thị trực tiếp trên trình duyệt (ảnh, video, PDF, văn bản)")
     public ResponseEntity<Resource> previewFile(@PathVariable Long id) {
         Document doc = documentService.getDocumentEntity(id, null);
         Resource resource = documentService.getFileResource(id, null);
@@ -108,10 +107,10 @@ public class DocumentController {
 
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "BearerAuth")
-    @Operation(summary = "Delete a document", description = "Removes the document record and deletes the physical file from storage")
+    @Operation(summary = "Xóa tài liệu", description = "Xóa bản ghi siêu dữ liệu và tệp tin vật lý trong bộ lưu trữ")
     public ResponseEntity<Map<String, String>> deleteDocument(@PathVariable Long id) {
         User currentUser = authService.getCurrentUser();
         documentService.deleteDocument(id, currentUser);
-        return ResponseEntity.ok(Map.of("message", "Document deleted successfully"));
+        return ResponseEntity.ok(Map.of("message", "Đã xóa tài liệu thành công"));
     }
 }

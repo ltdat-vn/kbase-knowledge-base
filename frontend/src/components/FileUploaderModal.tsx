@@ -63,7 +63,7 @@ export const FileUploaderModal: React.FC<FileUploaderModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setError('Please select or drop a file to upload');
+      setError('Vui lòng chọn hoặc kéo thả tệp tài liệu cần tải lên');
       return;
     }
 
@@ -83,7 +83,7 @@ export const FileUploaderModal: React.FC<FileUploaderModalProps> = ({
       onUploaded(uploadedDoc);
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'File upload failed');
+      setError(err.response?.data?.message || err.message || 'Tải tệp lên thất bại. Vui lòng thử lại.');
     } finally {
       setUploading(false);
     }
@@ -111,10 +111,10 @@ export const FileUploaderModal: React.FC<FileUploaderModalProps> = ({
         </button>
 
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <UploadCloud size={24} color="#818cf8" /> Upload to {projectName}
+          <UploadCloud size={24} color="#818cf8" /> Tải Tài Liệu Lên {projectName}
         </h2>
         <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: 20 }}>
-          Supported: PDF, Word (DOCX/DOC), Excel, PowerPoint, Markdown, Images, and Videos.
+          Hỗ trợ đa dạng: PDF, Word (DOCX/DOC), Excel, PowerPoint, Markdown, Hình ảnh và Video hướng dẫn.
         </p>
 
         {error && (
@@ -155,27 +155,27 @@ export const FileUploaderModal: React.FC<FileUploaderModalProps> = ({
                 <CheckCircle2 size={36} color="#34d399" />
                 <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{file.name}</div>
                 <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB • Click or drop another to replace
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB • Nhấp hoặc thả tệp khác để thay thế
                 </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                 <UploadCloud size={38} color="#818cf8" />
                 <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
-                  Drag & drop your files here, or <span style={{ color: '#818cf8' }}>browse</span>
+                  Kéo & thả tệp vào đây, hoặc <span style={{ color: '#818cf8' }}>chọn từ máy tính</span>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-                  Max file size: 100 MB per upload
+                  Dung lượng tối đa: 100 MB mỗi tệp
                 </div>
               </div>
             )}
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Document Title (optional)</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Tiêu Đề Tài Liệu (không bắt buộc)</label>
             <input
               type="text"
-              placeholder="e.g. Sprint 14 Architecture Overview"
+              placeholder="Ví dụ: Tài liệu Tổng Quan Kiến Trúc Nền Tảng"
               className="input-field"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -183,10 +183,10 @@ export const FileUploaderModal: React.FC<FileUploaderModalProps> = ({
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Description / Summary (optional)</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Mô Tả / Tóm Tắt Nội Dung (không bắt buộc)</label>
             <textarea
               rows={3}
-              placeholder="Provide a quick summary or tags to help teammates and the AI search tool..."
+              placeholder="Nhập tóm tắt nhanh hoặc từ khóa để hỗ trợ đồng đội và công cụ tìm kiếm AI..."
               className="input-field"
               style={{ resize: 'vertical' }}
               value={summary}
@@ -197,7 +197,7 @@ export const FileUploaderModal: React.FC<FileUploaderModalProps> = ({
           {uploading && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: 4 }}>
-                <span>Uploading...</span>
+                <span>Đang tải lên và xử lý...</span>
                 <span>{progress}%</span>
               </div>
               <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' }}>
@@ -208,10 +208,10 @@ export const FileUploaderModal: React.FC<FileUploaderModalProps> = ({
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 10 }}>
             <button type="button" onClick={onClose} disabled={uploading} className="btn btn-secondary">
-              Cancel
+              Hủy
             </button>
             <button type="submit" disabled={uploading || !file} className="btn btn-primary">
-              {uploading ? 'Uploading...' : 'Upload Document'}
+              {uploading ? 'Đang tải lên...' : 'Tải Lên Tài Liệu'}
             </button>
           </div>
         </form>

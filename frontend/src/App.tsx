@@ -97,7 +97,7 @@ export const App: React.FC = () => {
     try {
       await handleLogin(creds.email, creds.pass);
     } catch (err) {
-      alert('Quick login failed. Ensure Spring Boot backend is running.');
+      alert('Đăng nhập nhanh thất bại. Hãy đảm bảo backend Spring Boot và PostgreSQL đang hoạt động.');
     }
   };
 
@@ -106,6 +106,13 @@ export const App: React.FC = () => {
     setCurrentUser(null);
     setActiveTab('projects');
     setSelectedProject(null);
+  };
+
+  const formatRoleName = (r?: string) => {
+    if (r === 'OWNER') return 'CHỦ DỰ ÁN';
+    if (r === 'ADMIN') return 'QUẢN TRỊ';
+    if (r === 'VIEWER') return 'NGƯỜI XEM';
+    return 'THÀNH VIÊN';
   };
 
   return (
@@ -138,24 +145,24 @@ export const App: React.FC = () => {
               fontSize: '0.8rem',
               fontWeight: 600,
             }}>
-              <Sparkles size={15} /> Spring Boot 3 & React Knowledge Base with AI Chatbot
+              <Sparkles size={15} /> Nền Tảng Quản Trị Tri Thức KBase - Spring Boot 3, PostgreSQL & Trợ Lý AI
             </div>
 
             <h1 style={{ fontSize: '3rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.15, maxWidth: 850 }}>
-              The Modern Knowledge Platform for{' '}
+              Hệ Thống Cơ Sở Tri Thức Dành Cho{' '}
               <span style={{ background: 'linear-gradient(90deg, #818cf8, #22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Engineering Teams
+                Đội Ngũ Kỹ Thuật
               </span>
             </h1>
 
-            <p style={{ fontSize: '1.1rem', color: '#9ca3af', maxWidth: 650, lineHeight: 1.6 }}>
-              Store, organize, and search project documents, videos, and specifications. Ask questions and receive synthesized answers with direct source citations.
+            <p style={{ fontSize: '1.1rem', color: '#9ca3af', maxWidth: 680, lineHeight: 1.6 }}>
+              Lưu trữ, tổ chức và tìm kiếm tài liệu dự án, video hướng dẫn, kiến trúc hệ thống. Đặt câu hỏi và nhận câu trả lời tổng hợp thông minh kèm nguồn trích dẫn chứng cứ cụ thể.
             </p>
 
             {/* Quick Access Roles */}
             <div className="glass-panel" style={{ padding: 24, width: '100%', maxWidth: 700 }}>
               <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#e2e8f0', marginBottom: 14 }}>
-                🚀 Try live demo with pre-seeded accounts:
+                🚀 Trải nghiệm nhanh hệ thống với các tài khoản mẫu sẵn có:
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
                 <div
@@ -164,8 +171,8 @@ export const App: React.FC = () => {
                   style={{ padding: 18, cursor: 'pointer', textAlign: 'center' }}
                 >
                   <Shield size={26} color="#c084fc" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Admin</div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Full system oversight & users</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Quản Trị (Admin)</div>
+                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Giám sát hệ thống & tài khoản</div>
                 </div>
 
                 <div
@@ -174,8 +181,8 @@ export const App: React.FC = () => {
                   style={{ padding: 18, cursor: 'pointer', textAlign: 'center' }}
                 >
                   <FolderGit2 size={26} color="#38bdf8" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Project Owner</div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Creates projects & invites</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Chủ Dự Án (Owner)</div>
+                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Tạo dự án & mời thành viên</div>
                 </div>
 
                 <div
@@ -184,14 +191,14 @@ export const App: React.FC = () => {
                   style={{ padding: 18, cursor: 'pointer', textAlign: 'center' }}
                 >
                   <Bot size={26} color="#34d399" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>User / Member</div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Uploads docs & asks AI</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Thành Viên (User)</div>
+                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Tải tài liệu & hỏi đáp AI</div>
                 </div>
               </div>
 
               <div style={{ marginTop: 20 }}>
                 <button onClick={() => setIsAuthOpen(true)} className="btn btn-primary">
-                  Sign In with Custom Account <ArrowRight size={16} />
+                  Đăng Nhập Hoặc Đăng Ký Tài Khoản Riêng <ArrowRight size={16} />
                 </button>
               </div>
             </div>
@@ -219,9 +226,9 @@ export const App: React.FC = () => {
                     {/* Projects Header & Create Button */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
                       <div>
-                        <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Project Workspaces</h2>
+                        <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Không Gian Dự Án</h2>
                         <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: 2 }}>
-                          Select a project to browse knowledge documents or collaborate with team members.
+                          Chọn một không gian dự án để quản lý tài liệu, tệp video hoặc cộng tác cùng đồng đội.
                         </p>
                       </div>
 
@@ -229,7 +236,7 @@ export const App: React.FC = () => {
                         onClick={() => setIsCreateProjectOpen(true)}
                         className="btn btn-primary"
                       >
-                        <FolderPlus size={18} /> Create New Project
+                        <FolderPlus size={18} /> Tạo Không Gian Dự Án Mới
                       </button>
                     </div>
 
@@ -237,12 +244,12 @@ export const App: React.FC = () => {
                     {projects.length === 0 ? (
                       <div className="glass-panel" style={{ padding: 48, textAlign: 'center' }}>
                         <FolderGit2 size={48} color="#6366f1" style={{ margin: '0 auto 16px' }} />
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>No Projects Available</h3>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Chưa Có Dự Án Nào</h3>
                         <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: 4, maxWidth: 420, margin: '4px auto 16px' }}>
-                          Create your first project workspace to start organizing guides, meeting notes, and media.
+                          Hãy tạo không gian dự án đầu tiên của bạn để bắt đầu lưu trữ tài liệu đặc tả và video hướng dẫn.
                         </p>
                         <button onClick={() => setIsCreateProjectOpen(true)} className="btn btn-primary btn-sm">
-                          <FolderPlus size={16} /> Create Project
+                          <FolderPlus size={16} /> Tạo Dự Án Mới
                         </button>
                       </div>
                     ) : (
@@ -268,7 +275,7 @@ export const App: React.FC = () => {
                                   <FolderGit2 size={22} color="#818cf8" />
                                 </div>
                                 <span className="badge badge-owner">
-                                  {p.currentUserRole || 'MEMBER'}
+                                  {formatRoleName(p.currentUserRole)}
                                 </span>
                               </div>
 
@@ -276,22 +283,22 @@ export const App: React.FC = () => {
                                 {p.name}
                               </h3>
                               <p style={{ fontSize: '0.82rem', color: '#9ca3af', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                {p.description || 'No description provided.'}
+                                {p.description || 'Chưa có thông tin mô tả dự án.'}
                               </p>
                             </div>
 
                             <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', color: '#9ca3af' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                  <FileText size={14} color="#60a5fa" /> {p.documentCount} files
+                                  <FileText size={14} color="#60a5fa" /> {p.documentCount} tài liệu
                                 </span>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                  <Users size={14} color="#34d399" /> {p.memberCount} members
+                                  <Users size={14} color="#34d399" /> {p.memberCount} thành viên
                                 </span>
                               </div>
 
                               <span style={{ color: '#818cf8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                Open <ArrowRight size={14} />
+                                Mở Dự Án <ArrowRight size={14} />
                               </span>
                             </div>
                           </div>

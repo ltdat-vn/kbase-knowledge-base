@@ -81,22 +81,22 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   };
 
   const handleDeleteDoc = async (docId: number) => {
-    if (!window.confirm('Are you sure you want to delete this file?')) return;
+    if (!window.confirm('Bạn có chắc chắn muốn xóa tài liệu này không?')) return;
     try {
       await documentApi.delete(docId);
       setDocuments((prev) => prev.filter((d) => d.id !== docId));
     } catch (err: any) {
-      alert('Failed to delete file: ' + (err.response?.data?.message || err.message));
+      alert('Xóa tài liệu thất bại: ' + (err.response?.data?.message || err.message));
     }
   };
 
   const handleRemoveMember = async (userId: number) => {
-    if (!window.confirm('Remove this member from project?')) return;
+    if (!window.confirm('Bạn có chắc muốn xóa thành viên này khỏi dự án?')) return;
     try {
       await projectApi.removeMember(project.id, userId);
       setMembers((prev) => prev.filter((m) => m.user.id !== userId));
     } catch (err: any) {
-      alert('Failed to remove member: ' + (err.response?.data?.message || err.message));
+      alert('Xóa thành viên thất bại: ' + (err.response?.data?.message || err.message));
     }
   };
 
@@ -117,6 +117,23 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     }
   };
 
+  const categoryLabels: Record<string, string> = {
+    ALL: 'Tất Cả',
+    DOCUMENT: 'Tài Liệu',
+    SPREADSHEET: 'Bảng Tính',
+    PRESENTATION: 'Thuyết Trình',
+    IMAGE: 'Hình Ảnh',
+    VIDEO: 'Video',
+    TEXT: 'Văn Bản',
+  };
+
+  const formatRoleName = (r?: string) => {
+    if (r === 'OWNER') return 'CHỦ DỰ ÁN';
+    if (r === 'ADMIN') return 'QUẢN TRỊ';
+    if (r === 'VIEWER') return 'NGƯỜI XEM';
+    return 'THÀNH VIÊN';
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Back Button & Project Header */}
@@ -126,7 +143,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           className="btn btn-secondary btn-sm"
           style={{ marginBottom: 16, display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
-          <ArrowLeft size={16} /> Back to Projects
+          <ArrowLeft size={16} /> Quay Lại Danh Sách Dự Án
         </button>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
@@ -134,22 +151,22 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>{project.name}</h2>
               <span className="badge badge-owner">
-                {project.currentUserRole || 'MEMBER'}
+                {formatRoleName(project.currentUserRole)}
               </span>
             </div>
             <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginTop: 4, maxWidth: 800 }}>
-              {project.description || 'No description provided.'}
+              {project.description || 'Chưa có thông tin mô tả dự án.'}
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 12, fontSize: '0.8rem', color: '#6b7280' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Users size={14} /> Owner: <strong style={{ color: '#e2e8f0' }}>{project.owner?.fullName}</strong>
+                <Users size={14} /> Quản lý dự án: <strong style={{ color: '#e2e8f0' }}>{project.owner?.fullName}</strong>
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Calendar size={14} /> Created: {new Date(project.createdAt).toLocaleDateString()}
+                <Calendar size={14} /> Ngày tạo: {new Date(project.createdAt).toLocaleDateString('vi-VN')}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Clock size={14} /> Files: {documents.length}
+                <Clock size={14} /> Số tài liệu: {documents.length}
               </span>
             </div>
           </div>
@@ -157,10 +174,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={() => setIsUploadOpen(true)} className="btn btn-primary btn-sm">
-              <UploadCloud size={16} /> Upload Files
+              <UploadCloud size={16} /> Tải Tệp Lên
             </button>
             <button onClick={() => setIsInviteOpen(true)} className="btn btn-secondary btn-sm">
-              <UserPlus size={16} /> Invite Member
+              <UserPlus size={16} /> Mời Thành Viên
             </button>
           </div>
         </div>
@@ -176,7 +193,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
               border: activeSubTab === 'docs' ? '1px solid rgba(99, 102, 241, 0.4)' : 'none',
             }}
           >
-            <FileText size={16} /> Documents ({documents.length})
+            <FileText size={16} /> Tài Liệu Dự Án ({documents.length})
           </button>
           <button
             onClick={() => setActiveSubTab('members')}
@@ -187,7 +204,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
               border: activeSubTab === 'members' ? '1px solid rgba(6, 182, 212, 0.4)' : 'none',
             }}
           >
-            <Users size={16} /> Team Members ({members.length})
+            <Users size={16} /> Thành Viên Nhóm ({members.length})
           </button>
           <button
             onClick={() => setActiveSubTab('chat')}
@@ -198,7 +215,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
               border: activeSubTab === 'chat' ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
             }}
           >
-            <Bot size={16} /> Project AI Chat
+            <Bot size={16} /> Trợ Lý AI Dự Án
           </button>
         </div>
       </div>
@@ -214,14 +231,14 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                 <Search size={16} color="#9ca3af" style={{ position: 'absolute', left: 12, top: 12 }} />
                 <input
                   type="text"
-                  placeholder="Search files by title, filename, or document content..."
+                  placeholder="Tìm kiếm tài liệu theo tiêu đề, tên file, hoặc nội dung trích xuất..."
                   className="input-field"
                   style={{ paddingLeft: 36 }}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <button type="submit" className="btn btn-secondary btn-sm">Search</button>
+              <button type="submit" className="btn btn-secondary btn-sm">Tìm Kiếm</button>
             </form>
 
             {/* Category Filter Pills */}
@@ -239,7 +256,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     border: selectedCategory === cat ? '1px solid rgba(99, 102, 241, 0.5)' : '1px solid transparent',
                   }}
                 >
-                  {cat}
+                  {categoryLabels[cat] || cat}
                 </button>
               ))}
             </div>
@@ -249,14 +266,14 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           {filteredDocuments.length === 0 ? (
             <div className="glass-panel" style={{ padding: 48, textAlign: 'center' }}>
               <UploadCloud size={48} color="#6366f1" style={{ margin: '0 auto 16px' }} />
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>No Documents Found</h3>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Chưa Tìm Thấy Tài Liệu Nào</h3>
               <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: 4, maxWidth: 420, margin: '4px auto 16px' }}>
                 {searchQuery
-                  ? 'No documents matched your query. Try different keywords.'
-                  : 'Start by uploading specifications, recordings, or spreadsheets to this project.'}
+                  ? 'Không tìm thấy tài liệu nào khớp với từ khóa. Vui lòng thử từ khóa khác.'
+                  : 'Bắt đầu bằng cách tải lên các tài liệu hướng dẫn, bảng tính, hoặc video cho dự án này.'}
               </p>
               <button onClick={() => setIsUploadOpen(true)} className="btn btn-primary btn-sm">
-                <UploadCloud size={16} /> Upload First Document
+                <UploadCloud size={16} /> Tải Lên Tài Liệu Đầu Tiên
               </button>
             </div>
           ) : (
@@ -279,7 +296,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                         </div>
                       </div>
                       <span className={`category-badge category-${doc.fileCategory}`}>
-                        {doc.fileCategory}
+                        {categoryLabels[doc.fileCategory] || doc.fileCategory}
                       </span>
                     </div>
 
@@ -292,14 +309,14 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
                   <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                      {doc.formattedSize} • {new Date(doc.createdAt).toLocaleDateString()}
+                      {doc.formattedSize} • {new Date(doc.createdAt).toLocaleDateString('vi-VN')}
                     </div>
 
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button
                         onClick={() => setPreviewDoc(doc)}
                         className="btn btn-secondary btn-sm"
-                        title="Preview File"
+                        title="Xem trước tệp"
                         style={{ padding: '6px 8px' }}
                       >
                         <Eye size={14} />
@@ -309,7 +326,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-secondary btn-sm"
-                        title="Download File"
+                        title="Tải tệp về máy"
                         style={{ padding: '6px 8px' }}
                       >
                         <Download size={14} />
@@ -317,7 +334,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                       <button
                         onClick={() => handleDeleteDoc(doc.id)}
                         className="btn btn-danger btn-sm"
-                        title="Delete File"
+                        title="Xóa tệp"
                         style={{ padding: '6px 8px' }}
                       >
                         <Trash2 size={14} />
@@ -335,9 +352,9 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       {activeSubTab === 'members' && (
         <div className="glass-panel" style={{ padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Project Collaborators</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Thành Viên Trong Dự Án</h3>
             <button onClick={() => setIsInviteOpen(true)} className="btn btn-primary btn-sm">
-              <UserPlus size={16} /> Invite Teammate
+              <UserPlus size={16} /> Mời Thành Viên Mới
             </button>
           </div>
 
@@ -349,7 +366,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   <div style={{ fontSize: '0.78rem', color: '#93c5fd' }}>{m.user.email}</div>
                   <div style={{ marginTop: 6 }}>
                     <span className="badge" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
-                      {m.role}
+                      {formatRoleName(m.role)}
                     </span>
                   </div>
                 </div>
@@ -358,7 +375,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   <button
                     onClick={() => handleRemoveMember(m.user.id)}
                     className="btn btn-danger btn-sm"
-                    title="Remove from project"
+                    title="Xóa khỏi dự án"
                     style={{ padding: '6px 8px' }}
                   >
                     <Trash2 size={14} />
@@ -422,7 +439,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   rel="noreferrer"
                   className="btn btn-primary btn-sm"
                 >
-                  <Download size={14} /> Download
+                  <Download size={14} /> Tải Về
                 </a>
                 <button onClick={() => setPreviewDoc(null)} className="btn btn-secondary btn-sm">
                   <X size={16} />
@@ -440,7 +457,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
               ) : previewDoc.fileCategory === 'VIDEO' ? (
                 <video controls style={{ maxWidth: '100%', maxHeight: '70vh', borderRadius: 8 }}>
                   <source src={documentApi.getPreviewUrl(previewDoc.id)} type={previewDoc.contentType} />
-                  Your browser does not support HTML video.
+                  Trình duyệt không hỗ trợ phát trực tiếp video này.
                 </video>
               ) : (
                 <iframe

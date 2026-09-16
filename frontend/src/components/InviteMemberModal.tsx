@@ -36,7 +36,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
       onClose();
       setEmail('');
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to invite member. Make sure user exists in system.');
+      setError(err.response?.data?.message || err.message || 'Không thể mời thành viên. Hãy đảm bảo tài khoản người dùng đã đăng ký trên hệ thống.');
     } finally {
       setLoading(false);
     }
@@ -63,10 +63,10 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
         </button>
 
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <UserPlus size={22} color="#06b6d4" /> Invite Member to {projectName}
+          <UserPlus size={22} color="#06b6d4" /> Mời Thành Viên Tham Gia {projectName}
         </h2>
         <p style={{ fontSize: '0.82rem', color: '#9ca3af', marginBottom: 20 }}>
-          Add a registered teammate by their registered email address.
+          Thêm đồng đội vào không gian dự án bằng địa chỉ email đã đăng ký tài khoản.
         </p>
 
         {error && (
@@ -88,11 +88,11 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>User Email *</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Địa Chỉ Email Người Dùng *</label>
             <input
               type="email"
               required
-              placeholder="e.g. user@kbase.com"
+              placeholder="Ví dụ: engineer@kbase.com"
               className="input-field"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -100,24 +100,24 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Project Role</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Vai Trò Trong Dự Án</label>
             <select
               className="input-field"
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
-              <option value="MEMBER">Member (Can upload, view & ask AI)</option>
-              <option value="VIEWER">Viewer (Can read & download files)</option>
-              <option value="OWNER">Co-Owner (Full project management)</option>
+              <option value="MEMBER">Thành viên (Tải tài liệu, xem & hỏi đáp trợ lý AI)</option>
+              <option value="VIEWER">Người xem (Chỉ xem & tải tài liệu)</option>
+              <option value="OWNER">Đồng quản trị (Toàn quyền quản lý tài liệu & thành viên)</option>
             </select>
           </div>
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 10 }}>
             <button type="button" onClick={onClose} disabled={loading} className="btn btn-secondary">
-              Cancel
+              Hủy
             </button>
             <button type="submit" disabled={loading || !email.trim()} className="btn btn-primary">
-              {loading ? 'Inviting...' : 'Invite Member'}
+              {loading ? 'Đang gửi lời mời...' : 'Thêm Thành Viên'}
             </button>
           </div>
         </form>
