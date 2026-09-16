@@ -2,7 +2,7 @@ spring:
   application:
     name: kbase-backend
   profiles:
-    active: dev
+    active: postgres
   servlet:
     multipart:
       max-file-size: 100MB
@@ -28,6 +28,11 @@ kbase:
   storage:
     type: local # local or minio
     local-dir: ./uploads
+  minio:
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadminpassword
+    bucket-name: kbase-files
   ai:
     service-url: http://localhost:8000
     mock-fallback: true
@@ -50,11 +55,8 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
 
 ---
 # Production / PostgreSQL Profile
@@ -63,9 +65,9 @@ spring:
     activate:
       on-profile: postgres
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/kbasedb}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5432/kbasedb}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

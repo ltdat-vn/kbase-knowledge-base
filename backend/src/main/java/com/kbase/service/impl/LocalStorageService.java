@@ -22,7 +22,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
 @Service
+@ConditionalOnProperty(name = "kbase.storage.type", havingValue = "local", matchIfMissing = true)
 public class LocalStorageService implements StorageService {
 
     private final Path rootLocation;

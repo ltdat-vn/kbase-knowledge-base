@@ -58,11 +58,11 @@ CREATE INDEX IF NOT EXISTS idx_documents_category ON documents(file_category);
 CREATE INDEX IF NOT EXISTS idx_project_members_user ON project_members(user_id);
 
 -- =========================================================
--- Initial Seed Data (Default Passwords: BCrypt hashed 'Admin@123', 'Owner@123', 'User@123')
+-- Initial Seed Data (Passwords: 'Admin@123', 'Owner@123', 'User@123')
 -- =========================================================
 INSERT INTO users (id, email, password, full_name, role, enabled)
 VALUES 
-(1, 'admin@kbase.com', '$2a$10$wO0828l78G34e60m6YjC3ecpkyuQJsmY3WvF3K6J0p.1jG7Pz6nfm', 'Alexander Admin', 'ROLE_ADMIN', true),
-(2, 'owner@kbase.com', '$2a$10$fVqZ9Q.f/t.fB9Mh4mQ1U.H8h4E7vB8d3f6d7n1e8f2a5b4c3d2e1', 'Olivia Owner', 'ROLE_OWNER', true),
-(3, 'user@kbase.com', '$2a$10$k1wX7Y8z9A0b1C2d3E4f5.G6h7I8j9K0l1M2n3O4p5Q6r7S8t9U0v', 'Uri User', 'ROLE_USER', true)
+(1, 'admin@kbase.com', '$2a$10$m7Ht/sueZbkzPKZuWtSOuu.SVJl/9zWnAIZf7CILvYdnNMrAjiIkm', 'Alexander Admin', 'ROLE_ADMIN', true),
+(2, 'owner@kbase.com', '$2a$10$rMMNXyyXu9KBAetguOIhk.BjNEoayXujw6FARIr6vZiehRBEbHsWu', 'Olivia Owner', 'ROLE_OWNER', true),
+(3, 'user@kbase.com', '$2a$10$4yscyUXD3hMjnP1SgmStwug1SzauWV4dOUJ.JyDSywUIcE1K4eoZG', 'Uri User', 'ROLE_USER', true)
 ON CONFLICT (email) DO NOTHING;
