@@ -312,23 +312,13 @@ export const App: React.FC = () => {
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
                       {/* Section Title Header matching Reference Image */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                        <div>
-                          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>
-                            Cơ Sở Tri Thức (Knowledge Base)
-                          </h1>
-                          <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 2 }}>
-                            Quản lý các không gian dự án và các nguồn tài liệu kỹ thuật được kết nối.
-                          </p>
-                        </div>
-
-                        <button
-                          onClick={() => setIsCreateProjectOpen(true)}
-                          className="btn btn-black-pill"
-                          style={{ height: 38 }}
-                        >
-                          <Plus size={16} /> Tạo Dự Án Mới
-                        </button>
+                      <div>
+                        <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>
+                          Cơ Sở Tri Thức (Knowledge Base)
+                        </h1>
+                        <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 2 }}>
+                          Quản lý các không gian dự án và các nguồn tài liệu kỹ thuật được kết nối.
+                        </p>
                       </div>
 
                       {/* SECTION 1: RECENT PROJECTS (macOS Folder Preview Cards like Reference Image) */}
