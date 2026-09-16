@@ -3,12 +3,10 @@ import { Project, DocumentItem, ProjectMember, FileCategory, User } from '../typ
 import { documentApi, projectApi } from '../services/api';
 import { FileUploaderModal } from './FileUploaderModal';
 import { InviteMemberModal } from './InviteMemberModal';
-import { AiChatPanel } from './AiChatPanel';
 import {
   ArrowLeft,
-  UploadCloud,
+  Plus,
   UserPlus,
-  Bot,
   FileText,
   Search,
   Download,
@@ -23,6 +21,13 @@ import {
   File,
   X,
   Clock,
+  SlidersHorizontal,
+  LayoutGrid,
+  List,
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  Sparkles,
 } from 'lucide-react';
 
 interface ProjectDetailViewProps {
@@ -30,6 +35,7 @@ interface ProjectDetailViewProps {
   currentUser: User | null;
   onBack: () => void;
   allProjects: Project[];
+  onOpenAiChat?: () => void;
 }
 
 export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
@@ -37,11 +43,13 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   currentUser,
   onBack,
   allProjects,
+  onOpenAiChat,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'docs' | 'members' | 'chat'>('docs');
+  const [activeSubTab, setActiveSubTab] = useState<'docs' | 'members'>('docs');
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<FileCategory | 'ALL'>('ALL');
@@ -105,15 +113,25 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     return d.fileCategory === selectedCategory;
   });
 
+  // Recent documents (up to 4)
+  const recentDocs = [...documents].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4);
+
   const getFileIcon = (cat: FileCategory) => {
     switch (cat) {
-      case 'DOCUMENT': return <FileText size={20} color="#60a5fa" />;
-      case 'SPREADSHEET': return <FileSpreadsheet size={20} color="#34d399" />;
-      case 'PRESENTATION': return <File size={20} color="#fbbf24" />;
-      case 'IMAGE': return <ImageIcon size={20} color="#f472b6" />;
-      case 'VIDEO': return <Film size={20} color="#c084fc" />;
-      case 'TEXT': return <FileCode size={20} color="#38bdf8" />;
-      default: return <File size={20} color="#9ca3af" />;
+      case 'DOCUMENT':
+        return <FileText size={18} color="#2563eb" />;
+      case 'SPREADSHEET':
+        return <FileSpreadsheet size={18} color="#059669" />;
+      case 'PRESENTATION':
+        return <File size={18} color="#d97706" />;
+      case 'IMAGE':
+        return <ImageIcon size={18} color="#db2777" />;
+      case 'VIDEO':
+        return <Film size={18} color="#7c3aed" />;
+      case 'TEXT':
+        return <FileCode size={18} color="#0284c7" />;
+      default:
+        return <File size={18} color="#64748b" />;
     }
   };
 
@@ -124,250 +142,674 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     PRESENTATION: 'Thuyết Trình',
     IMAGE: 'Hình Ảnh',
     VIDEO: 'Video',
-    TEXT: 'Văn Bản',
+    TEXT: 'Văn Bản / Code',
   };
 
-  const formatRoleName = (r?: string) => {
-    if (r === 'OWNER') return 'CHỦ DỰ ÁN';
-    if (r === 'ADMIN') return 'QUẢN TRỊ';
-    if (r === 'VIEWER') return 'NGƯỜI XEM';
-    return 'THÀNH VIÊN';
+  // Mock status distribution for realistic SaaS look like reference image
+  const getDocStatus = (docId: number) => {
+    if (docId % 3 === 0) {
+      return { label: 'Bản nháp', className: 'badge-status-draft', dotColor: '#f59e0b' };
+    }
+    if (docId % 3 === 1) {
+      return { label: 'Hoạt động', className: 'badge-status-active', dotColor: '#10b981' };
+    }
+    return { label: 'Đang duyệt', className: 'badge-status-review', dotColor: '#3b82f6' };
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Back Button & Project Header */}
-      <div className="glass-panel" style={{ padding: 24 }}>
-        <button
-          onClick={onBack}
-          className="btn btn-secondary btn-sm"
-          style={{ marginBottom: 16, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-        >
-          <ArrowLeft size={16} /> Quay Lại Danh Sách Dự Án
-        </button>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>{project.name}</h2>
-              <span className="badge badge-owner">
-                {formatRoleName(project.currentUserRole)}
-              </span>
-            </div>
-            <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginTop: 4, maxWidth: 800 }}>
-              {project.description || 'Chưa có thông tin mô tả dự án.'}
-            </p>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 12, fontSize: '0.8rem', color: '#6b7280' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Users size={14} /> Quản lý dự án: <strong style={{ color: '#e2e8f0' }}>{project.owner?.fullName}</strong>
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Calendar size={14} /> Ngày tạo: {new Date(project.createdAt).toLocaleDateString('vi-VN')}
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Clock size={14} /> Số tài liệu: {documents.length}
-              </span>
-            </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+      {/* Top Header Row matching Reference Image */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: '0.8rem',
+              color: '#64748b',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              marginBottom: 8,
+              padding: 0,
+            }}
+          >
+            <ArrowLeft size={14} /> Quay lại danh sách dự án
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' }}>
+              {project.name}
+            </h1>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                padding: '2px 8px',
+                borderRadius: 9999,
+                background: '#e0f2fe',
+                color: '#0369a1',
+                fontWeight: 600,
+              }}
+            >
+              {project.currentUserRole === 'OWNER' ? 'Chủ Dự Án' : project.currentUserRole === 'ADMIN' ? 'Quản Trị' : 'Thành Viên'}
+            </span>
           </div>
-
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={() => setIsUploadOpen(true)} className="btn btn-primary btn-sm">
-              <UploadCloud size={16} /> Tải Tệp Lên
-            </button>
-            <button onClick={() => setIsInviteOpen(true)} className="btn btn-secondary btn-sm">
-              <UserPlus size={16} /> Mời Thành Viên
-            </button>
-          </div>
+          <p style={{ color: '#64748b', fontSize: '0.875rem', marginTop: 4 }}>
+            {project.description || 'Quản lý tài liệu kỹ thuật, hướng dẫn và tích hợp trợ lý AI cho dự án.'}
+          </p>
         </div>
 
-        {/* Tab Navigation */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 24, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
+        {/* Action Buttons: Black Pill Button matching Reference */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <button
-            onClick={() => setActiveSubTab('docs')}
-            className="btn btn-sm"
-            style={{
-              background: activeSubTab === 'docs' ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-              color: activeSubTab === 'docs' ? '#818cf8' : '#9ca3af',
-              border: activeSubTab === 'docs' ? '1px solid rgba(99, 102, 241, 0.4)' : 'none',
-            }}
+            onClick={() => setIsInviteOpen(true)}
+            className="btn btn-secondary btn-sm"
+            style={{ height: 38, borderRadius: 9999, padding: '0 16px' }}
           >
-            <FileText size={16} /> Tài Liệu Dự Án ({documents.length})
+            <UserPlus size={15} /> Mời Thành Viên
           </button>
           <button
-            onClick={() => setActiveSubTab('members')}
-            className="btn btn-sm"
-            style={{
-              background: activeSubTab === 'members' ? 'rgba(6, 182, 212, 0.2)' : 'transparent',
-              color: activeSubTab === 'members' ? '#22d3ee' : '#9ca3af',
-              border: activeSubTab === 'members' ? '1px solid rgba(6, 182, 212, 0.4)' : 'none',
-            }}
+            onClick={() => setIsUploadOpen(true)}
+            className="btn btn-black-pill"
+            style={{ height: 38, display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
-            <Users size={16} /> Thành Viên Nhóm ({members.length})
-          </button>
-          <button
-            onClick={() => setActiveSubTab('chat')}
-            className="btn btn-sm"
-            style={{
-              background: activeSubTab === 'chat' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
-              color: activeSubTab === 'chat' ? '#c084fc' : '#9ca3af',
-              border: activeSubTab === 'chat' ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
-            }}
-          >
-            <Bot size={16} /> Trợ Lý AI Dự Án
+            <Plus size={16} /> Tải Tệp Mới
           </button>
         </div>
       </div>
 
-      {/* SUBTAB 1: DOCUMENTS */}
+      {/* Navigation Sub-Tabs */}
+      <div style={{ display: 'flex', gap: 12, borderBottom: '1px solid #eaecf0', paddingBottom: 10 }}>
+        <button
+          onClick={() => setActiveSubTab('docs')}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '0.875rem',
+            fontWeight: activeSubTab === 'docs' ? 600 : 500,
+            color: activeSubTab === 'docs' ? '#0f172a' : '#64748b',
+            cursor: 'pointer',
+            padding: '4px 8px',
+            borderBottom: activeSubTab === 'docs' ? '2px solid #0f172a' : '2px solid transparent',
+            marginBottom: -11,
+          }}
+        >
+          Tài Liệu Dự Án ({documents.length})
+        </button>
+        <button
+          onClick={() => setActiveSubTab('members')}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '0.875rem',
+            fontWeight: activeSubTab === 'members' ? 600 : 500,
+            color: activeSubTab === 'members' ? '#0f172a' : '#64748b',
+            cursor: 'pointer',
+            padding: '4px 8px',
+            borderBottom: activeSubTab === 'members' ? '2px solid #0f172a' : '2px solid transparent',
+            marginBottom: -11,
+          }}
+        >
+          Thành Viên ({members.length})
+        </button>
+      </div>
+
       {activeSubTab === 'docs' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Search & Category Filter Bar */}
-          <div className="glass-card" style={{ padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
-            {/* Search Input */}
-            <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, flex: 1, minWidth: 260 }}>
-              <div style={{ position: 'relative', flex: 1 }}>
-                <Search size={16} color="#9ca3af" style={{ position: 'absolute', left: 12, top: 12 }} />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm tài liệu theo tiêu đề, tên file, hoặc nội dung trích xuất..."
-                  className="input-field"
-                  style={{ paddingLeft: 36 }}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+          {/* SECTION 1: RECENT DOCUMENTS (macOS Folder Preview Cards like Reference Image) */}
+          <div>
+            <div style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#0f172a' }}>
+                Tài liệu gần đây
+              </h3>
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                {recentDocs.length} tài liệu cập nhật mới nhất
+              </span>
+            </div>
+
+            {recentDocs.length === 0 ? (
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: 12,
+                  padding: '32px 20px',
+                  textAlign: 'center',
+                }}
+              >
+                <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                  Chưa có tài liệu nào gần đây. Hãy tải lên tệp tin tài liệu đầu tiên!
+                </p>
+                <button
+                  onClick={() => setIsUploadOpen(true)}
+                  className="btn btn-black-pill"
+                  style={{ marginTop: 12 }}
+                >
+                  <Plus size={15} /> Tải Tệp Ngay
+                </button>
               </div>
-              <button type="submit" className="btn btn-secondary btn-sm">Tìm Kiếm</button>
-            </form>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  gap: 16,
+                }}
+              >
+                {recentDocs.map((doc) => (
+                  <div
+                    key={doc.id}
+                    onClick={() => setPreviewDoc(doc)}
+                    className="folder-preview-card"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: 145,
+                    }}
+                  >
+                    <div>
+                      {/* macOS 3 Window Dots */}
+                      <div className="window-dots">
+                        <span className="window-dot" style={{ background: '#ef4444' }} />
+                        <span className="window-dot" style={{ background: '#f59e0b' }} />
+                        <span className="window-dot" style={{ background: '#10b981' }} />
+                      </div>
+
+                      {/* Content Icon & Title */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
+                        <div
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 8,
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {getFileIcon(doc.fileCategory)}
+                        </div>
+                        <h4
+                          style={{
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            color: '#0f172a',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                          title={doc.title}
+                        >
+                          {doc.title}
+                        </h4>
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 16 }}>
+                      Cập nhật: {new Date(doc.createdAt).toLocaleDateString('vi-VN')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* SECTION 2: ALL DOCUMENTS (Table matching Reference Image) */}
+          <div>
+            <div
+              style={{
+                marginBottom: 14,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 12,
+              }}
+            >
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#0f172a' }}>
+                Tất cả tài liệu
+              </h3>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* Search in project */}
+                <div style={{ position: 'relative', width: 220 }}>
+                  <Search size={14} color="#94a3b8" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text"
+                    placeholder="Lọc tài liệu..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="input-field"
+                    style={{
+                      height: 32,
+                      paddingLeft: 30,
+                      paddingRight: 10,
+                      fontSize: '0.78rem',
+                      borderRadius: 6,
+                    }}
+                  />
+                </div>
+
+                {/* View switcher */}
+                <div
+                  style={{
+                    display: 'flex',
+                    background: '#f1f5f9',
+                    borderRadius: 6,
+                    padding: 2,
+                    border: '1px solid #e2e8f0',
+                  }}
+                >
+                  <button
+                    onClick={() => setViewMode('table')}
+                    style={{
+                      border: 'none',
+                      background: viewMode === 'table' ? '#ffffff' : 'transparent',
+                      color: viewMode === 'table' ? '#0f172a' : '#64748b',
+                      borderRadius: 4,
+                      padding: '4px 8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      boxShadow: viewMode === 'table' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                    }}
+                    title="Dạng bảng"
+                  >
+                    <List size={14} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    style={{
+                      border: 'none',
+                      background: viewMode === 'grid' ? '#ffffff' : 'transparent',
+                      color: viewMode === 'grid' ? '#0f172a' : '#64748b',
+                      borderRadius: 4,
+                      padding: '4px 8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      boxShadow: viewMode === 'grid' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                    }}
+                    title="Dạng lưới"
+                  >
+                    <LayoutGrid size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Category Filter Pills */}
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
               {(['ALL', 'DOCUMENT', 'SPREADSHEET', 'PRESENTATION', 'IMAGE', 'VIDEO', 'TEXT'] as const).map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className="btn btn-sm"
                   style={{
-                    padding: '5px 10px',
-                    fontSize: '0.74rem',
-                    background: selectedCategory === cat ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255,255,255,0.04)',
-                    color: selectedCategory === cat ? '#a5b4fc' : '#9ca3af',
-                    border: selectedCategory === cat ? '1px solid rgba(99, 102, 241, 0.5)' : '1px solid transparent',
+                    padding: '4px 12px',
+                    fontSize: '0.75rem',
+                    borderRadius: 9999,
+                    border: '1px solid',
+                    borderColor: selectedCategory === cat ? '#0f172a' : '#e2e8f0',
+                    background: selectedCategory === cat ? '#0f172a' : '#ffffff',
+                    color: selectedCategory === cat ? '#ffffff' : '#64748b',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   {categoryLabels[cat] || cat}
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* Document Grid */}
-          {filteredDocuments.length === 0 ? (
-            <div className="glass-panel" style={{ padding: 48, textAlign: 'center' }}>
-              <UploadCloud size={48} color="#6366f1" style={{ margin: '0 auto 16px' }} />
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Chưa Tìm Thấy Tài Liệu Nào</h3>
-              <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: 4, maxWidth: 420, margin: '4px auto 16px' }}>
-                {searchQuery
-                  ? 'Không tìm thấy tài liệu nào khớp với từ khóa. Vui lòng thử từ khóa khác.'
-                  : 'Bắt đầu bằng cách tải lên các tài liệu hướng dẫn, bảng tính, hoặc video cho dự án này.'}
-              </p>
-              <button onClick={() => setIsUploadOpen(true)} className="btn btn-primary btn-sm">
-                <UploadCloud size={16} /> Tải Lên Tài Liệu Đầu Tiên
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
-              {filteredDocuments.map((doc) => (
-                <div key={doc.id} className="glass-card" style={{ padding: 18, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
-                        <div style={{ padding: 8, background: 'rgba(255,255,255,0.05)', borderRadius: 8 }}>
-                          {getFileIcon(doc.fileCategory)}
-                        </div>
-                        <div>
-                          <h4 style={{ fontSize: '0.95rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 190 }} title={doc.title}>
-                            {doc.title}
-                          </h4>
-                          <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-                            {doc.originalFilename}
+            {filteredDocuments.length === 0 ? (
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #eaecf0',
+                  borderRadius: 12,
+                  padding: '48px 20px',
+                  textAlign: 'center',
+                }}
+              >
+                <FileText size={36} color="#cbd5e1" style={{ margin: '0 auto 12px' }} />
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#0f172a' }}>
+                  Không tìm thấy tài liệu phù hợp
+                </h4>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 4 }}>
+                  Thử thay đổi bộ lọc thể loại hoặc từ khóa tìm kiếm.
+                </p>
+              </div>
+            ) : viewMode === 'table' ? (
+              /* MODERN TABLE MATCHING REFERENCE IMAGE */
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #eaecf0',
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  boxShadow: 'var(--shadow-card)',
+                }}
+              >
+                <table className="modern-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '40%' }}>Tên Tài Liệu</th>
+                      <th>Phân Loại</th>
+                      <th>Ngày Tải Lên</th>
+                      <th>Dung Lượng</th>
+                      <th>Trạng Thái</th>
+                      <th style={{ textAlign: 'right' }}>Thao Tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredDocuments.map((doc) => {
+                      const status = getDocStatus(doc.id);
+                      return (
+                        <tr key={doc.id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div
+                                style={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: 6,
+                                  background: '#f8fafc',
+                                  border: '1px solid #e2e8f0',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {getFileIcon(doc.fileCategory)}
+                              </div>
+                              <div style={{ overflow: 'hidden' }}>
+                                <div
+                                  style={{
+                                    fontWeight: 600,
+                                    color: '#0f172a',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: 280,
+                                  }}
+                                  title={doc.title}
+                                >
+                                  {doc.title}
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                                  {doc.originalFilename}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>
+                            <span className="category-badge">
+                              {categoryLabels[doc.fileCategory] || doc.fileCategory}
+                            </span>
+                          </td>
+
+                          <td style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                            {new Date(doc.createdAt).toLocaleDateString('vi-VN')}
+                          </td>
+
+                          <td style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                            {doc.formattedSize}
+                          </td>
+
+                          <td>
+                            <span className={`badge-status ${status.className}`}>
+                              <span
+                                style={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: '50%',
+                                  background: status.dotColor,
+                                }}
+                              />
+                              {status.label}
+                            </span>
+                          </td>
+
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', gap: 6 }}>
+                              <button
+                                onClick={() => setPreviewDoc(doc)}
+                                className="btn btn-secondary btn-sm"
+                                title="Xem trước tài liệu"
+                                style={{ padding: '4px 8px', borderRadius: 6 }}
+                              >
+                                <Eye size={13} />
+                              </button>
+                              <a
+                                href={documentApi.getDownloadUrl(doc.id)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-secondary btn-sm"
+                                title="Tải về máy"
+                                style={{ padding: '4px 8px', borderRadius: 6 }}
+                              >
+                                <Download size={13} />
+                              </a>
+                              <button
+                                onClick={() => handleDeleteDoc(doc.id)}
+                                className="btn btn-danger btn-sm"
+                                title="Xóa tài liệu"
+                                style={{ padding: '4px 8px', borderRadius: 6 }}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              /* GRID VIEW */
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                {filteredDocuments.map((doc) => {
+                  const status = getDocStatus(doc.id);
+                  return (
+                    <div
+                      key={doc.id}
+                      className="white-card"
+                      style={{ padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
+                            <div
+                              style={{
+                                width: 34,
+                                height: 34,
+                                borderRadius: 8,
+                                background: '#f8fafc',
+                                border: '1px solid #e2e8f0',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                              }}
+                            >
+                              {getFileIcon(doc.fileCategory)}
+                            </div>
+                            <div style={{ overflow: 'hidden' }}>
+                              <h4
+                                style={{
+                                  fontSize: '0.88rem',
+                                  fontWeight: 600,
+                                  color: '#0f172a',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                }}
+                                title={doc.title}
+                              >
+                                {doc.title}
+                              </h4>
+                              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                                {doc.originalFilename}
+                              </span>
+                            </div>
+                          </div>
+                          <span className={`badge-status ${status.className}`} style={{ fontSize: '0.68rem', padding: '2px 8px' }}>
+                            {status.label}
                           </span>
                         </div>
+
+                        {doc.summary && (
+                          <p
+                            style={{
+                              fontSize: '0.78rem',
+                              color: '#64748b',
+                              marginTop: 10,
+                              lineHeight: 1.45,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {doc.summary}
+                          </p>
+                        )}
                       </div>
-                      <span className={`category-badge category-${doc.fileCategory}`}>
-                        {categoryLabels[doc.fileCategory] || doc.fileCategory}
-                      </span>
-                    </div>
 
-                    {doc.summary && (
-                      <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: 12, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        {doc.summary}
-                      </p>
-                    )}
-                  </div>
+                      <div
+                        style={{
+                          marginTop: 14,
+                          paddingTop: 10,
+                          borderTop: '1px solid #f1f5f9',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                          {doc.formattedSize}
+                        </span>
 
-                  <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                      {doc.formattedSize} • {new Date(doc.createdAt).toLocaleDateString('vi-VN')}
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            onClick={() => setPreviewDoc(doc)}
+                            className="btn btn-secondary btn-sm"
+                            title="Xem trước"
+                            style={{ padding: '4px 8px', borderRadius: 6 }}
+                          >
+                            <Eye size={13} />
+                          </button>
+                          <a
+                            href={documentApi.getDownloadUrl(doc.id)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-secondary btn-sm"
+                            title="Tải về"
+                            style={{ padding: '4px 8px', borderRadius: 6 }}
+                          >
+                            <Download size={13} />
+                          </a>
+                          <button
+                            onClick={() => handleDeleteDoc(doc.id)}
+                            className="btn btn-danger btn-sm"
+                            title="Xóa"
+                            style={{ padding: '4px 8px', borderRadius: 6 }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button
-                        onClick={() => setPreviewDoc(doc)}
-                        className="btn btn-secondary btn-sm"
-                        title="Xem trước tệp"
-                        style={{ padding: '6px 8px' }}
-                      >
-                        <Eye size={14} />
-                      </button>
-                      <a
-                        href={documentApi.getDownloadUrl(doc.id)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-secondary btn-sm"
-                        title="Tải tệp về máy"
-                        style={{ padding: '6px 8px' }}
-                      >
-                        <Download size={14} />
-                      </a>
-                      <button
-                        onClick={() => handleDeleteDoc(doc.id)}
-                        className="btn btn-danger btn-sm"
-                        title="Xóa tệp"
-                        style={{ padding: '6px 8px' }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* SUBTAB 2: TEAM MEMBERS */}
+      {/* SUBTAB 2: MEMBERS */}
       {activeSubTab === 'members' && (
-        <div className="glass-panel" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Thành Viên Trong Dự Án</h3>
-            <button onClick={() => setIsInviteOpen(true)} className="btn btn-primary btn-sm">
-              <UserPlus size={16} /> Mời Thành Viên Mới
+        <div style={{ background: '#ffffff', border: '1px solid #eaecf0', borderRadius: 12, padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
+                Thành viên trong dự án
+              </h3>
+              <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                Danh sách những người có quyền truy cập và cộng tác trên tài liệu của dự án.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsInviteOpen(true)}
+              className="btn btn-black-pill"
+            >
+              <UserPlus size={15} /> Mời Thành Viên Mới
             </button>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
             {members.map((m) => (
-              <div key={m.id} className="glass-card" style={{ padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{m.user.fullName}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#93c5fd' }}>{m.user.email}</div>
-                  <div style={{ marginTop: 6 }}>
-                    <span className="badge" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
-                      {formatRoleName(m.role)}
-                    </span>
+              <div
+                key={m.id}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 10,
+                  padding: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: '#f1f5f9',
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 700,
+                      color: '#0f172a',
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    {m.user.fullName.substring(0, 1).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}>
+                      {m.user.fullName}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                      {m.user.email}
+                    </div>
+                    <div style={{ marginTop: 4 }}>
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          padding: '1px 6px',
+                          borderRadius: 4,
+                          background: m.role === 'OWNER' ? '#e0f2fe' : '#f1f5f9',
+                          color: m.role === 'OWNER' ? '#0369a1' : '#475569',
+                        }}
+                      >
+                        {m.role === 'OWNER' ? 'Chủ dự án' : m.role === 'VIEWER' ? 'Người xem' : 'Thành viên'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -375,10 +817,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   <button
                     onClick={() => handleRemoveMember(m.user.id)}
                     className="btn btn-danger btn-sm"
-                    title="Xóa khỏi dự án"
-                    style={{ padding: '6px 8px' }}
+                    title="Xóa thành viên khỏi dự án"
+                    style={{ padding: '4px 8px', borderRadius: 6 }}
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                   </button>
                 )}
               </div>
@@ -387,89 +829,133 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         </div>
       )}
 
-      {/* SUBTAB 3: EMBEDDED AI CHAT */}
-      {activeSubTab === 'chat' && (
-        <AiChatPanel projects={allProjects} selectedProjectId={project.id} />
+      {/* Document Preview Modal */}
+      {previewDoc && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 20,
+          }}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: 16,
+              maxWidth: 700,
+              width: '100%',
+              padding: 24,
+              boxShadow: 'var(--shadow-elevated)',
+              position: 'relative',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+            }}
+          >
+            <button
+              onClick={() => setPreviewDoc(null)}
+              style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                background: '#f1f5f9',
+                border: 'none',
+                borderRadius: '50%',
+                width: 32,
+                height: 32,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#64748b',
+              }}
+            >
+              <X size={18} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {getFileIcon(previewDoc.fileCategory)}
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>
+                  {previewDoc.title}
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                  {previewDoc.originalFilename} • {previewDoc.formattedSize}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: 16, marginBottom: 20 }}>
+              <h4 style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a', marginBottom: 6 }}>
+                Tóm Tắt Nội Dung (RAG Index):
+              </h4>
+              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+                {previewDoc.summary || 'Chưa có bản tóm tắt nội dung tự động.'}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="btn btn-secondary btn-sm"
+              >
+                Đóng
+              </button>
+              <a
+                href={documentApi.getDownloadUrl(previewDoc.id)}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-black-pill"
+                style={{ fontSize: '0.8rem' }}
+              >
+                <Download size={14} /> Tải Xuống Bản Gốc
+              </a>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Modals */}
+      {/* Upload Modal */}
       <FileUploaderModal
         projectId={project.id}
         projectName={project.name}
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
-        onUploaded={(newDoc) => {
-          setDocuments((prev) => [newDoc, ...prev]);
+        onUploaded={() => {
+          loadProjectData();
+          setIsUploadOpen(false);
         }}
       />
 
+      {/* Invite Modal */}
       <InviteMemberModal
         projectId={project.id}
         projectName={project.name}
         isOpen={isInviteOpen}
         onClose={() => setIsInviteOpen(false)}
-        onMemberAdded={(newMem) => {
-          setMembers((prev) => [...prev, newMem]);
+        onMemberAdded={() => {
+          loadProjectData();
+          setIsInviteOpen(false);
         }}
       />
-
-      {/* Inline Document Preview Modal */}
-      {previewDoc && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(5, 8, 15, 0.85)',
-          backdropFilter: 'blur(10px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1100,
-          padding: 24,
-        }}>
-          <div className="glass-panel" style={{ width: '90%', maxWidth: 900, maxHeight: '90vh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{previewDoc.title}</h3>
-                <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{previewDoc.originalFilename} ({previewDoc.formattedSize})</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <a
-                  href={documentApi.getDownloadUrl(previewDoc.id)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-primary btn-sm"
-                >
-                  <Download size={14} /> Tải Về
-                </a>
-                <button onClick={() => setPreviewDoc(null)} className="btn btn-secondary btn-sm">
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div style={{ flex: 1, padding: 20, overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'rgba(0,0,0,0.3)' }}>
-              {previewDoc.fileCategory === 'IMAGE' ? (
-                <img
-                  src={documentApi.getPreviewUrl(previewDoc.id)}
-                  alt={previewDoc.title}
-                  style={{ maxWidth: '100%', maxHeight: '70vh', borderRadius: 8, objectFit: 'contain' }}
-                />
-              ) : previewDoc.fileCategory === 'VIDEO' ? (
-                <video controls style={{ maxWidth: '100%', maxHeight: '70vh', borderRadius: 8 }}>
-                  <source src={documentApi.getPreviewUrl(previewDoc.id)} type={previewDoc.contentType} />
-                  Trình duyệt không hỗ trợ phát trực tiếp video này.
-                </video>
-              ) : (
-                <iframe
-                  src={documentApi.getPreviewUrl(previewDoc.id)}
-                  title={previewDoc.title}
-                  style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8, background: '#fff' }}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -46,76 +46,111 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(5, 8, 15, 0.8)',
-      backdropFilter: 'blur(8px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-      padding: 16,
-    }}>
-      <div className="glass-panel" style={{ width: '100%', maxWidth: 440, padding: 32, position: 'relative' }}>
-        {/* Close */}
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(15, 23, 42, 0.45)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          background: '#ffffff',
+          borderRadius: 16,
+          width: '100%',
+          maxWidth: 440,
+          padding: 30,
+          position: 'relative',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          border: '1px solid #e2e8f0',
+        }}
+      >
+        {/* Close Button */}
         <button
           onClick={onClose}
-          style={{ position: 'absolute', top: 18, right: 18, background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer' }}
+          style={{
+            position: 'absolute',
+            top: 18,
+            right: 18,
+            background: '#f8fafc',
+            border: 'none',
+            borderRadius: '50%',
+            width: 30,
+            height: 30,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#64748b',
+            cursor: 'pointer',
+          }}
         >
-          <X size={20} />
+          <X size={16} />
         </button>
 
         {/* Tab switch */}
-        <div style={{ display: 'flex', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 14, marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 16, borderBottom: '1px solid #eaecf0', paddingBottom: 12, marginBottom: 20 }}>
           <button
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '1.05rem',
-              fontWeight: 700,
-              color: tab === 'login' ? '#818cf8' : '#6b7280',
+              fontSize: '0.95rem',
+              fontWeight: tab === 'login' ? 700 : 500,
+              color: tab === 'login' ? '#0f172a' : '#64748b',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 6,
+              paddingBottom: 4,
+              borderBottom: tab === 'login' ? '2px solid #0f172a' : '2px solid transparent',
+              marginBottom: -13,
             }}
             onClick={() => { setTab('login'); setError(null); }}
           >
-            <LogIn size={18} /> Đăng Nhập
+            <LogIn size={16} /> Đăng Nhập
           </button>
           <button
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '1.05rem',
-              fontWeight: 700,
-              color: tab === 'register' ? '#818cf8' : '#6b7280',
+              fontSize: '0.95rem',
+              fontWeight: tab === 'register' ? 700 : 500,
+              color: tab === 'register' ? '#0f172a' : '#64748b',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 6,
+              paddingBottom: 4,
+              borderBottom: tab === 'register' ? '2px solid #0f172a' : '2px solid transparent',
+              marginBottom: -13,
             }}
             onClick={() => { setTab('register'); setError(null); }}
           >
-            <UserPlus size={18} /> Đăng Ký Tài Khoản
+            <UserPlus size={16} /> Đăng Ký Tài Khoản
           </button>
         </div>
 
         {error && (
-          <div style={{
-            background: 'rgba(244, 63, 94, 0.15)',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
-            borderRadius: 8,
-            padding: '10px 14px',
-            color: '#fb7185',
-            fontSize: '0.85rem',
-            marginBottom: 16,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}>
-            <AlertCircle size={16} /> {error}
+          <div
+            style={{
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: 8,
+              padding: '10px 14px',
+              color: '#dc2626',
+              fontSize: '0.82rem',
+              marginBottom: 16,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <AlertCircle size={15} /> {error}
           </div>
         )}
 
@@ -123,7 +158,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {tab === 'register' && (
             <>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Họ và Tên *</label>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
+                  Họ và Tên *
+                </label>
                 <input
                   type="text"
                   required
@@ -134,7 +171,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Vai Trò Tài Khoản *</label>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
+                  Vai Trò Tài Khoản *
+                </label>
                 <select
                   className="input-field"
                   value={role}
@@ -149,7 +188,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Địa Chỉ Email *</label>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
+              Địa Chỉ Email *
+            </label>
             <input
               type="email"
               required
@@ -161,7 +202,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#9ca3af', marginBottom: 5 }}>Mật Khẩu *</label>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
+              Mật Khẩu *
+            </label>
             <input
               type="password"
               required
@@ -172,40 +215,66 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             />
           </div>
 
-          <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', marginTop: 8 }}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-black-pill"
+            style={{ width: '100%', height: 40, marginTop: 6, fontSize: '0.875rem' }}
+          >
             {loading ? 'Đang xử lý...' : tab === 'login' ? 'Đăng Nhập Ngay' : 'Tạo Tài Khoản Mới'}
           </button>
         </form>
 
         {/* Quick Demo Login Preset Buttons */}
-        <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', textAlign: 'center', marginBottom: 10 }}>
+        <div style={{ marginTop: 22, paddingTop: 16, borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center', marginBottom: 10 }}>
             Hoặc đăng nhập nhanh bằng các tài khoản mẫu:
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             <button
               onClick={() => { onQuickLogin('admin'); onClose(); }}
               className="btn btn-secondary btn-sm"
-              style={{ flexDirection: 'column', gap: 4, padding: '10px 4px' }}
+              style={{
+                flexDirection: 'column',
+                gap: 4,
+                padding: '8px 4px',
+                background: '#faf5ff',
+                borderColor: '#e9d5ff',
+                color: '#7e22ce',
+              }}
             >
-              <Shield size={16} color="#c084fc" />
-              <span style={{ fontSize: '0.75rem' }}>Quản Trị (Admin)</span>
+              <Shield size={16} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Admin</span>
             </button>
             <button
               onClick={() => { onQuickLogin('owner'); onClose(); }}
               className="btn btn-secondary btn-sm"
-              style={{ flexDirection: 'column', gap: 4, padding: '10px 4px' }}
+              style={{
+                flexDirection: 'column',
+                gap: 4,
+                padding: '8px 4px',
+                background: '#f0f9ff',
+                borderColor: '#bae6fd',
+                color: '#0369a1',
+              }}
             >
-              <Briefcase size={16} color="#38bdf8" />
-              <span style={{ fontSize: '0.75rem' }}>Chủ Dự Án (Owner)</span>
+              <Briefcase size={16} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Owner</span>
             </button>
             <button
               onClick={() => { onQuickLogin('user'); onClose(); }}
               className="btn btn-secondary btn-sm"
-              style={{ flexDirection: 'column', gap: 4, padding: '10px 4px' }}
+              style={{
+                flexDirection: 'column',
+                gap: 4,
+                padding: '8px 4px',
+                background: '#ecfdf5',
+                borderColor: '#a7f3d0',
+                color: '#047857',
+              }}
             >
-              <UserIcon size={16} color="#34d399" />
-              <span style={{ fontSize: '0.75rem' }}>Thành Viên (User)</span>
+              <UserIcon size={16} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>User</span>
             </button>
           </div>
         </div>

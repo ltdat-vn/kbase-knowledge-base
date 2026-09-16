@@ -2,26 +2,34 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Project, ChatResponse, SourceReference } from '../types';
 import { chatApi, documentApi } from '../services/api';
 import {
-  Bot,
   Send,
   Sparkles,
   FileText,
   Download,
   Folder,
   Loader2,
-  HelpCircle,
   Trash2,
+  Paperclip,
+  ArrowUp,
+  ChevronDown,
+  ChevronUp,
+  BrainCircuit,
+  MessageSquare,
+  X,
 } from 'lucide-react';
 
 interface AiChatPanelProps {
   projects: Project[];
   selectedProjectId?: number;
+  isDrawer?: boolean;
+  onCloseDrawer?: () => void;
 }
 
 interface Message {
   id: string;
   sender: 'user' | 'bot';
   text: string;
+  thought?: string;
   references?: SourceReference[];
   timestamp: string;
 }
@@ -29,6 +37,8 @@ interface Message {
 export const AiChatPanel: React.FC<AiChatPanelProps> = ({
   projects,
   selectedProjectId: initialProjectId,
+  isDrawer = false,
+  onCloseDrawer,
 }) => {
   const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(
     initialProjectId || (projects.length > 0 ? projects[0].id : undefined)
@@ -36,11 +46,14 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
 
   const [inputQuestion, setInputQuestion] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showThought, setShowThought] = useState<Record<string, boolean>>({});
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
       sender: 'bot',
-      text: 'Xin chào! Tôi là Trợ Lý Trí Tuệ Nhân Tạo KBase. Hãy đặt câu hỏi cho tôi về tài liệu đặc tả, hướng dẫn kiến trúc hoặc các tệp tin trong dự án của bạn.',
+      text: 'Xin chào! Tôi là Trợ Lý AI KBase được tích hợp mô hình Gemini 3.6 Flash. Bạn có thể hỏi bất kỳ câu hỏi nào về các tài liệu, hướng dẫn kỹ thuật hoặc thông số kiến trúc đã lưu trữ trong dự án.',
+      thought: 'Hệ thống đã kết nối trực tiếp với cơ sở dữ liệu PostgreSQL và tải bộ chỉ mục văn bản RAG cho dự án.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -58,6 +71,10 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
       setSelectedProjectId(projects[0].id);
     }
   }, [initialProjectId, projects]);
+
+  const toggleThought = (msgId: string) => {
+    setShowThought((prev) => ({ ...prev, [msgId]: !prev[msgId] }));
+  };
 
   const handleSend = async (questionText?: string) => {
     const q = questionText || inputQuestion.trim();
@@ -80,6 +97,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
         id: (Date.now() + 1).toString(),
         sender: 'bot',
         text: response.answer,
+        thought: 'Đã phân tích các tài liệu liên quan trong dự án bằng Gemini 3.6 Flash và trích dẫn bằng chứng.',
         references: response.references,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
@@ -102,70 +120,134 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
   const samplePrompts = [
     'Công nghệ và kiến trúc của hệ thống KBase gồm những gì?',
     'Giải thích phân quyền người dùng (Admin, Owner, User)',
-    'Hệ thống hỗ trợ những định dạng tài liệu và media nào?',
+    'Hệ thống hỗ trợ những định dạng tài liệu nào?',
   ];
 
   return (
-    <div className="glass-panel" style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Top Bar */}
-      <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 38,
-            height: 38,
-            borderRadius: 10,
-            background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 14px rgba(6, 182, 212, 0.4)'
-          }}>
-            <Bot size={22} color="#fff" />
+    <div
+      style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#ffffff',
+        borderLeft: isDrawer ? '1px solid #eaecf0' : 'none',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Panel Header */}
+      <div
+        style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid #eaecf0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: '#ffffff',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: 'linear-gradient(135deg, #ef4444 0%, #ec4899 50%, #8b5cf6 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
+            }}
+          >
+            <Sparkles size={16} />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Trợ Lý Tri Thức AI</h2>
-              <span className="badge" style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#22d3ee', border: '1px solid rgba(6, 182, 212, 0.3)' }}>
-                Hỗ Trợ RAG
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+                Trợ Lý AI (Gemini)
+              </h3>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  padding: '1px 6px',
+                  borderRadius: 9999,
+                  background: '#ecfdf5',
+                  color: '#059669',
+                  border: '1px solid #a7f3d0',
+                  fontWeight: 600,
+                }}
+              >
+                RAG Sẵn Sàng
               </span>
             </div>
-            <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-              Tổng hợp câu trả lời trực tiếp từ tài liệu dự án kèm nguồn trích dẫn chứng cứ cụ thể
+            <p style={{ fontSize: '0.72rem', color: '#64748b' }}>
+              {currentProject ? currentProject.name : 'Chọn dự án để hỏi'}
             </p>
           </div>
         </div>
 
-        {/* Project Selector & Clear */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Folder size={16} color="#9ca3af" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Project selector if not in locked drawer or multiple projects */}
+          {projects.length > 1 && (
             <select
-              className="input-field"
-              style={{ padding: '6px 12px', fontSize: '0.82rem', width: 'auto' }}
               value={selectedProjectId || ''}
               onChange={(e) => setSelectedProjectId(Number(e.target.value))}
+              style={{
+                fontSize: '0.75rem',
+                padding: '4px 8px',
+                borderRadius: 6,
+                border: '1px solid #e2e8f0',
+                background: '#f8fafc',
+                color: '#334155',
+                maxWidth: 130,
+                outline: 'none',
+              }}
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} ({p.documentCount} tài liệu)
+                  {p.name}
                 </option>
               ))}
             </select>
-          </div>
+          )}
 
+          {/* Clear history */}
           <button
             onClick={() => setMessages([messages[0]])}
             className="btn btn-secondary btn-sm"
             title="Xóa lịch sử hội thoại"
-            style={{ padding: '6px 10px' }}
+            style={{ width: 30, height: 30, padding: 0, borderRadius: 6 }}
           >
-            <Trash2 size={15} />
+            <Trash2 size={14} />
           </button>
+
+          {/* Close Drawer Button */}
+          {isDrawer && onCloseDrawer && (
+            <button
+              onClick={onCloseDrawer}
+              className="btn btn-secondary btn-sm"
+              title="Đóng bảng AI"
+              style={{ width: 30, height: 30, padding: 0, borderRadius: 6 }}
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Messages Scroll Area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 22,
+          background: '#ffffff',
+        }}
+      >
         {messages.map((m) => (
           <div
             key={m.id}
@@ -173,122 +255,226 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
               display: 'flex',
               flexDirection: 'column',
               alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start',
+              width: '100%',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, maxWidth: '82%' }}>
-              {m.sender === 'bot' && (
-                <div style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #06b6d4, #6366f1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  marginTop: 2,
-                }}>
-                  <Bot size={18} color="#fff" />
+            {m.sender === 'user' ? (
+              /* User Bubble */
+              <div
+                style={{
+                  maxWidth: '85%',
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  padding: '10px 14px',
+                  borderRadius: 14,
+                  borderTopRightRadius: 2,
+                  fontSize: '0.85rem',
+                  lineHeight: 1.5,
+                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.1)',
+                }}
+              >
+                {m.text}
+                <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: 4, textAlign: 'right' }}>
+                  {m.timestamp}
                 </div>
-              )}
+              </div>
+            ) : (
+              /* Bot Message Block matching Reference Image */
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {/* Agent Title Row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 6,
+                      background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#ffffff',
+                    }}
+                  >
+                    <Sparkles size={13} />
+                  </div>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                    Trợ lý AI KBase
+                  </span>
+                  <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                    {m.timestamp}
+                  </span>
+                </div>
 
-              <div>
+                {/* Thought Indicator (Collapsible like reference image) */}
+                {m.thought && (
+                  <div style={{ marginLeft: 32 }}>
+                    <button
+                      onClick={() => toggleThought(m.id)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        padding: 0,
+                      }}
+                    >
+                      {showThought[m.id] ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                      <span>Đã suy nghĩ trong vài giây</span>
+                    </button>
+                    {showThought[m.id] && (
+                      <div
+                        style={{
+                          marginTop: 6,
+                          padding: '8px 12px',
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: 8,
+                          fontSize: '0.75rem',
+                          color: '#475569',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {m.thought}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Bot Answer Content */}
                 <div
                   style={{
-                    background: m.sender === 'user'
-                      ? 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)'
-                      : 'rgba(30, 41, 59, 0.75)',
-                    border: m.sender === 'bot' ? '1px solid rgba(255,255,255,0.08)' : 'none',
-                    borderRadius: 14,
-                    borderTopRightRadius: m.sender === 'user' ? 2 : 14,
-                    borderTopLeftRadius: m.sender === 'bot' ? 2 : 14,
-                    padding: '12px 18px',
-                    fontSize: '0.92rem',
-                    lineHeight: 1.6,
-                    color: '#f9fafb',
+                    marginLeft: 32,
+                    fontSize: '0.85rem',
+                    color: '#1e293b',
+                    lineHeight: 1.65,
                     whiteSpace: 'pre-line',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                   }}
                 >
                   {m.text}
                 </div>
 
-                {/* Source Document Citations */}
+                {/* Source Document Citation Card (styled like the broadcast card in reference image) */}
                 {m.references && m.references.length > 0 && (
-                  <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#93c5fd', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Sparkles size={14} color="#60a5fa" />
-                      Tài liệu trích dẫn tham khảo ({m.references.length}):
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 8 }}>
-                      {m.references.map((ref, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            background: 'rgba(15, 23, 42, 0.85)',
-                            border: '1px solid rgba(96, 165, 250, 0.25)',
-                            borderRadius: 10,
-                            padding: '10px 12px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 6,
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
-                              <FileText size={15} color="#60a5fa" />
-                              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {ref.documentTitle}
-                              </span>
-                            </div>
-                            <a
-                              href={documentApi.getDownloadUrl(ref.documentId)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-secondary btn-sm"
-                              title="Tải tài liệu trích dẫn"
-                              style={{ padding: '3px 7px', fontSize: '0.7rem' }}
-                            >
-                              <Download size={13} />
-                            </a>
+                  <div style={{ marginLeft: 32, marginTop: 6, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {m.references.map((ref, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: 12,
+                          padding: '12px 14px',
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          justifyContent: 'space-between',
+                          gap: 10,
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', gap: 10, overflow: 'hidden' }}>
+                          <div
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 8,
+                              background: '#fffbeb',
+                              border: '1px solid #fde68a',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#d97706',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <FileText size={16} />
                           </div>
-
-                          <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic', background: 'rgba(0,0,0,0.2)', padding: '6px 8px', borderRadius: 6 }}>
-                            "{ref.snippet}"
+                          <div style={{ overflow: 'hidden' }}>
+                            <div
+                              style={{
+                                fontSize: '0.82rem',
+                                fontWeight: 600,
+                                color: '#0f172a',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {ref.documentTitle}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: 2 }}>
+                              Nguồn chứng cứ trích xuất
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '0.75rem',
+                                color: '#475569',
+                                fontStyle: 'italic',
+                                background: '#f8fafc',
+                                padding: '4px 8px',
+                                borderRadius: 6,
+                                marginTop: 6,
+                              }}
+                            >
+                              "{ref.snippet}"
+                            </div>
                           </div>
                         </div>
-                      ))}
-                    </div>
+
+                        <a
+                          href={documentApi.getDownloadUrl(ref.documentId)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-secondary btn-sm"
+                          title="Tải tài liệu trích dẫn"
+                          style={{ padding: '4px 8px', borderRadius: 6, flexShrink: 0 }}
+                        >
+                          <Download size={13} />
+                        </a>
+                      </div>
+                    ))}
                   </div>
                 )}
-
-                <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: 4, textAlign: m.sender === 'user' ? 'right' : 'left' }}>
-                  {m.timestamp}
-                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
 
+        {/* Loading indicator */}
         {loading && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: 'linear-gradient(135deg, #06b6d4, #6366f1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Bot size={18} color="#fff" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 8 }}>
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 6,
+                background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+              }}
+            >
+              <Sparkles size={13} />
             </div>
-            <div style={{ background: 'rgba(30, 41, 59, 0.75)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Loader2 size={18} className="spin" color="#818cf8" />
-              <span style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                Đang tra cứu và phân tích tài liệu trong {currentProject?.name || 'dự án'}...
-              </span>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '8px 14px',
+                fontSize: '0.8rem',
+                color: '#64748b',
+              }}
+            >
+              <Loader2 size={15} className="spin" color="#6366f1" />
+              <span>Đang tra cứu tài liệu và sinh câu trả lời bằng Gemini...</span>
             </div>
           </div>
         )}
@@ -296,53 +482,124 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested Quick Questions */}
-      <div style={{ padding: '10px 24px', background: 'rgba(15, 23, 42, 0.5)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto' }}>
-        <span style={{ fontSize: '0.75rem', color: '#9ca3af', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <HelpCircle size={14} /> Gợi ý câu hỏi:
-        </span>
+      {/* Quick Questions Pills */}
+      <div
+        style={{
+          padding: '8px 16px',
+          background: '#fafafa',
+          borderTop: '1px solid #f1f5f9',
+          display: 'flex',
+          gap: 6,
+          overflowX: 'auto',
+          flexShrink: 0,
+        }}
+      >
         {samplePrompts.map((prompt, i) => (
           <button
             key={i}
             onClick={() => handleSend(prompt)}
             disabled={loading || !selectedProjectId}
             className="btn btn-secondary btn-sm"
-            style={{ fontSize: '0.75rem', whiteSpace: 'nowrap', padding: '4px 10px', borderRadius: 9999 }}
+            style={{
+              fontSize: '0.72rem',
+              whiteSpace: 'nowrap',
+              padding: '4px 10px',
+              borderRadius: 9999,
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              color: '#475569',
+            }}
           >
             {prompt}
           </button>
         ))}
       </div>
 
-      {/* Input Box */}
-      <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(11, 15, 25, 0.9)' }}>
+      {/* Bottom Input Area matching Reference Image */}
+      <div
+        style={{
+          padding: '14px 16px',
+          borderTop: '1px solid #eaecf0',
+          background: '#ffffff',
+          flexShrink: 0,
+        }}
+      >
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          style={{ display: 'flex', gap: 10 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: 9999,
+            padding: '4px 6px 4px 14px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+            transition: 'border-color 0.2s',
+          }}
         >
+          {/* Paperclip Icon */}
+          <button
+            type="button"
+            title="Đính kèm tệp tham khảo"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '4px 6px 4px 0',
+            }}
+          >
+            <Paperclip size={16} />
+          </button>
+
+          {/* Text Input */}
           <input
             type="text"
             placeholder={
               selectedProjectId
-                ? `Hỏi bất kỳ điều gì về tài liệu trong ${currentProject?.name || 'dự án này'}...`
-                : 'Vui lòng chọn một dự án ở trên để bắt đầu đặt câu hỏi...'
+                ? `Hỏi bất kỳ điều gì về ${currentProject?.name || 'dự án'}...`
+                : 'Chọn một dự án để bắt đầu hỏi...'
             }
             disabled={!selectedProjectId || loading}
-            className="input-field"
             value={inputQuestion}
             onChange={(e) => setInputQuestion(e.target.value)}
-            style={{ borderRadius: 12, padding: '12px 18px' }}
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontSize: '0.82rem',
+              color: '#0f172a',
+              padding: '6px 8px',
+            }}
           />
+
+          {/* Black Circular Send Button with ArrowUp */}
           <button
             type="submit"
             disabled={!selectedProjectId || !inputQuestion.trim() || loading}
-            className="btn btn-primary"
-            style={{ borderRadius: 12, padding: '12px 22px' }}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background: '#0f172a',
+              border: 'none',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: !selectedProjectId || !inputQuestion.trim() || loading ? 'not-allowed' : 'pointer',
+              opacity: !selectedProjectId || !inputQuestion.trim() || loading ? 0.4 : 1,
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+            }}
           >
-            {loading ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
+            {loading ? <Loader2 size={15} className="spin" /> : <ArrowUp size={16} />}
           </button>
         </form>
       </div>

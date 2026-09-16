@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Project, User, UserRole } from './types';
 import { authApi, projectApi } from './services/api';
-import { Navbar } from './components/Navbar';
+import { SidebarRail } from './components/SidebarRail';
+import { TopHeader } from './components/TopHeader';
 import { AuthModal } from './components/AuthModal';
 import { CreateProjectModal } from './components/CreateProjectModal';
 import { ProjectDetailView } from './components/ProjectDetailView';
@@ -9,17 +10,16 @@ import { AiChatPanel } from './components/AiChatPanel';
 import { AdminPanel } from './components/AdminPanel';
 import {
   FolderGit2,
-  FolderPlus,
+  Plus,
   Bot,
   Users,
   FileText,
   ArrowRight,
   Shield,
-  Layers,
   Sparkles,
-  Database,
   ExternalLink,
-  Lock,
+  Search,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -27,6 +27,8 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'projects' | 'chat' | 'admin'>('projects');
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
@@ -109,219 +111,494 @@ export const App: React.FC = () => {
   };
 
   const formatRoleName = (r?: string) => {
-    if (r === 'OWNER') return 'CHỦ DỰ ÁN';
-    if (r === 'ADMIN') return 'QUẢN TRỊ';
-    if (r === 'VIEWER') return 'NGƯỜI XEM';
-    return 'THÀNH VIÊN';
+    if (r === 'OWNER') return 'Chủ Dự Án';
+    if (r === 'ADMIN') return 'Quản Trị';
+    if (r === 'VIEWER') return 'Người Xem';
+    return 'Thành Viên';
   };
 
+  // Breadcrumb path computation
+  const getBreadcrumbs = () => {
+    if (!currentUser) return ['KBase', 'Giới Thiệu'];
+    if (selectedProject) return ['Cơ Sở Tri Thức', 'Không Gian Dự Án', selectedProject.name];
+    if (activeTab === 'admin') return ['Hệ Thống', 'Quản Trị Viên'];
+    if (activeTab === 'chat') return ['Cơ Sở Tri Thức', 'Trợ Lý AI'];
+    return ['Cơ Sở Tri Thức', 'Tất Cả Dự Án'];
+  };
+
+  // Filtered projects based on search query
+  const filteredProjects = projects.filter((p) => {
+    if (!searchQuery.trim()) return true;
+    return (
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  });
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar
+    <div className="saas-layout">
+      {/* 1. LEFT ICON RAIL (68px) */}
+      <SidebarRail
         user={currentUser}
         activeTab={activeTab}
         setActiveTab={(tab) => {
           setActiveTab(tab);
           setSelectedProject(null);
         }}
+        isAiDrawerOpen={isAiDrawerOpen}
+        setIsAiDrawerOpen={setIsAiDrawerOpen}
         onLogout={handleLogout}
         onOpenAuth={() => setIsAuthOpen(true)}
-        onQuickLogin={handleQuickLogin}
       />
 
-      <main style={{ maxWidth: 1400, width: '100%', margin: '0 auto', padding: '28px 24px', flex: 1 }}>
-        {/* If user is NOT logged in: Show rich Landing / Demo banner */}
-        {!currentUser && !loading && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center', textAlign: 'center', marginTop: 40 }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '6px 14px',
-              borderRadius: 9999,
-              background: 'rgba(99, 102, 241, 0.12)',
-              border: '1px solid rgba(99, 102, 241, 0.3)',
-              color: '#818cf8',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-            }}>
-              <Sparkles size={15} /> Nền Tảng Quản Trị Tri Thức KBase - Spring Boot 3, PostgreSQL & Trợ Lý AI
-            </div>
+      {/* 2. CENTER MAIN COLUMN */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+        {/* Top Header Bar */}
+        <TopHeader
+          user={currentUser}
+          breadcrumbPath={getBreadcrumbs()}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          isAiDrawerOpen={isAiDrawerOpen}
+          setIsAiDrawerOpen={setIsAiDrawerOpen}
+          onOpenCreateProject={currentUser ? () => setIsCreateProjectOpen(true) : undefined}
+          onQuickLogin={handleQuickLogin}
+          onOpenAuth={() => setIsAuthOpen(true)}
+        />
 
-            <h1 style={{ fontSize: '3rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.15, maxWidth: 850 }}>
-              Hệ Thống Cơ Sở Tri Thức Dành Cho{' '}
-              <span style={{ background: 'linear-gradient(90deg, #818cf8, #22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Đội Ngũ Kỹ Thuật
-              </span>
-            </h1>
-
-            <p style={{ fontSize: '1.1rem', color: '#9ca3af', maxWidth: 680, lineHeight: 1.6 }}>
-              Lưu trữ, tổ chức và tìm kiếm tài liệu dự án, video hướng dẫn, kiến trúc hệ thống. Đặt câu hỏi và nhận câu trả lời tổng hợp thông minh kèm nguồn trích dẫn chứng cứ cụ thể.
-            </p>
-
-            {/* Quick Access Roles */}
-            <div className="glass-panel" style={{ padding: 24, width: '100%', maxWidth: 700 }}>
-              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#e2e8f0', marginBottom: 14 }}>
-                🚀 Trải nghiệm nhanh hệ thống với các tài khoản mẫu sẵn có:
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+        {/* Scrollable Main Body */}
+        <main style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
+          {/* A. LOGGED OUT LANDING VIEW */}
+          {!currentUser && !loading && (
+            <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 36 }}>
+              {/* Hero Banner */}
+              <div style={{ textAlign: 'center', marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div
-                  className="glass-card"
-                  onClick={() => handleQuickLogin('admin')}
-                  style={{ padding: 18, cursor: 'pointer', textAlign: 'center' }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '6px 16px',
+                    borderRadius: 9999,
+                    background: '#f1f5f9',
+                    border: '1px solid #e2e8f0',
+                    color: '#334155',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    marginBottom: 16,
+                  }}
                 >
-                  <Shield size={26} color="#c084fc" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Quản Trị (Admin)</div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Giám sát hệ thống & tài khoản</div>
+                  <Sparkles size={15} color="#7c3aed" /> Nền Tảng Cơ Sở Tri Thức KBase & Trợ Lý Gemini 3.6 Flash
                 </div>
 
+                <h1 style={{ fontSize: '2.6rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#0f172a', lineHeight: 1.2, maxWidth: 820 }}>
+                  Không Gian Lưu Trữ & Hỏi Đáp Tri Thức Cho Nhóm Kỹ Thuật
+                </h1>
+
+                <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: 660, marginTop: 14, lineHeight: 1.6 }}>
+                  Quản lý tài liệu dự án, video hướng dẫn và kiến trúc hệ thống. Trợ lý AI tổng hợp câu trả lời thông minh kèm nguồn trích dẫn chứng cứ cụ thể.
+                </p>
+
+                {/* 1-Click Quick Demo Login Pills */}
                 <div
-                  className="glass-card"
-                  onClick={() => handleQuickLogin('owner')}
-                  style={{ padding: 18, cursor: 'pointer', textAlign: 'center' }}
+                  className="white-card"
+                  style={{
+                    marginTop: 32,
+                    padding: 24,
+                    width: '100%',
+                    maxWidth: 720,
+                    textAlign: 'left',
+                  }}
                 >
-                  <FolderGit2 size={26} color="#38bdf8" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Chủ Dự Án (Owner)</div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Tạo dự án & mời thành viên</div>
-                </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
+                      🚀 Đăng nhập nhanh với các tài khoản mẫu sẵn có:
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                      Không cần nhập mật khẩu
+                    </span>
+                  </div>
 
-                <div
-                  className="glass-card"
-                  onClick={() => handleQuickLogin('user')}
-                  style={{ padding: 18, cursor: 'pointer', textAlign: 'center' }}
-                >
-                  <Bot size={26} color="#34d399" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Thành Viên (User)</div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>Tải tài liệu & hỏi đáp AI</div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 20 }}>
-                <button onClick={() => setIsAuthOpen(true)} className="btn btn-primary">
-                  Đăng Nhập Hoặc Đăng Ký Tài Khoản Riêng <ArrowRight size={16} />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* If user is logged in: Main App Workflows */}
-        {currentUser && (
-          <>
-            {/* VIEW 1: PROJECTS TAB */}
-            {activeTab === 'projects' && (
-              <>
-                {selectedProject ? (
-                  <ProjectDetailView
-                    project={selectedProject}
-                    currentUser={currentUser}
-                    onBack={() => {
-                      setSelectedProject(null);
-                      loadProjects();
-                    }}
-                    allProjects={projects}
-                  />
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                    {/* Projects Header & Create Button */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-                      <div>
-                        <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Không Gian Dự Án</h2>
-                        <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: 2 }}>
-                          Chọn một không gian dự án để quản lý tài liệu, tệp video hoặc cộng tác cùng đồng đội.
-                        </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                    <div
+                      onClick={() => handleQuickLogin('admin')}
+                      className="folder-preview-card"
+                      style={{ padding: 14 }}
+                    >
+                      <div className="window-dots">
+                        <span className="window-dot" style={{ background: '#ef4444' }} />
+                        <span className="window-dot" style={{ background: '#f59e0b' }} />
+                        <span className="window-dot" style={{ background: '#10b981' }} />
                       </div>
-
-                      <button
-                        onClick={() => setIsCreateProjectOpen(true)}
-                        className="btn btn-primary"
-                      >
-                        <FolderPlus size={18} /> Tạo Không Gian Dự Án Mới
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                        <Shield size={18} color="#7c3aed" />
+                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>Admin</span>
+                      </div>
+                      <p style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 4 }}>
+                        Giám sát & toàn quyền hệ thống
+                      </p>
                     </div>
 
-                    {/* Projects Grid */}
-                    {projects.length === 0 ? (
-                      <div className="glass-panel" style={{ padding: 48, textAlign: 'center' }}>
-                        <FolderGit2 size={48} color="#6366f1" style={{ margin: '0 auto 16px' }} />
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Chưa Có Dự Án Nào</h3>
-                        <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: 4, maxWidth: 420, margin: '4px auto 16px' }}>
-                          Hãy tạo không gian dự án đầu tiên của bạn để bắt đầu lưu trữ tài liệu đặc tả và video hướng dẫn.
-                        </p>
-                        <button onClick={() => setIsCreateProjectOpen(true)} className="btn btn-primary btn-sm">
-                          <FolderPlus size={16} /> Tạo Dự Án Mới
+                    <div
+                      onClick={() => handleQuickLogin('owner')}
+                      className="folder-preview-card"
+                      style={{ padding: 14 }}
+                    >
+                      <div className="window-dots">
+                        <span className="window-dot" style={{ background: '#ef4444' }} />
+                        <span className="window-dot" style={{ background: '#f59e0b' }} />
+                        <span className="window-dot" style={{ background: '#10b981' }} />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                        <FolderGit2 size={18} color="#0284c7" />
+                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>Owner</span>
+                      </div>
+                      <p style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 4 }}>
+                        Tạo dự án & mời thành viên
+                      </p>
+                    </div>
+
+                    <div
+                      onClick={() => handleQuickLogin('user')}
+                      className="folder-preview-card"
+                      style={{ padding: 14 }}
+                    >
+                      <div className="window-dots">
+                        <span className="window-dot" style={{ background: '#ef4444' }} />
+                        <span className="window-dot" style={{ background: '#f59e0b' }} />
+                        <span className="window-dot" style={{ background: '#10b981' }} />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                        <Bot size={18} color="#059669" />
+                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>User</span>
+                      </div>
+                      <p style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 4 }}>
+                        Tải tài liệu & hỏi đáp AI
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 20, textAlign: 'center' }}>
+                    <button
+                      onClick={() => setIsAuthOpen(true)}
+                      className="btn btn-black-pill"
+                      style={{ padding: '10px 24px' }}
+                    >
+                      Đăng Nhập Hoặc Đăng Ký Tài Khoản Riêng <ArrowRight size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* B. LOGGED IN WORKSPACE */}
+          {currentUser && (
+            <>
+              {/* TAB 1: PROJECTS */}
+              {activeTab === 'projects' && (
+                <>
+                  {selectedProject ? (
+                    <ProjectDetailView
+                      project={selectedProject}
+                      currentUser={currentUser}
+                      onBack={() => {
+                        setSelectedProject(null);
+                        loadProjects();
+                      }}
+                      allProjects={projects}
+                      onOpenAiChat={() => setIsAiDrawerOpen(true)}
+                    />
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                      {/* Section Title Header matching Reference Image */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                        <div>
+                          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>
+                            Cơ Sở Tri Thức (Knowledge Base)
+                          </h1>
+                          <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 2 }}>
+                            Quản lý các không gian dự án và các nguồn tài liệu kỹ thuật được kết nối.
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => setIsCreateProjectOpen(true)}
+                          className="btn btn-black-pill"
+                          style={{ height: 38 }}
+                        >
+                          <Plus size={16} /> Tạo Dự Án Mới
                         </button>
                       </div>
-                    ) : (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
-                        {projects.map((p) => (
+
+                      {/* SECTION 1: RECENT PROJECTS (macOS Folder Preview Cards like Reference Image) */}
+                      <div>
+                        <div style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#0f172a' }}>
+                            Không gian làm việc gần đây
+                          </h3>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                            {projects.length} không gian dự án
+                          </span>
+                        </div>
+
+                        {projects.length === 0 ? (
                           <div
-                            key={p.id}
-                            className="glass-card"
-                            style={{ padding: 22, cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
-                            onClick={() => setSelectedProject(p)}
+                            style={{
+                              background: '#ffffff',
+                              border: '1px dashed #cbd5e1',
+                              borderRadius: 12,
+                              padding: '40px 20px',
+                              textAlign: 'center',
+                            }}
                           >
-                            <div>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                                <div style={{
-                                  width: 42,
-                                  height: 42,
-                                  borderRadius: 10,
-                                  background: 'rgba(99, 102, 241, 0.15)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                }}>
-                                  <FolderGit2 size={22} color="#818cf8" />
-                                </div>
-                                <span className="badge badge-owner">
-                                  {formatRoleName(p.currentUserRole)}
-                                </span>
-                              </div>
-
-                              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: 6 }}>
-                                {p.name}
-                              </h3>
-                              <p style={{ fontSize: '0.82rem', color: '#9ca3af', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                {p.description || 'Chưa có thông tin mô tả dự án.'}
-                              </p>
-                            </div>
-
-                            <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', color: '#9ca3af' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                  <FileText size={14} color="#60a5fa" /> {p.documentCount} tài liệu
-                                </span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                  <Users size={14} color="#34d399" /> {p.memberCount} thành viên
-                                </span>
-                              </div>
-
-                              <span style={{ color: '#818cf8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                Mở Dự Án <ArrowRight size={14} />
-                              </span>
-                            </div>
+                            <FolderGit2 size={36} color="#94a3b8" style={{ margin: '0 auto 10px' }} />
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#0f172a' }}>
+                              Chưa có không gian dự án nào
+                            </h4>
+                            <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 4 }}>
+                              Hãy tạo dự án đầu tiên để bắt đầu lưu trữ tài liệu đặc tả và kích hoạt trợ lý AI.
+                            </p>
+                            <button
+                              onClick={() => setIsCreateProjectOpen(true)}
+                              className="btn btn-black-pill"
+                              style={{ marginTop: 14 }}
+                            >
+                              <Plus size={15} /> Tạo Dự Án Đầu Tiên
+                            </button>
                           </div>
-                        ))}
+                        ) : (
+                          <div
+                            style={{
+                              display: 'grid',
+                              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                              gap: 16,
+                            }}
+                          >
+                            {projects.slice(0, 4).map((p) => (
+                              <div
+                                key={p.id}
+                                onClick={() => setSelectedProject(p)}
+                                className="folder-preview-card"
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'space-between',
+                                  minHeight: 145,
+                                }}
+                              >
+                                <div>
+                                  {/* macOS Window Dots */}
+                                  <div className="window-dots">
+                                    <span className="window-dot" style={{ background: '#ef4444' }} />
+                                    <span className="window-dot" style={{ background: '#f59e0b' }} />
+                                    <span className="window-dot" style={{ background: '#10b981' }} />
+                                  </div>
+
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
+                                    <div
+                                      style={{
+                                        width: 34,
+                                        height: 34,
+                                        borderRadius: 8,
+                                        background: '#f8fafc',
+                                        border: '1px solid #e2e8f0',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: '#0284c7',
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      <FolderGit2 size={18} />
+                                    </div>
+                                    <div style={{ overflow: 'hidden' }}>
+                                      <h4
+                                        style={{
+                                          fontSize: '0.875rem',
+                                          fontWeight: 600,
+                                          color: '#0f172a',
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                        }}
+                                        title={p.name}
+                                      >
+                                        {p.name}
+                                      </h4>
+                                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                        {p.documentCount} tài liệu • {p.memberCount} thành viên
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span>Tạo ngày: {new Date(p.createdAt).toLocaleDateString('vi-VN')}</span>
+                                  <span style={{ color: '#0f172a', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    Mở <ArrowRight size={12} />
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
 
-            {/* VIEW 2: FULL AI CHATBOT TAB */}
-            {activeTab === 'chat' && (
-              <AiChatPanel projects={projects} />
-            )}
+                      {/* SECTION 2: ALL PROJECTS (Table matching Reference Image) */}
+                      <div>
+                        <div style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#0f172a' }}>
+                            Tất cả không gian dự án
+                          </h3>
+                        </div>
 
-            {/* VIEW 3: ADMIN OVERSIGHT TAB */}
-            {activeTab === 'admin' && currentUser.role === 'ROLE_ADMIN' && (
-              <AdminPanel />
-            )}
-          </>
-        )}
-      </main>
+                        {filteredProjects.length === 0 ? (
+                          <div style={{ background: '#ffffff', border: '1px solid #eaecf0', borderRadius: 12, padding: 32, textAlign: 'center' }}>
+                            <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Không tìm thấy dự án nào phù hợp với từ khóa.</p>
+                          </div>
+                        ) : (
+                          <div style={{ background: '#ffffff', border: '1px solid #eaecf0', borderRadius: 12, overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
+                            <table className="modern-table">
+                              <thead>
+                                <tr>
+                                  <th style={{ width: '40%' }}>Tên Dự Án</th>
+                                  <th>Vai Trò Của Bạn</th>
+                                  <th>Số Tài Liệu</th>
+                                  <th>Thành Viên</th>
+                                  <th>Trạng Thái</th>
+                                  <th style={{ textAlign: 'right' }}>Thao Tác</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {filteredProjects.map((p) => (
+                                  <tr
+                                    key={p.id}
+                                    onClick={() => setSelectedProject(p)}
+                                    style={{ cursor: 'pointer' }}
+                                  >
+                                    <td>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                        <div
+                                          style={{
+                                            width: 30,
+                                            height: 30,
+                                            borderRadius: 6,
+                                            background: '#f8fafc',
+                                            border: '1px solid #e2e8f0',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#0f172a',
+                                            flexShrink: 0,
+                                          }}
+                                        >
+                                          <FolderGit2 size={16} />
+                                        </div>
+                                        <div>
+                                          <div style={{ fontWeight: 600, color: '#0f172a' }}>
+                                            {p.name}
+                                          </div>
+                                          <div style={{ fontSize: '0.72rem', color: '#94a3b8', maxWidth: 280, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {p.description || 'Chưa có mô tả'}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+
+                                    <td>
+                                      <span
+                                        style={{
+                                          fontSize: '0.72rem',
+                                          fontWeight: 600,
+                                          padding: '2px 8px',
+                                          borderRadius: 4,
+                                          background: p.currentUserRole === 'OWNER' ? '#e0f2fe' : '#f1f5f9',
+                                          color: p.currentUserRole === 'OWNER' ? '#0369a1' : '#475569',
+                                        }}
+                                      >
+                                        {formatRoleName(p.currentUserRole)}
+                                      </span>
+                                    </td>
+
+                                    <td style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                                      {p.documentCount} tệp
+                                    </td>
+
+                                    <td style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                                      {p.memberCount} người
+                                    </td>
+
+                                    <td>
+                                      <span className="badge-status badge-status-active">
+                                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
+                                        Hoạt động
+                                      </span>
+                                    </td>
+
+                                    <td style={{ textAlign: 'right' }}>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedProject(p);
+                                        }}
+                                        className="btn btn-secondary btn-sm"
+                                        style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 600 }}
+                                      >
+                                        Mở Không Gian <ArrowRight size={13} />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* TAB 2: STANDALONE AI CHAT */}
+              {activeTab === 'chat' && (
+                <div style={{ height: 'calc(100vh - 120px)', background: '#ffffff', borderRadius: 12, border: '1px solid #eaecf0', overflow: 'hidden' }}>
+                  <AiChatPanel projects={projects} selectedProjectId={selectedProject?.id} />
+                </div>
+              )}
+
+              {/* TAB 3: ADMIN OVERSIGHT */}
+              {activeTab === 'admin' && currentUser.role === 'ROLE_ADMIN' && (
+                <AdminPanel />
+              )}
+            </>
+          )}
+        </main>
+      </div>
+
+      {/* 3. RIGHT COLLAPSIBLE AI COPILOT SIDEBAR (matching reference image) */}
+      {isAiDrawerOpen && (
+        <aside
+          style={{
+            width: 420,
+            height: '100vh',
+            borderLeft: '1px solid #eaecf0',
+            background: '#ffffff',
+            flexShrink: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: 'var(--shadow-sidebar)',
+            zIndex: 40,
+          }}
+        >
+          <AiChatPanel
+            projects={projects}
+            selectedProjectId={selectedProject?.id}
+            isDrawer={true}
+            onCloseDrawer={() => setIsAiDrawerOpen(false)}
+          />
+        </aside>
+      )}
 
       {/* Auth Modal */}
       <AuthModal
@@ -344,4 +621,5 @@ export const App: React.FC = () => {
     </div>
   );
 };
+
 export default App;
