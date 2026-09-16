@@ -577,14 +577,15 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                             {doc.formattedSize}
                           </td>
 
-                          <td>
-                            <span className={`badge-status ${status.className}`}>
+                          <td style={{ whiteSpace: 'nowrap' }}>
+                            <span className={`badge-status ${status.className}`} style={{ whiteSpace: 'nowrap' }}>
                               <span
                                 style={{
                                   width: 6,
                                   height: 6,
                                   borderRadius: '50%',
                                   background: status.dotColor,
+                                  flexShrink: 0,
                                 }}
                               />
                               {status.label}

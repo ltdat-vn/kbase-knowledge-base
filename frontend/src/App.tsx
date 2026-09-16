@@ -525,12 +525,12 @@ export const App: React.FC = () => {
                                       {p.memberCount} người
                                     </td>
 
-                                    <td>
-                                      <span className="badge-status badge-status-active">
-                                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
-                                        Hoạt động
-                                      </span>
-                                    </td>
+                                     <td style={{ whiteSpace: 'nowrap' }}>
+                                       <span className="badge-status badge-status-active" style={{ whiteSpace: 'nowrap' }}>
+                                         <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                                         Hoạt động
+                                       </span>
+                                     </td>
 
                                     <td style={{ textAlign: 'right' }}>
                                       <button
