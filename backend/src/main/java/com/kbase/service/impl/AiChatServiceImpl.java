@@ -186,7 +186,7 @@ public class AiChatServiceImpl implements AiChatService {
 
         return ChatResponse.builder()
                 .question(request.getQuestion())
-                .answer(answerBuilder.toString())
+                .answer(cleanMarkdownFormatting(answerBuilder.toString()))
                 .projectId(projectId)
                 .references(references)
                 .build();
@@ -221,11 +221,14 @@ public class AiChatServiceImpl implements AiChatService {
         try {
             String prompt = String.format("""
                     Bạn là Trợ lý AI chuyên gia của hệ thống KBase.
-                    Hãy trả lời câu hỏi của người dùng bằng Tiếng Việt dựa trên ngữ cảnh tài liệu dự án "%s" dưới đây.
+                    Hãy trả lời câu hỏi của người dùng bằng Tiếng Việt một cách tự nhiên, rõ ràng, mạch lạc dựa trên ngữ cảnh tài liệu dự án "%s" dưới đây.
                     
-                    Yêu cầu:
-                    1. Trình bày rõ ràng, mạch lạc, có cấu trúc bằng định dạng Markdown (tiêu đề, in đậm, danh sách gạch đầu dòng).
-                    2. Dựa sát vào thông tin có trong ngữ cảnh tài liệu. Nếu tài liệu không đề cập đến nội dung câu hỏi, hãy nói rõ là tài liệu dự án hiện chưa có thông tin này.
+                    Quy tắc trình bày:
+                    1. TUYỆT ĐỐI KHÔNG sử dụng các ký hiệu markdown như '###', '##', '#', '**', '*', '`'.
+                    2. Không dùng dấu thăng '#' để làm tiêu đề. Hãy xuống dòng và viết hoa chữ cái đầu tiêu đề bình thường.
+                    3. Không dùng dấu sao kép '**' để in đậm.
+                    4. Khi liệt kê các ý, dùng dấu gạch đầu dòng '-' đơn giản hoặc số thứ tự 1, 2, 3, tuyệt đối không dùng dấu sao '*'.
+                    5. Dựa sát vào thông tin có trong ngữ cảnh tài liệu. Nếu tài liệu không đề cập đến nội dung câu hỏi, hãy nói rõ là tài liệu dự án hiện chưa có thông tin này.
                     
                     ---
                     [NGỮ CẢNH TÀI LIỆU DỰ ÁN]:
@@ -260,7 +263,7 @@ public class AiChatServiceImpl implements AiChatService {
                 JsonNode rootNode = objectMapper.readTree(response.body());
                 JsonNode textNode = rootNode.at("/candidates/0/content/parts/0/text");
                 if (!textNode.isMissingNode() && !textNode.asText().isBlank()) {
-                    return textNode.asText();
+                    return cleanMarkdownFormatting(textNode.asText());
                 }
             } else {
                 log.warn("Gemini API phản hồi mã lỗi: {}, nội dung: {}", response.statusCode(), response.body());
@@ -269,6 +272,16 @@ public class AiChatServiceImpl implements AiChatService {
             log.warn("Lỗi khi kết nối Google Gemini API, tự động chuyển về chế độ nội bộ: {}", e.getMessage());
         }
         return null;
+    }
+
+    private String cleanMarkdownFormatting(String text) {
+        if (text == null) return "";
+        return text
+                .replaceAll("(?m)^#{1,6}\\s*", "")
+                .replaceAll("\\*\\*", "")
+                .replaceAll("`", "")
+                .replaceAll("(?m)^\\*\\s+", "- ")
+                .trim();
     }
 
     private int countOccurrences(String text, String term) {

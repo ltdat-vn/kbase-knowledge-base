@@ -354,7 +354,12 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
                     whiteSpace: 'pre-line',
                   }}
                 >
-                  {m.text}
+                  {m.text
+                    .replace(/^#{1,6}\s*/gm, '')
+                    .replace(/\*\*/g, '')
+                    .replace(/`([^`]+)`/g, '$1')
+                    .replace(/^[\*]\s+/gm, '• ')
+                    .trim()}
                 </div>
 
                 {/* Source Document Citation Card (styled like the broadcast card in reference image) */}
