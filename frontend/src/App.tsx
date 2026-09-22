@@ -90,19 +90,6 @@ export const App: React.FC = () => {
     setCurrentUser(user);
   };
 
-  const handleQuickLogin = async (role: 'admin' | 'owner' | 'user') => {
-    const creds = {
-      admin: { email: 'admin@kbase.com', pass: 'Admin@123' },
-      owner: { email: 'owner@kbase.com', pass: 'Owner@123' },
-      user: { email: 'user@kbase.com', pass: 'User@123' },
-    }[role];
-
-    try {
-      await handleLogin(creds.email, creds.pass);
-    } catch (err) {
-      alert('Đăng nhập nhanh thất bại. Hãy đảm bảo backend Spring Boot và PostgreSQL đang hoạt động.');
-    }
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('kbase_token');
@@ -163,7 +150,6 @@ export const App: React.FC = () => {
           isAiDrawerOpen={isAiDrawerOpen}
           setIsAiDrawerOpen={setIsAiDrawerOpen}
           onOpenCreateProject={!selectedProject && currentUser ? () => setIsCreateProjectOpen(true) : undefined}
-          onQuickLogin={handleQuickLogin}
           onOpenAuth={() => setIsAuthOpen(true)}
           onBreadcrumbClick={(idx) => {
             if (idx <= 1) {
@@ -180,7 +166,6 @@ export const App: React.FC = () => {
             <RoleLoginPage
               onLogin={handleLogin}
               onRegister={handleRegister}
-              onQuickLogin={handleQuickLogin}
             />
           )}
 
@@ -488,7 +473,6 @@ export const App: React.FC = () => {
         onClose={() => setIsAuthOpen(false)}
         onLogin={handleLogin}
         onRegister={handleRegister}
-        onQuickLogin={handleQuickLogin}
       />
 
       {/* Create Project Modal */}

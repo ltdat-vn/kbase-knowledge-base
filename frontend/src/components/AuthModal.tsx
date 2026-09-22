@@ -7,7 +7,6 @@ interface AuthModalProps {
   onClose: () => void;
   onLogin: (email: string, pass: string) => Promise<void>;
   onRegister: (email: string, pass: string, name: string, role: UserRole) => Promise<void>;
-  onQuickLogin: (role: 'admin' | 'owner' | 'user') => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -15,7 +14,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onLogin,
   onRegister,
-  onQuickLogin,
 }) => {
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -224,60 +222,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {loading ? 'Đang xử lý...' : tab === 'login' ? 'Đăng Nhập Ngay' : 'Tạo Tài Khoản Mới'}
           </button>
         </form>
-
-        {/* Quick Demo Login Preset Buttons */}
-        <div style={{ marginTop: 22, paddingTop: 16, borderTop: '1px solid #f1f5f9' }}>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center', marginBottom: 10 }}>
-            Hoặc đăng nhập nhanh bằng các tài khoản mẫu:
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-            <button
-              onClick={() => { onQuickLogin('admin'); onClose(); }}
-              className="btn btn-secondary btn-sm"
-              style={{
-                flexDirection: 'column',
-                gap: 4,
-                padding: '8px 4px',
-                background: '#faf5ff',
-                borderColor: '#e9d5ff',
-                color: '#7e22ce',
-              }}
-            >
-              <Shield size={16} />
-              <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Admin</span>
-            </button>
-            <button
-              onClick={() => { onQuickLogin('owner'); onClose(); }}
-              className="btn btn-secondary btn-sm"
-              style={{
-                flexDirection: 'column',
-                gap: 4,
-                padding: '8px 4px',
-                background: '#f0f9ff',
-                borderColor: '#bae6fd',
-                color: '#0369a1',
-              }}
-            >
-              <Briefcase size={16} />
-              <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Owner</span>
-            </button>
-            <button
-              onClick={() => { onQuickLogin('user'); onClose(); }}
-              className="btn btn-secondary btn-sm"
-              style={{
-                flexDirection: 'column',
-                gap: 4,
-                padding: '8px 4px',
-                background: '#ecfdf5',
-                borderColor: '#a7f3d0',
-                color: '#047857',
-              }}
-            >
-              <UserIcon size={16} />
-              <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>User</span>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

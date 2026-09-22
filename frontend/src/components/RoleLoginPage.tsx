@@ -14,96 +14,91 @@ import {
   Sparkles,
   ExternalLink,
   AlertCircle,
-  Zap,
-  ArrowRight,
-  Database,
-  Server,
-  FileText,
-  Bot,
-  Users,
+  Check,
+  Info,
+  UserCheck,
 } from 'lucide-react';
 
 interface RoleLoginPageProps {
   onLogin: (email: string, pass: string) => Promise<void>;
   onRegister: (email: string, pass: string, name: string, role: UserRole) => Promise<void>;
-  onQuickLogin: (role: 'admin' | 'owner' | 'user') => void;
 }
 
-interface RoleConfig {
-  key: 'admin' | 'owner' | 'user';
-  roleEnum: UserRole;
+interface RoleOption {
+  role: UserRole;
   title: string;
+  shortTitle: string;
   subtitle: string;
   badge: string;
-  defaultEmail: string;
-  defaultPass: string;
-  primaryColor: string;
-  lightBg: string;
+  color: string;
+  bgLight: string;
   borderColor: string;
   icon: React.ElementType;
+  demoEmail: string;
+  demoPass: string;
   description: string;
   permissions: string[];
 }
 
-const ROLES: RoleConfig[] = [
+const ROLE_OPTIONS: RoleOption[] = [
   {
-    key: 'admin',
-    roleEnum: 'ROLE_ADMIN',
+    role: 'ROLE_ADMIN',
     title: 'Quản Trị Viên (Admin)',
+    shortTitle: 'Admin',
     subtitle: 'Toàn quyền quản trị hệ thống',
     badge: 'ROLE_ADMIN',
-    defaultEmail: 'admin@kbase.com',
-    defaultPass: 'Admin@123',
-    primaryColor: '#7c3aed',
-    lightBg: '#faf5ff',
+    color: '#7c3aed',
+    bgLight: '#faf5ff',
     borderColor: '#e9d5ff',
     icon: Shield,
-    description: 'Quản trị hệ thống, giám sát toàn bộ người dùng, dự án, theo dõi dung lượng lưu trữ và kiểm soát an toàn bảo mật.',
+    demoEmail: 'admin@kbase.com',
+    demoPass: 'Admin@123',
+    description: 'Quản trị hệ thống, quản lý tất cả tài khoản người dùng, giám sát dung lượng bộ nhớ và cấu hình toàn bộ dự án.',
     permissions: [
-      'Quản lý tất cả tài khoản người dùng & kích hoạt/khóa tài khoản',
-      'Giám sát thống kê hệ thống (tổng user, dự án, file, storage)',
-      'Toàn quyền quản lý mọi dự án và tài liệu tri thức',
-      'Đầy đủ quyền gọi Admin API và cấu hình Swagger',
+      'Quản lý tất cả tài khoản người dùng (Kích hoạt / Khóa tài khoản)',
+      'Giám sát thống kê hệ thống (Users, Dự án, Files, Dung lượng)',
+      'Toàn quyền quản lý mọi dự án tri thức',
+      'Đầy đủ quyền gọi Admin API và Swagger',
     ],
   },
   {
-    key: 'owner',
-    roleEnum: 'ROLE_OWNER',
+    role: 'ROLE_OWNER',
     title: 'Chủ Dự Án (Project Owner)',
+    shortTitle: 'Owner',
     subtitle: 'Khởi tạo & Quản lý dự án',
     badge: 'ROLE_OWNER',
-    defaultEmail: 'owner@kbase.com',
-    defaultPass: 'Owner@123',
-    primaryColor: '#0284c7',
-    lightBg: '#f0f9ff',
+    color: '#0284c7',
+    bgLight: '#f0f9ff',
     borderColor: '#bae6fd',
     icon: Briefcase,
-    description: 'Khởi tạo các không gian tri thức dự án, mời đồng nghiệp tham gia, tải lên tài liệu và phân phối tri thức cho nhóm kỹ thuật.',
+    demoEmail: 'owner@kbase.com',
+    demoPass: 'Owner@123',
+    description: 'Khởi tạo các không gian làm việc dự án, mời đồng nghiệp tham gia, tải lên và tổ chức tài liệu tri thức cho nhóm.',
     permissions: [
       'Khởi tạo và chỉnh sửa không gian dự án mới',
       'Mời cộng tác viên tham gia với vai trò Owner, Member, Viewer',
-      'Tải lên và phân loại tài liệu đa định dạng (PDF, Office, Media)',
-      'Tra cứu và hỏi đáp AI Copilot trên phạm vi dự án sở hữu',
+      'Tải lên và quản lý tài liệu đa định dạng (PDF, Word, Excel, Video)',
+      'Hỏi đáp cùng Trợ lý Gemini AI trong phạm vi dự án',
     ],
   },
   {
-    key: 'user',
-    roleEnum: 'ROLE_USER',
+    role: 'ROLE_USER',
     title: 'Thành Viên (Member / User)',
+    shortTitle: 'User',
     subtitle: 'Tra cứu & Hỏi đáp cùng AI',
     badge: 'ROLE_USER',
-    defaultEmail: 'user@kbase.com',
-    defaultPass: 'User@123',
-    primaryColor: '#059669',
-    lightBg: '#ecfdf5',
+    color: '#059669',
+    bgLight: '#ecfdf5',
     borderColor: '#a7f3d0',
     icon: UserIcon,
-    description: 'Thành viên nhóm kỹ thuật, tham gia các dự án được mời, đọc tài liệu hướng dẫn và hỏi đáp thông minh với trợ lý AI.',
+    demoEmail: 'user@kbase.com',
+    demoPass: 'User@123',
+    description: 'Thành viên nhóm, tham gia vào các dự án được mời, đọc tài liệu hướng dẫn và hỏi đáp thông minh với trợ lý AI.',
     permissions: [
       'Tham gia vào các dự án được cấp quyền truy cập',
-      'Xem trước trực tuyến và tải về an toàn các tài liệu nội bộ',
-      'Tìm kiếm tức thời theo từ khóa và nội dung tài liệu',
-      'Đặt câu hỏi cho Trợ lý Gemini AI kèm trích dẫn nguồn gốc',
+      'Xem trước trực tuyến và tải về an toàn tài liệu',
+      'Tìm kiếm tức thời theo từ khóa và nội dung file',
+      'Hỏi đáp với Trợ lý AI Copilot kèm trích dẫn tài liệu gốc',
     ],
   },
 ];
@@ -111,59 +106,104 @@ const ROLES: RoleConfig[] = [
 export const RoleLoginPage: React.FC<RoleLoginPageProps> = ({
   onLogin,
   onRegister,
-  onQuickLogin,
 }) => {
-  const [selectedRoleKey, setSelectedRoleKey] = useState<'admin' | 'owner' | 'user'>('admin');
-  const [tab, setTab] = useState<'login' | 'register'>('login');
-  const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [selectedRole, setSelectedRole] = useState<UserRole>('ROLE_ADMIN');
+
+  // Login Form States
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  // Register Form States
+  const [regFullName, setRegFullName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [showRegPassword, setShowRegPassword] = useState(false);
+
+  // Status States
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const currentRole = ROLES.find((r) => r.key === selectedRoleKey)!;
+  const currentRoleConfig = ROLE_OPTIONS.find((r) => r.role === selectedRole)!;
 
-  const [email, setEmail] = useState(currentRole.defaultEmail);
-  const [password, setPassword] = useState(currentRole.defaultPass);
-  const [fullName, setFullName] = useState('');
-
-  // When switching role, update credentials preset
-  const handleSelectRole = (roleKey: 'admin' | 'owner' | 'user') => {
-    setSelectedRoleKey(roleKey);
-    const target = ROLES.find((r) => r.key === roleKey)!;
-    setEmail(target.defaultEmail);
-    setPassword(target.defaultPass);
+  // Handle Fill Demo Credentials into the Login Form (only fills inputs, DOES NOT bypass)
+  const handleFillDemoToForm = (role: RoleOption) => {
+    setSelectedRole(role.role);
+    setLoginEmail(role.demoEmail);
+    setLoginPassword(role.demoPass);
     setError(null);
+    setSuccessMsg(`Đã điền thông tin tài khoản mẫu ${role.shortTitle}. Bạn hãy bấm "Đăng Nhập" để xác thực qua hệ thống.`);
   };
 
-  const handleFillDemo = () => {
-    setEmail(currentRole.defaultEmail);
-    setPassword(currentRole.defaultPass);
-    setError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle Login Submit
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMsg(null);
+
+    if (!loginEmail.trim() || !loginPassword) {
+      setError('Vui lòng nhập đầy đủ Email và Mật khẩu.');
+      return;
+    }
+
     setLoading(true);
     try {
-      if (tab === 'login') {
-        await onLogin(email, password);
-      } else {
-        await onRegister(email, password, fullName || `${currentRole.title}`, currentRole.roleEnum);
-      }
+      await onLogin(loginEmail.trim(), loginPassword);
     } catch (err: any) {
-      setError(
+      const msg =
         err.response?.data?.message ||
-          err.message ||
-          'Đăng nhập không thành công. Hãy kiểm tra lại thông tin tài khoản hoặc kết nối server.'
-      );
+        err.message ||
+        'Đăng nhập không thành công. Vui lòng kiểm tra lại email hoặc mật khẩu!';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Register Submit
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg(null);
+
+    if (!regFullName.trim()) {
+      setError('Vui lòng nhập Họ và tên của bạn.');
+      return;
+    }
+    if (!regEmail.trim()) {
+      setError('Vui lòng nhập địa chỉ Email.');
+      return;
+    }
+    if (regPassword.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự.');
+      return;
+    }
+    if (regPassword !== regConfirmPassword) {
+      setError('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await onRegister(regEmail.trim(), regPassword, regFullName.trim(), selectedRole);
+      // Upon successful registration, onRegister updates auth state in App.tsx
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        'Đăng ký tài khoản không thành công. Email này có thể đã được sử dụng.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 1040, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 40 }}>
-      {/* Top Banner Header */}
+    <div style={{ maxWidth: 1060, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 40 }}>
+      {/* 1. TOP HEADER BANNER */}
       <div style={{ textAlign: 'center', marginTop: 12 }}>
         <div
           style={{
@@ -182,118 +222,180 @@ export const RoleLoginPage: React.FC<RoleLoginPageProps> = ({
           }}
         >
           <Sparkles size={15} color="#7c3aed" />
-          <span>Hệ Thống Phân Quyền Vai Trò (RBAC) • KBase Knowledge Base</span>
+          <span>Hệ Thống Phân Quyền Vai Trò (RBAC) • Bảo Mật Chuẩn Spring Security & JWT</span>
         </div>
 
-        <h1 style={{ fontSize: '2.4rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-          Cổng Đăng Nhập Dành Cho 3 Vai Trò
+        <h1 style={{ fontSize: '2.3rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.025em', lineHeight: 1.2 }}>
+          {activeTab === 'login' ? 'Đăng Nhập Hệ Thống KBase' : 'Đăng Ký Tài Khoản Cho Từng Vai Trò'}
         </h1>
-        <p style={{ fontSize: '0.98rem', color: '#64748b', maxWidth: 640, margin: '10px auto 0', lineHeight: 1.5 }}>
-          Lựa chọn vai trò phù hợp bên dưới để đăng nhập hoặc trải nghiệm ngay các tính năng phân quyền chuyên biệt.
+        <p style={{ fontSize: '0.95rem', color: '#64748b', maxWidth: 640, margin: '8px auto 0', lineHeight: 1.5 }}>
+          {activeTab === 'login'
+            ? 'Vui lòng nhập đúng địa chỉ Email và Mật khẩu của bạn để truy cập không gian làm việc.'
+            : 'Chọn một vai trò phù hợp (Admin, Owner, User) và nhập thông tin để tạo tài khoản riêng trong hệ thống.'}
         </p>
+
+        {/* Tab Switcher: Đăng Nhập vs Đăng Ký */}
+        <div
+          style={{
+            display: 'inline-flex',
+            background: '#f1f5f9',
+            padding: 4,
+            borderRadius: 9999,
+            marginTop: 20,
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('login');
+              setError(null);
+              setSuccessMsg(null);
+            }}
+            style={{
+              padding: '8px 24px',
+              borderRadius: 9999,
+              border: 'none',
+              background: activeTab === 'login' ? '#ffffff' : 'transparent',
+              color: activeTab === 'login' ? '#0f172a' : '#64748b',
+              fontWeight: activeTab === 'login' ? 700 : 500,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              boxShadow: activeTab === 'login' ? '0 2px 5px rgba(0,0,0,0.06)' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <LogIn size={15} /> Đăng Nhập
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('register');
+              setError(null);
+              setSuccessMsg(null);
+            }}
+            style={{
+              padding: '8px 24px',
+              borderRadius: 9999,
+              border: 'none',
+              background: activeTab === 'register' ? '#ffffff' : 'transparent',
+              color: activeTab === 'register' ? '#0f172a' : '#64748b',
+              fontWeight: activeTab === 'register' ? 700 : 500,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              boxShadow: activeTab === 'register' ? '0 2px 5px rgba(0,0,0,0.06)' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <UserPlus size={15} /> Đăng Ký Tài Khoản Mới
+          </button>
+        </div>
       </div>
 
-      {/* 1. THREE ROLE SELECTOR CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-        {ROLES.map((r) => {
-          const isSelected = r.key === selectedRoleKey;
-          const Icon = r.icon;
-          return (
-            <div
-              key={r.key}
-              onClick={() => handleSelectRole(r.key)}
-              style={{
-                background: '#ffffff',
-                borderRadius: 16,
-                padding: '20px 20px',
-                border: isSelected ? `2px solid ${r.primaryColor}` : '1px solid #e2e8f0',
-                boxShadow: isSelected
-                  ? `0 10px 25px -5px ${r.primaryColor}25, 0 4px 10px -2px ${r.primaryColor}15`
-                  : '0 2px 6px rgba(0,0,0,0.02)',
-                cursor: 'pointer',
-                position: 'relative',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                transform: isSelected ? 'translateY(-2px)' : 'none',
-              }}
-            >
-              {/* Window Dots Style Bar */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ display: 'flex', gap: 5 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444' }} />
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b' }} />
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
-                </div>
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: 9999,
-                    background: r.lightBg,
-                    color: r.primaryColor,
-                    border: `1px solid ${r.borderColor}`,
-                  }}
-                >
-                  {r.badge}
-                </span>
-              </div>
+      {/* 2. ROLE SELECTOR CARDS (Hiển thị 3 vai trò rõ ràng) */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
+            {activeTab === 'register' ? '1. Chọn vai trò bạn muốn tạo tài khoản:' : 'Chọn vai trò để xem đặc quyền & thông tin:'}
+          </span>
+          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+            {activeTab === 'register' ? 'Tài khoản sẽ được phân cấp đúng quyền hạn tương ứng' : 'Phân quyền chuẩn RBAC'}
+          </span>
+        </div>
 
-              {/* Icon & Title */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    background: r.lightBg,
-                    border: `1px solid ${r.borderColor}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: r.primaryColor,
-                    flexShrink: 0,
-                  }}
-                >
-                  <Icon size={22} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+          {ROLE_OPTIONS.map((r) => {
+            const isSelected = r.role === selectedRole;
+            const Icon = r.icon;
+            return (
+              <div
+                key={r.role}
+                onClick={() => setSelectedRole(r.role)}
+                style={{
+                  background: '#ffffff',
+                  borderRadius: 14,
+                  padding: '16px 18px',
+                  border: isSelected ? `2px solid ${r.color}` : '1px solid #e2e8f0',
+                  boxShadow: isSelected
+                    ? `0 8px 20px -4px ${r.color}20, 0 2px 6px -1px ${r.color}10`
+                    : '0 1px 3px rgba(0,0,0,0.02)',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.18s ease',
+                  transform: isSelected ? 'translateY(-2px)' : 'none',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      background: r.bgLight,
+                      color: r.color,
+                      border: `1px solid ${r.borderColor}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Icon size={18} />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: 9999,
+                      background: r.bgLight,
+                      color: r.color,
+                      border: `1px solid ${r.borderColor}`,
+                    }}
+                  >
+                    {r.badge}
+                  </span>
                 </div>
-                <div>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                    {r.title}
-                  </h3>
-                  <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '2px 0 0' }}>
-                    {r.subtitle}
-                  </p>
-                </div>
-              </div>
 
-              {/* Selected Checkmark Badge */}
-              {isSelected && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: -10,
-                    right: 18,
-                    background: r.primaryColor,
-                    color: '#ffffff',
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    padding: '3px 10px',
-                    borderRadius: 9999,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                  }}
-                >
-                  <CheckCircle2 size={12} /> Đang Chọn
-                </div>
-              )}
-            </div>
-          );
-        })}
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  {r.title}
+                </h3>
+                <p style={{ fontSize: '0.72rem', color: '#64748b', margin: '3px 0 0', lineHeight: 1.4 }}>
+                  {r.subtitle}
+                </p>
+
+                {isSelected && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: -9,
+                      right: 14,
+                      background: r.color,
+                      color: '#ffffff',
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: 9999,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    <Check size={11} /> Đang chọn
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* 2. MAIN LOGIN FORM & ROLE OVERVIEW SPLIT CONTAINER */}
+      {/* 3. MAIN FORM & ROLE DETAIL CONTAINER */}
       <div
         style={{
           background: '#ffffff',
@@ -302,15 +404,15 @@ export const RoleLoginPage: React.FC<RoleLoginPageProps> = ({
           boxShadow: '0 8px 30px -10px rgba(0,0,0,0.06)',
           overflow: 'hidden',
           display: 'grid',
-          gridTemplateColumns: '1.05fr 1.25fr',
+          gridTemplateColumns: '1fr 1.3fr',
         }}
       >
-        {/* Left Side: Role Description & Responsibilities */}
+        {/* Left Column: Role Details & Responsibilities */}
         <div
           style={{
             background: '#f8fafc',
             borderRight: '1px solid #eaecf0',
-            padding: '32px 28px',
+            padding: '30px 26px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -320,341 +422,423 @@ export const RoleLoginPage: React.FC<RoleLoginPageProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <div
                 style={{
-                  width: 36,
-                  height: 36,
+                  width: 38,
+                  height: 38,
                   borderRadius: 10,
-                  background: currentRole.lightBg,
-                  color: currentRole.primaryColor,
-                  border: `1px solid ${currentRole.borderColor}`,
+                  background: currentRoleConfig.bgLight,
+                  color: currentRoleConfig.color,
+                  border: `1px solid ${currentRoleConfig.borderColor}`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                {React.createElement(currentRole.icon, { size: 18 })}
+                {React.createElement(currentRoleConfig.icon, { size: 20 })}
               </div>
               <div>
                 <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                  {currentRole.title}
+                  {currentRoleConfig.title}
                 </h4>
-                <span style={{ fontSize: '0.72rem', color: currentRole.primaryColor, fontWeight: 600 }}>
-                  Quyền hạn chuẩn xác: {currentRole.badge}
+                <span style={{ fontSize: '0.72rem', color: currentRoleConfig.color, fontWeight: 600 }}>
+                  Mã định danh: {currentRoleConfig.badge}
                 </span>
               </div>
             </div>
 
             <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, marginBottom: 20 }}>
-              {currentRole.description}
+              {currentRoleConfig.description}
             </p>
 
-            <h5 style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', fontWeight: 700, marginBottom: 12 }}>
-              Đặc quyền của vai trò này:
+            <h5 style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', fontWeight: 700, marginBottom: 12 }}>
+              Quyền hạn cụ thể trong hệ thống:
             </h5>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {currentRole.permissions.map((perm, idx) => (
+              {currentRoleConfig.permissions.map((perm, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.82rem', color: '#334155' }}>
-                  <CheckCircle2 size={15} color={currentRole.primaryColor} style={{ marginTop: 2, flexShrink: 0 }} />
+                  <CheckCircle2 size={15} color={currentRoleConfig.color} style={{ marginTop: 2, flexShrink: 0 }} />
                   <span>{perm}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Quick Demo Instant Entry Button */}
+          {/* Reference Info Box: Gợi ý tài khoản mẫu (KHÔNG PHẢI NÚT BYPASS) */}
           <div
             style={{
-              marginTop: 28,
+              marginTop: 26,
               padding: '14px 16px',
               borderRadius: 12,
-              background: currentRole.lightBg,
-              border: `1px solid ${currentRole.borderColor}`,
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: currentRole.primaryColor, display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Zap size={14} /> Chế độ Đăng nhập 1-Click
-              </span>
-              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>Không cần gõ phím</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+              <Info size={14} color="#6366f1" />
+              <span>Gợi ý tài khoản mẫu có sẵn trong Database:</span>
             </div>
-            <button
-              onClick={() => onQuickLogin(currentRole.key)}
-              style={{
-                width: '100%',
-                height: 38,
-                borderRadius: 8,
-                border: 'none',
-                background: currentRole.primaryColor,
-                color: '#ffffff',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                transition: 'opacity 0.15s ease',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-            >
-              <span>Vào ngay với vai trò {currentRole.title.split(' ')[0]}</span>
-              <ArrowRight size={14} />
-            </button>
-          </div>
-        </div>
-
-        {/* Right Side: Form (Login / Register) */}
-        <div style={{ padding: '32px 36px' }}>
-          {/* Tabs: Đăng Nhập vs Đăng Ký */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #eaecf0', paddingBottom: 14, marginBottom: 22 }}>
-            <div style={{ display: 'flex', gap: 18 }}>
-              <button
-                type="button"
-                onClick={() => { setTab('login'); setError(null); }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '0.95rem',
-                  fontWeight: tab === 'login' ? 700 : 500,
-                  color: tab === 'login' ? '#0f172a' : '#64748b',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  paddingBottom: 6,
-                  borderBottom: tab === 'login' ? `2px solid ${currentRole.primaryColor}` : '2px solid transparent',
-                  marginBottom: -15,
-                }}
-              >
-                <LogIn size={16} /> Đăng Nhập
-              </button>
-              <button
-                type="button"
-                onClick={() => { setTab('register'); setError(null); }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '0.95rem',
-                  fontWeight: tab === 'register' ? 700 : 500,
-                  color: tab === 'register' ? '#0f172a' : '#64748b',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  paddingBottom: 6,
-                  borderBottom: tab === 'register' ? `2px solid ${currentRole.primaryColor}` : '2px solid transparent',
-                  marginBottom: -15,
-                }}
-              >
-                <UserPlus size={16} /> Đăng Ký Tài Khoản Mới
-              </button>
+            <div style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
+              <div>Email: <strong style={{ color: '#0f172a' }}>{currentRoleConfig.demoEmail}</strong></div>
+              <div>Mật khẩu: <strong style={{ color: '#0f172a' }}>{currentRoleConfig.demoPass}</strong></div>
             </div>
-
-            {/* Quick Fill Button */}
-            {tab === 'login' && (
+            {activeTab === 'login' && (
               <button
                 type="button"
-                onClick={handleFillDemo}
+                onClick={() => handleFillDemoToForm(currentRoleConfig)}
                 style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  marginTop: 10,
+                  width: '100%',
+                  padding: '6px 10px',
                   borderRadius: 6,
-                  padding: '4px 8px',
-                  fontSize: '0.72rem',
+                  border: '1px solid #e2e8f0',
+                  background: '#f8fafc',
                   color: '#475569',
-                  cursor: 'pointer',
+                  fontSize: '0.72rem',
                   fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 5,
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#f1f5f9')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#f8fafc')}
               >
-                Điền tài khoản mẫu
+                <span>Điền nhanh thông tin mẫu này vào form</span>
               </button>
             )}
           </div>
+        </div>
 
-          {/* Error Message */}
+        {/* Right Column: Actual Form (Login or Register) */}
+        <div style={{ padding: '32px 34px' }}>
+          {/* Notification Messages */}
           {error && (
             <div
               style={{
                 background: '#fef2f2',
                 border: '1px solid #fecaca',
                 borderRadius: 8,
-                padding: '10px 14px',
+                padding: '11px 14px',
                 color: '#dc2626',
-                fontSize: '0.8rem',
+                fontSize: '0.82rem',
                 marginBottom: 18,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
               }}
             >
-              <AlertCircle size={15} style={{ flexShrink: 0 }} />
+              <AlertCircle size={16} style={{ flexShrink: 0 }} />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {tab === 'register' && (
-              <>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 6 }}>
-                    Họ và Tên *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ví dụ: Nguyễn Văn A"
-                    className="input-field"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 6 }}>
-                    Vai Trò Khởi Tạo *
-                  </label>
-                  <div
-                    style={{
-                      background: currentRole.lightBg,
-                      border: `1px solid ${currentRole.borderColor}`,
-                      padding: '8px 12px',
-                      borderRadius: 8,
-                      fontSize: '0.82rem',
-                      fontWeight: 600,
-                      color: currentRole.primaryColor,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}
-                  >
-                    {React.createElement(currentRole.icon, { size: 16 })}
-                    <span>{currentRole.title} ({currentRole.badge})</span>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 6 }}>
-                Địa Chỉ Email *
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="email"
-                  required
-                  placeholder="user@kbase.com"
-                  className="input-field"
-                  style={{ paddingLeft: 36 }}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#334155' }}>
-                  Mật Khẩu *
-                </label>
-                {tab === 'login' && (
-                  <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                    Mẫu: <code style={{ color: currentRole.primaryColor, fontWeight: 600 }}>{currentRole.defaultPass}</code>
-                  </span>
-                )}
-              </div>
-              <div style={{ position: 'relative' }}>
-                <Lock size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="••••••••"
-                  className="input-field"
-                  style={{ paddingLeft: 36, paddingRight: 36 }}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: 12,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-black-pill"
+          {successMsg && (
+            <div
               style={{
-                width: '100%',
-                height: 42,
-                marginTop: 8,
-                fontSize: '0.875rem',
-                background: currentRole.primaryColor,
-                borderColor: currentRole.primaryColor,
+                background: '#ecfdf5',
+                border: '1px solid #a7f3d0',
+                borderRadius: 8,
+                padding: '11px 14px',
+                color: '#047857',
+                fontSize: '0.82rem',
+                marginBottom: 18,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
               }}
             >
-              {loading ? (
-                'Đang xác thực hệ thống...'
-              ) : tab === 'login' ? (
-                <>
-                  <LogIn size={16} /> Đăng Nhập Với Vai Trò {currentRole.title.split(' ')[0]}
-                </>
-              ) : (
-                <>
-                  <UserPlus size={16} /> Hoàn Tất Đăng Ký Tài Khoản
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Quick Preset Footnote */}
-          <div style={{ marginTop: 22, paddingTop: 16, borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-              Chuyển nhanh sang vai trò khác:
-            </span>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {ROLES.map((r) => (
-                <button
-                  key={r.key}
-                  type="button"
-                  onClick={() => handleSelectRole(r.key)}
-                  style={{
-                    padding: '3px 8px',
-                    borderRadius: 6,
-                    border: `1px solid ${r.borderColor}`,
-                    background: r.lightBg,
-                    color: r.primaryColor,
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {r.title.split(' ')[0]}
-                </button>
-              ))}
+              <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
+              <span>{successMsg}</span>
             </div>
-          </div>
+          )}
+
+          {/* TAB A: FORM ĐĂNG NHẬP */}
+          {activeTab === 'login' && (
+            <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ marginBottom: 4 }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Đăng Nhập Tài Khoản
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '3px 0 0' }}>
+                  Xác thực thông tin tài khoản với máy chủ backend để vào hệ thống.
+                </p>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 6 }}>
+                  Địa Chỉ Email *
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="email"
+                    required
+                    placeholder="Nhập email của bạn (ví dụ: your_name@kbase.com)"
+                    className="input-field"
+                    style={{ paddingLeft: 36 }}
+                    value={loginEmail}
+                    onChange={(e) => {
+                      setLoginEmail(e.target.value);
+                      setError(null);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#334155' }}>
+                    Mật Khẩu *
+                  </label>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type={showLoginPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Nhập mật khẩu"
+                    className="input-field"
+                    style={{ paddingLeft: 36, paddingRight: 36 }}
+                    value={loginPassword}
+                    onChange={(e) => {
+                      setLoginPassword(e.target.value);
+                      setError(null);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: 12,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      color: '#94a3b8',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {showLoginPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-black-pill"
+                style={{
+                  width: '100%',
+                  height: 42,
+                  marginTop: 8,
+                  fontSize: '0.875rem',
+                  background: '#0f172a',
+                  borderColor: '#0f172a',
+                }}
+              >
+                {loading ? (
+                  'Đang kiểm tra thông tin...'
+                ) : (
+                  <>
+                    <LogIn size={16} /> Đăng Nhập Vào Không Gian
+                  </>
+                )}
+              </button>
+
+              <div style={{ textAlign: 'center', marginTop: 12, paddingTop: 14, borderTop: '1px solid #f1f5f9', fontSize: '0.78rem', color: '#64748b' }}>
+                Chưa có tài khoản riêng?{' '}
+                <span
+                  onClick={() => {
+                    setActiveTab('register');
+                    setError(null);
+                    setSuccessMsg(null);
+                  }}
+                  style={{ color: '#6366f1', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  Bấm vào đây để đăng ký tài khoản mới
+                </span>
+              </div>
+            </form>
+          )}
+
+          {/* TAB B: FORM ĐĂNG KÝ TÀI KHOẢN MỚI */}
+          {activeTab === 'register' && (
+            <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ marginBottom: 4 }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Đăng Ký Tài Khoản Mới
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '3px 0 0' }}>
+                  Tạo tài khoản riêng và gắn với vai trò{' '}
+                  <strong style={{ color: currentRoleConfig.color }}>{currentRoleConfig.title}</strong>
+                </p>
+              </div>
+
+              {/* Selected Role Reminder */}
+              <div
+                style={{
+                  background: currentRoleConfig.bgLight,
+                  border: `1px solid ${currentRoleConfig.borderColor}`,
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  color: currentRoleConfig.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <UserCheck size={16} />
+                <span>Vai trò đã chọn: {currentRoleConfig.title} ({currentRoleConfig.badge})</span>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
+                  Họ và Tên Của Bạn *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ví dụ: Nguyễn Văn A"
+                  className="input-field"
+                  value={regFullName}
+                  onChange={(e) => {
+                    setRegFullName(e.target.value);
+                    setError(null);
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
+                  Địa Chỉ Email Riêng *
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@company.com"
+                    className="input-field"
+                    style={{ paddingLeft: 36 }}
+                    value={regEmail}
+                    onChange={(e) => {
+                      setRegEmail(e.target.value);
+                      setError(null);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
+                  Mật Khẩu * (Tối thiểu 6 ký tự)
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type={showRegPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    placeholder="Tạo mật khẩu an toàn"
+                    className="input-field"
+                    style={{ paddingLeft: 36, paddingRight: 36 }}
+                    value={regPassword}
+                    onChange={(e) => {
+                      setRegPassword(e.target.value);
+                      setError(null);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegPassword(!showRegPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: 12,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      color: '#94a3b8',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {showRegPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
+                  Xác Nhận Lại Mật Khẩu *
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type={showRegPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    placeholder="Nhập lại mật khẩu để xác nhận"
+                    className="input-field"
+                    style={{ paddingLeft: 36 }}
+                    value={regConfirmPassword}
+                    onChange={(e) => {
+                      setRegConfirmPassword(e.target.value);
+                      setError(null);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-black-pill"
+                style={{
+                  width: '100%',
+                  height: 42,
+                  marginTop: 8,
+                  fontSize: '0.875rem',
+                  background: currentRoleConfig.color,
+                  borderColor: currentRoleConfig.color,
+                }}
+              >
+                {loading ? (
+                  'Đang tạo tài khoản...'
+                ) : (
+                  <>
+                    <UserPlus size={16} /> Tạo Tài Khoản {currentRoleConfig.shortTitle}
+                  </>
+                )}
+              </button>
+
+              <div style={{ textAlign: 'center', marginTop: 10, paddingTop: 12, borderTop: '1px solid #f1f5f9', fontSize: '0.78rem', color: '#64748b' }}>
+                Đã có tài khoản?{' '}
+                <span
+                  onClick={() => {
+                    setActiveTab('login');
+                    setError(null);
+                    setSuccessMsg(null);
+                  }}
+                  style={{ color: '#6366f1', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  Quay lại đăng nhập
+                </span>
+              </div>
+            </form>
+          )}
         </div>
       </div>
 
-      {/* 3. DETAILED RBAC PERMISSION COMPARISON MATRIX */}
+      {/* 4. RBAC COMPARISON MATRIX */}
       <div
         style={{
           background: '#ffffff',

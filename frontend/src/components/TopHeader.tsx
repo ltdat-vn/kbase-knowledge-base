@@ -21,7 +21,6 @@ interface TopHeaderProps {
   setIsAiDrawerOpen: (open: boolean) => void;
   onOpenCreateProject?: () => void;
   onOpenUpload?: () => void;
-  onQuickLogin: (role: 'admin' | 'owner' | 'user') => void;
   onOpenAuth: () => void;
   onBreadcrumbClick?: (index: number) => void;
 }
@@ -35,7 +34,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   setIsAiDrawerOpen,
   onOpenCreateProject,
   onOpenUpload,
-  onQuickLogin,
   onOpenAuth,
   onBreadcrumbClick,
 }) => {
@@ -152,17 +150,11 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           {isAiDrawerOpen ? <PanelRightClose size={17} /> : <PanelRightOpen size={17} />}
         </button>
 
-        {/* If not logged in: Demo Switchers & Sign In */}
+        {/* If not logged in: Sign In / Sign Up */}
         {!user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 4, background: '#f8fafc', padding: '2px 4px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-              <span style={{ fontSize: '0.7rem', color: '#64748b', alignSelf: 'center', margin: '0 4px' }}>Demo:</span>
-              <button onClick={() => onQuickLogin('admin')} className="btn btn-sm" style={{ padding: '3px 7px', fontSize: '0.72rem', background: '#9333ea', color: '#fff', borderRadius: 6 }}>Admin</button>
-              <button onClick={() => onQuickLogin('owner')} className="btn btn-sm" style={{ padding: '3px 7px', fontSize: '0.72rem', background: '#0284c7', color: '#fff', borderRadius: 6 }}>Owner</button>
-              <button onClick={() => onQuickLogin('user')} className="btn btn-sm" style={{ padding: '3px 7px', fontSize: '0.72rem', background: '#059669', color: '#fff', borderRadius: 6 }}>User</button>
-            </div>
-            <button onClick={onOpenAuth} className="btn btn-black-pill" style={{ height: 34, padding: '0 14px' }}>
-              Đăng Nhập
+            <button onClick={onOpenAuth} className="btn btn-black-pill" style={{ height: 34, padding: '0 16px', fontSize: '0.8rem' }}>
+              Đăng Nhập / Đăng Ký
             </button>
           </div>
         ) : (
