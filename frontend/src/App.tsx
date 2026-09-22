@@ -8,7 +8,7 @@ import { CreateProjectModal } from './components/CreateProjectModal';
 import { ProjectDetailView } from './components/ProjectDetailView';
 import { AiChatPanel } from './components/AiChatPanel';
 import { AdminPanel } from './components/AdminPanel';
-import { RoleLoginPage } from './components/RoleLoginPage';
+import { LoginPage } from './components/LoginPage';
 import {
   FolderGit2,
   Plus,
@@ -107,7 +107,7 @@ export const App: React.FC = () => {
 
   // Breadcrumb path computation
   const getBreadcrumbs = () => {
-    if (!currentUser) return ['KBase', 'Cổng Đăng Nhập 3 Role'];
+    if (!currentUser) return ['KBase', 'Đăng Nhập'];
     if (selectedProject) return ['Cơ Sở Tri Thức', 'Không Gian Dự Án', selectedProject.name];
     if (activeTab === 'admin') return ['Hệ Thống', 'Quản Trị Viên'];
     if (activeTab === 'chat') return ['Cơ Sở Tri Thức', 'Trợ Lý AI'];
@@ -161,9 +161,9 @@ export const App: React.FC = () => {
 
         {/* Scrollable Main Body */}
         <main style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
-          {/* A. LOGGED OUT ROLE LOGIN VIEW */}
+          {/* A. LOGGED OUT LOGIN VIEW */}
           {!currentUser && !loading && (
-            <RoleLoginPage
+            <LoginPage
               onLogin={handleLogin}
               onRegister={handleRegister}
             />
