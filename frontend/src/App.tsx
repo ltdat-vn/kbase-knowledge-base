@@ -8,6 +8,7 @@ import { CreateProjectModal } from './components/CreateProjectModal';
 import { ProjectDetailView } from './components/ProjectDetailView';
 import { AiChatPanel } from './components/AiChatPanel';
 import { AdminPanel } from './components/AdminPanel';
+import { RoleLoginPage } from './components/RoleLoginPage';
 import {
   FolderGit2,
   Plus,
@@ -119,7 +120,7 @@ export const App: React.FC = () => {
 
   // Breadcrumb path computation
   const getBreadcrumbs = () => {
-    if (!currentUser) return ['KBase', 'Giới Thiệu'];
+    if (!currentUser) return ['KBase', 'Cổng Đăng Nhập 3 Role'];
     if (selectedProject) return ['Cơ Sở Tri Thức', 'Không Gian Dự Án', selectedProject.name];
     if (activeTab === 'admin') return ['Hệ Thống', 'Quản Trị Viên'];
     if (activeTab === 'chat') return ['Cơ Sở Tri Thức', 'Trợ Lý AI'];
@@ -174,128 +175,13 @@ export const App: React.FC = () => {
 
         {/* Scrollable Main Body */}
         <main style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
-          {/* A. LOGGED OUT LANDING VIEW */}
+          {/* A. LOGGED OUT ROLE LOGIN VIEW */}
           {!currentUser && !loading && (
-            <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 36 }}>
-              {/* Hero Banner */}
-              <div style={{ textAlign: 'center', marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '6px 16px',
-                    borderRadius: 9999,
-                    background: '#f1f5f9',
-                    border: '1px solid #e2e8f0',
-                    color: '#334155',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    marginBottom: 16,
-                  }}
-                >
-                  <Sparkles size={15} color="#7c3aed" /> Nền Tảng Cơ Sở Tri Thức KBase & Trợ Lý Gemini 3.6 Flash
-                </div>
-
-                <h1 style={{ fontSize: '2.6rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#0f172a', lineHeight: 1.2, maxWidth: 820 }}>
-                  Không Gian Lưu Trữ & Hỏi Đáp Tri Thức Cho Nhóm Kỹ Thuật
-                </h1>
-
-                <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: 660, marginTop: 14, lineHeight: 1.6 }}>
-                  Quản lý tài liệu dự án, video hướng dẫn và kiến trúc hệ thống. Trợ lý AI tổng hợp câu trả lời thông minh kèm nguồn trích dẫn chứng cứ cụ thể.
-                </p>
-
-                {/* 1-Click Quick Demo Login Pills */}
-                <div
-                  className="white-card"
-                  style={{
-                    marginTop: 32,
-                    padding: 24,
-                    width: '100%',
-                    maxWidth: 720,
-                    textAlign: 'left',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
-                      🚀 Đăng nhập nhanh với các tài khoản mẫu sẵn có:
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                      Không cần nhập mật khẩu
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                    <div
-                      onClick={() => handleQuickLogin('admin')}
-                      className="folder-preview-card"
-                      style={{ padding: 14 }}
-                    >
-                      <div className="window-dots">
-                        <span className="window-dot" style={{ background: '#ef4444' }} />
-                        <span className="window-dot" style={{ background: '#f59e0b' }} />
-                        <span className="window-dot" style={{ background: '#10b981' }} />
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                        <Shield size={18} color="#7c3aed" />
-                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>Admin</span>
-                      </div>
-                      <p style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 4 }}>
-                        Giám sát & toàn quyền hệ thống
-                      </p>
-                    </div>
-
-                    <div
-                      onClick={() => handleQuickLogin('owner')}
-                      className="folder-preview-card"
-                      style={{ padding: 14 }}
-                    >
-                      <div className="window-dots">
-                        <span className="window-dot" style={{ background: '#ef4444' }} />
-                        <span className="window-dot" style={{ background: '#f59e0b' }} />
-                        <span className="window-dot" style={{ background: '#10b981' }} />
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                        <FolderGit2 size={18} color="#0284c7" />
-                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>Owner</span>
-                      </div>
-                      <p style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 4 }}>
-                        Tạo dự án & mời thành viên
-                      </p>
-                    </div>
-
-                    <div
-                      onClick={() => handleQuickLogin('user')}
-                      className="folder-preview-card"
-                      style={{ padding: 14 }}
-                    >
-                      <div className="window-dots">
-                        <span className="window-dot" style={{ background: '#ef4444' }} />
-                        <span className="window-dot" style={{ background: '#f59e0b' }} />
-                        <span className="window-dot" style={{ background: '#10b981' }} />
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                        <Bot size={18} color="#059669" />
-                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>User</span>
-                      </div>
-                      <p style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 4 }}>
-                        Tải tài liệu & hỏi đáp AI
-                      </p>
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: 20, textAlign: 'center' }}>
-                    <button
-                      onClick={() => setIsAuthOpen(true)}
-                      className="btn btn-black-pill"
-                      style={{ padding: '10px 24px' }}
-                    >
-                      Đăng Nhập Hoặc Đăng Ký Tài Khoản Riêng <ArrowRight size={15} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <RoleLoginPage
+              onLogin={handleLogin}
+              onRegister={handleRegister}
+              onQuickLogin={handleQuickLogin}
+            />
           )}
 
           {/* B. LOGGED IN WORKSPACE */}
