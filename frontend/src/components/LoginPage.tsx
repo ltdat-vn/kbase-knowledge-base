@@ -264,14 +264,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             type="button"
             onClick={() => setIsRegister(false)}
             style={{
-              padding: '8px 24px',
+              padding: '7px 20px',
               borderRadius: 9999,
               border: 'none',
               background: '#1e1b4b',
               color: '#ffffff',
-              fontSize: '0.78rem',
-              fontWeight: 800,
-              letterSpacing: '0.1em',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              letterSpacing: '0.06em',
               textTransform: 'uppercase',
               cursor: 'pointer',
               boxShadow: '0 4px 12px rgba(30, 27, 75, 0.25)',
@@ -509,14 +509,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 disabled={loading}
                 style={{
                   width: '100%',
-                  height: 48,
+                  height: 44,
                   borderRadius: 9999,
                   border: 'none',
                   background: 'linear-gradient(135deg, #1e293b 0%, #1e1b4b 100%)',
                   color: '#ffffff',
-                  fontSize: '0.92rem',
-                  fontWeight: 800,
-                  letterSpacing: '0.14em',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   cursor: 'pointer',
                   marginTop: 6,
@@ -800,14 +800,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 disabled={loading}
                 style={{
                   width: '100%',
-                  height: 46,
+                  height: 44,
                   borderRadius: 9999,
                   border: 'none',
                   background: 'linear-gradient(135deg, #1e293b 0%, #1e1b4b 100%)',
                   color: '#ffffff',
-                  fontSize: '0.9rem',
-                  fontWeight: 800,
-                  letterSpacing: '0.12em',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   cursor: 'pointer',
                   marginTop: 6,
@@ -841,11 +841,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <h1
             style={{
-              fontSize: '4.8rem',
-              fontWeight: 800,
-              letterSpacing: '-0.035em',
+              fontSize: '3.4rem',
+              fontWeight: 600,
+              letterSpacing: '-0.02em',
               color: '#1e1b4b',
-              lineHeight: 0.95,
+              lineHeight: 1.05,
               margin: 0,
               textShadow: '0 2px 10px rgba(30, 27, 75, 0.06)',
             }}
