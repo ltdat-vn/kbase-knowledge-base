@@ -121,11 +121,31 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         justifyContent: 'space-between',
         fontFamily: "'Segoe UI', 'Be Vietnam Pro', -apple-system, sans-serif",
         color: '#ffffff',
-        /* Rich fluid purple-blue aurora gradient base */
-        background: 'linear-gradient(135deg, #18052e 0%, #2a085c 18%, #312e81 38%, #4f46e5 55%, #7c3aed 72%, #a21caf 88%, #c026d3 100%)',
+        /* Rich silky purple-blue gradient base */
+        background: 'linear-gradient(135deg, #18052e 0%, #22074d 20%, #2e1065 42%, #4338ca 62%, #6d28d9 78%, #9333ea 90%, #c026d3 100%)',
       }}
     >
-      {/* 1. FLUID AURORA MESH BACKGROUND WITH 3D PURPLE-BLUE WAVE RIPPLES */}
+      {/* Global CSS to prevent browser autofill from breaking capsule input style */}
+      <style>{`
+        .login-capsule-input {
+          background: rgba(255, 255, 255, 0.16) !important;
+          color: #ffffff !important;
+        }
+        .login-capsule-input::placeholder {
+          color: rgba(255, 255, 255, 0.72) !important;
+        }
+        .login-capsule-input:-webkit-autofill,
+        .login-capsule-input:-webkit-autofill:hover,
+        .login-capsule-input:-webkit-autofill:focus,
+        .login-capsule-input:-webkit-autofill:active {
+          -webkit-text-fill-color: #ffffff !important;
+          -webkit-box-shadow: 0 0 0 1000px rgba(67, 24, 114, 0.88) inset !important;
+          transition: background-color 5000s ease-in-out 0s;
+          caret-color: #ffffff;
+        }
+      `}</style>
+
+      {/* 1. CLEAN 3D PURPLE-BLUE VECTOR WAVE BACKGROUND (NO FROSTED GLASS BLUR) */}
       <div
         style={{
           position: 'absolute',
@@ -135,61 +155,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           overflow: 'hidden',
         }}
       >
-        {/* Intense Neon Blue & Deep Indigo Core Glow Orbs */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '25%',
-            left: '12%',
-            width: '55vw',
-            height: '55vw',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(37, 99, 235, 0.95) 0%, rgba(67, 56, 202, 0.8) 30%, rgba(91, 33, 182, 0.4) 60%, transparent 75%)',
-            filter: 'blur(80px)',
-            opacity: 0.95,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '-10%',
-            left: '30%',
-            width: '50vw',
-            height: '50vw',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.85) 0%, rgba(139, 92, 246, 0.6) 40%, transparent 70%)',
-            filter: 'blur(85px)',
-            opacity: 0.85,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-15%',
-            left: '-5%',
-            width: '50vw',
-            height: '50vw',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.95) 0%, rgba(192, 38, 211, 0.7) 40%, transparent 70%)',
-            filter: 'blur(90px)',
-            opacity: 0.9,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '5%',
-            right: '-10%',
-            width: '60vw',
-            height: '60vw',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(217, 70, 239, 0.9) 0%, rgba(168, 85, 247, 0.65) 45%, transparent 75%)',
-            filter: 'blur(100px)',
-            opacity: 0.9,
-          }}
-        />
-
-        {/* Layered 3D Liquid Waves with Purple-Blue Blends and Ripples */}
         <svg
           viewBox="0 0 1440 900"
           fill="none"
@@ -200,108 +165,105 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             inset: 0,
             width: '100%',
             height: '100%',
-            opacity: 0.92,
           }}
         >
           <defs>
-            {/* Primary Purple-Blue Wave Gradient */}
-            <linearGradient id="bluePurpleWave1" x1="0%" y1="100%" x2="100%" y2="0%">
+            {/* Primary Blue -> Purple -> Magenta Silk Gradient */}
+            <linearGradient id="waveSilk1" x1="0%" y1="100%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.95" />
-              <stop offset="20%" stopColor="#2563eb" stopOpacity="0.95" />
-              <stop offset="42%" stopColor="#4f46e5" stopOpacity="0.95" />
-              <stop offset="65%" stopColor="#7c3aed" stopOpacity="0.95" />
-              <stop offset="85%" stopColor="#c026d3" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#ec4899" stopOpacity="0.85" />
+              <stop offset="22%" stopColor="#2563eb" stopOpacity="0.95" />
+              <stop offset="46%" stopColor="#4f46e5" stopOpacity="0.95" />
+              <stop offset="68%" stopColor="#7c3aed" stopOpacity="0.95" />
+              <stop offset="88%" stopColor="#c026d3" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#ec4899" stopOpacity="0.9" />
             </linearGradient>
 
-            {/* Deep Shadow Fold Gradient (giving the 3D depth inside the wave) */}
-            <linearGradient id="deepWaveShadow" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0f172a" stopOpacity="0.85" />
-              <stop offset="30%" stopColor="#1e1b4b" stopOpacity="0.9" />
-              <stop offset="60%" stopColor="#312e81" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#4c1d95" stopOpacity="0.4" />
+            {/* Deep 3D Shadow Wave Fold */}
+            <linearGradient id="waveShadow1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#0f172a" stopOpacity="0.95" />
+              <stop offset="35%" stopColor="#1e1b4b" stopOpacity="0.92" />
+              <stop offset="70%" stopColor="#2e1065" stopOpacity="0.88" />
+              <stop offset="100%" stopColor="#3b0764" stopOpacity="0.6" />
             </linearGradient>
 
-            {/* Glowing Neon Blue-Violet Crest Gradient */}
-            <linearGradient id="neonCrestGlow" x1="0%" y1="50%" x2="100%" y2="50%">
+            {/* High-Contrast Electric Blue Ripple Fold */}
+            <linearGradient id="waveCyanBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.9" />
+              <stop offset="35%" stopColor="#2563eb" stopOpacity="0.88" />
+              <stop offset="70%" stopColor="#6366f1" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#9333ea" stopOpacity="0.75" />
+            </linearGradient>
+
+            {/* Shiny Crest Ridge Highlight */}
+            <linearGradient id="waveCrestLine" x1="0%" y1="50%" x2="100%" y2="50%">
               <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.95" />
               <stop offset="35%" stopColor="#818cf8" stopOpacity="0.95" />
               <stop offset="70%" stopColor="#c084fc" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.9" />
             </linearGradient>
 
-            {/* Secondary Ripple Wave Gradient */}
-            <linearGradient id="rippleGrad2" x1="100%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.7" />
-              <stop offset="35%" stopColor="#6366f1" stopOpacity="0.8" />
-              <stop offset="70%" stopColor="#9333ea" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#d946ef" stopOpacity="0.7" />
+            {/* Soft Ripple Under-layer */}
+            <linearGradient id="waveFoldHighlight" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#d946ef" stopOpacity="0.65" />
+              <stop offset="50%" stopColor="#818cf8" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.75" />
             </linearGradient>
-
-            <filter id="softGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="35" />
-            </filter>
-            <filter id="crispGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="16" />
-            </filter>
-            <filter id="deepBlurFilter" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="60" />
-            </filter>
           </defs>
 
-          {/* 1. Deep Midnight Blue-Violet Under-Layer */}
+          {/* 1. Deep Midnight Shadow Layer Under Wave Arch */}
           <path
-            d="M -100,500 C 180,320 320,720 580,540 C 840,360 1100,520 1550,300 L 1550,950 L -100,950 Z"
-            fill="url(#deepWaveShadow)"
-            filter="url(#deepBlurFilter)"
+            d="M -100,520 C 160,340 300,740 560,560 C 820,380 1080,520 1550,280 L 1550,950 L -100,950 Z"
+            fill="url(#waveShadow1)"
+            opacity="0.95"
           />
 
-          {/* 2. Main Iconic Arched 3D Wave Ribbon (wraps over and around the avatar like reference image) */}
+          {/* 2. Main 3D Arched Wave Ribbon (wraps over and around the avatar like reference design) */}
           <path
-            d="M -120,720 C 150,880 260,380 520,240 C 780,100 1020,260 1280,360 C 1420,410 1500,320 1560,250 L 1560,950 L -120,950 Z"
-            fill="url(#bluePurpleWave1)"
-            filter="url(#softGlowFilter)"
-            opacity="0.9"
+            d="M -120,720 C 140,860 250,380 500,240 C 760,100 1020,240 1280,350 C 1420,400 1500,320 1560,240 L 1560,950 L -120,950 Z"
+            fill="url(#waveSilk1)"
+            opacity="0.92"
           />
 
-          {/* 3. Inner Blue Wave Fold (creates the high-contrast blue ripple in the fold) */}
+          {/* 3. Electric Blue Inner Wave Ripple Fold */}
           <path
-            d="M 50,820 C 220,680 340,360 560,320 C 760,280 920,460 1150,560 C 1350,650 1480,550 1560,480 L 1560,950 L 50,950 Z"
-            fill="url(#rippleGrad2)"
-            filter="url(#softGlowFilter)"
-            opacity="0.85"
-            style={{ mixBlendMode: 'screen' }}
+            d="M 40,840 C 200,700 320,380 540,320 C 740,260 920,440 1140,540 C 1340,640 1480,540 1560,460 L 1560,950 L 40,950 Z"
+            fill="url(#waveCyanBlue)"
+            opacity="0.82"
           />
 
-          {/* 4. Glowing Crest Ripple Lines (Defined waves with purple-blue shine) */}
+          {/* 4. Lower-left Flowing Wave Ripple */}
           <path
-            d="M -80,680 C 180,820 280,360 530,220 C 780,80 1040,240 1300,340 C 1440,390 1520,300 1560,240"
-            stroke="url(#neonCrestGlow)"
-            strokeWidth="28"
-            strokeLinecap="round"
-            filter="url(#crispGlowFilter)"
-            opacity="0.75"
-          />
-
-          <path
-            d="M 80,780 C 240,640 360,340 580,300 C 800,260 960,440 1180,540 C 1360,620 1480,540 1560,460"
-            stroke="url(#bluePurpleWave1)"
-            strokeWidth="22"
-            strokeLinecap="round"
-            filter="url(#crispGlowFilter)"
-            opacity="0.65"
-          />
-
-          {/* 5. Lower Left Bright Magenta/Pink Liquid Pool */}
-          <ellipse
-            cx="220"
-            cy="780"
-            rx="320"
-            ry="180"
-            fill="url(#neonCrestGlow)"
-            filter="url(#softGlowFilter)"
+            d="M -100,820 C 120,750 280,560 480,480 C 700,400 950,560 1220,680 L 1560,820 L 1560,950 L -100,950 Z"
+            fill="url(#waveFoldHighlight)"
             opacity="0.6"
-            style={{ mixBlendMode: 'screen' }}
+          />
+
+          {/* 5. Crisp, Defined Wave Crest Ridge Strokes (No Blur - Smooth & Clean) */}
+          <path
+            d="M -80,680 C 160,810 260,360 510,220 C 760,80 1020,230 1290,340 C 1430,390 1510,300 1560,230"
+            stroke="url(#waveCrestLine)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            fill="none"
+            opacity="0.92"
+          />
+
+          <path
+            d="M 60,800 C 220,660 340,360 560,305 C 760,250 940,430 1160,530 C 1340,610 1480,530 1560,450"
+            stroke="url(#waveCyanBlue)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            fill="none"
+            opacity="0.88"
+          />
+
+          <path
+            d="M -100,800 C 140,730 290,545 490,465 C 710,385 960,545 1230,665"
+            stroke="url(#waveCrestLine)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+            opacity="0.75"
           />
         </svg>
       </div>
@@ -317,7 +279,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           padding: '24px 48px',
         }}
       >
-        {/* Left: Brand Logo matching Template DSGN mark */}
+        {/* Left: Brand Logo matching Template DSGN */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
           <div
             style={{
@@ -352,12 +314,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               KBASE
             </span>
             <span style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.2em', color: 'rgba(255, 255, 255, 0.75)', marginTop: 2 }}>
-              DSGN
+              HỆ THỐNG TRI THỨC
             </span>
           </div>
         </div>
 
-        {/* Center: Navigation Links */}
+        {/* Center: Navigation Links in Vietnamese */}
         <nav
           style={{
             display: 'flex',
@@ -401,12 +363,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)')}
           >
-            <span>SWAGGER API</span>
+            <span>TÀI LIỆU API</span>
             <ExternalLink size={12} />
           </a>
         </nav>
 
-        {/* Right: Sign In Button & Hamburger Menu */}
+        {/* Right: Sign In Button & Menu */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button
             type="button"
@@ -414,28 +376,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             style={{
               padding: '8px 24px',
               borderRadius: 9999,
-              border: 'none',
-              background: 'rgba(15, 23, 42, 0.65)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              background: 'rgba(15, 23, 42, 0.75)',
               color: '#ffffff',
               fontSize: '0.78rem',
               fontWeight: 800,
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              backdropFilter: 'blur(8px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)';
+              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.9)';
               e.currentTarget.style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.65)';
+              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.75)';
               e.currentTarget.style.transform = 'none';
             }}
           >
-            SIGN IN
+            ĐĂNG NHẬP
           </button>
 
           <button
@@ -471,7 +432,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           gap: 60,
         }}
       >
-        {/* LEFT COLUMN: TRANSLUCENT GLASSMORPHIC LOGIN CARD */}
+        {/* LEFT COLUMN: CRISP CAPSULE LOGIN FORM */}
         <div
           style={{
             maxWidth: 380,
@@ -481,20 +442,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             alignItems: 'center',
           }}
         >
-          {/* Big Glowing Circular Avatar Icon */}
+          {/* Circular Avatar Icon (Crisp - No Blur) */}
           <div
             style={{
               width: 86,
               height: 86,
               borderRadius: '50%',
-              border: '2px solid rgba(255, 255, 255, 0.35)',
-              background: 'rgba(255, 255, 255, 0.08)',
-              backdropFilter: 'blur(16px)',
+              border: '2px solid rgba(255, 255, 255, 0.45)',
+              background: 'rgba(255, 255, 255, 0.12)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 26,
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.3)',
             }}
           >
             {isRegister ? <UserPlus size={36} color="#ffffff" /> : <UserIcon size={38} color="#ffffff" strokeWidth={1.75} />}
@@ -505,8 +465,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             <div
               style={{
                 width: '100%',
-                background: 'rgba(239, 68, 68, 0.25)',
-                border: '1px solid rgba(254, 202, 202, 0.5)',
+                background: 'rgba(220, 38, 38, 0.45)',
+                border: '1px solid rgba(254, 202, 202, 0.6)',
                 borderRadius: 9999,
                 padding: '8px 18px',
                 color: '#ffffff',
@@ -515,7 +475,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                backdropFilter: 'blur(8px)',
               }}
             >
               <AlertCircle size={15} style={{ flexShrink: 0 }} />
@@ -536,7 +495,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     pointerEvents: 'none',
                   }}
                 >
@@ -545,8 +504,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 <input
                   type="email"
                   required
-                  placeholder="USERNAME / EMAIL"
+                  placeholder="TÊN ĐĂNG NHẬP / EMAIL"
                   value={loginEmail}
+                  className="login-capsule-input"
                   onChange={(e) => {
                     setLoginEmail(e.target.value);
                     setError(null);
@@ -555,25 +515,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 46,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.32)',
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
+                    background: 'rgba(255, 255, 255, 0.16)',
                     padding: '0 20px 0 48px',
                     color: '#ffffff',
                     fontSize: '0.82rem',
                     fontWeight: 600,
                     letterSpacing: '0.06em',
                     outline: 'none',
-                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
                     transition: 'all 0.15s ease',
                   }}
                   onFocus={(e) => {
                     e.currentTarget.style.border = '1.5px solid #ffffff';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.22)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.32)';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.38)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.16)';
                   }}
                 />
               </div>
@@ -588,7 +547,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     pointerEvents: 'none',
                   }}
                 >
@@ -597,8 +556,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 <input
                   type={showLoginPassword ? 'text' : 'password'}
                   required
-                  placeholder="••••••••"
+                  placeholder="MẬT KHẨU"
                   value={loginPassword}
+                  className="login-capsule-input"
                   onChange={(e) => {
                     setLoginPassword(e.target.value);
                     setError(null);
@@ -607,25 +567,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 46,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.32)',
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
+                    background: 'rgba(255, 255, 255, 0.16)',
                     padding: '0 44px 0 48px',
                     color: '#ffffff',
                     fontSize: '0.82rem',
                     fontWeight: 600,
                     letterSpacing: '0.1em',
                     outline: 'none',
-                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
                     transition: 'all 0.15s ease',
                   }}
                   onFocus={(e) => {
                     e.currentTarget.style.border = '1.5px solid #ffffff';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.22)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.32)';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.38)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.16)';
                   }}
                 />
                 <button
@@ -638,7 +597,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -648,7 +607,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 </button>
               </div>
 
-              {/* White Pill High-Contrast Primary CTA Button */}
+              {/* White Pill Primary CTA Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -680,10 +639,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   e.currentTarget.style.boxShadow = '0 10px 25px -4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15)';
                 }}
               >
-                {loading ? 'LOGGING IN...' : 'LOGIN'}
+                {loading ? 'ĐANG ĐĂNG NHẬP...' : 'ĐĂNG NHẬP'}
               </button>
 
-              {/* Sub-row: Remember me & Forgot Password */}
+              {/* Sub-row: Ghi nhớ đăng nhập & Quên mật khẩu */}
               <div
                 style={{
                   display: 'flex',
@@ -701,7 +660,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     onChange={(e) => setRememberMe(e.target.checked)}
                     style={{ accentColor: '#ffffff', cursor: 'pointer' }}
                   />
-                  <span>Remember me</span>
+                  <span>Ghi nhớ đăng nhập</span>
                 </label>
 
                 <span
@@ -714,14 +673,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                 >
-                  Forgot your password?
+                  Quên mật khẩu?
                 </span>
               </div>
             </form>
           ) : (
             /* B. REGISTER FORM */
             <form onSubmit={handleRegisterSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 11 }}>
-              {/* Full Name */}
+              {/* Họ và tên */}
               <div style={{ position: 'relative' }}>
                 <div
                   style={{
@@ -731,7 +690,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     pointerEvents: 'none',
                   }}
                 >
@@ -740,8 +699,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 <input
                   type="text"
                   required
-                  placeholder="FULL NAME"
+                  placeholder="HỌ VÀ TÊN"
                   value={regFullName}
+                  className="login-capsule-input"
                   onChange={(e) => {
                     setRegFullName(e.target.value);
                     setError(null);
@@ -750,9 +710,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.32)',
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
+                    background: 'rgba(255, 255, 255, 0.16)',
                     padding: '0 20px 0 46px',
                     color: '#ffffff',
                     fontSize: '0.8rem',
@@ -763,7 +722,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 />
               </div>
 
-              {/* Email */}
+              {/* Địa chỉ Email */}
               <div style={{ position: 'relative' }}>
                 <div
                   style={{
@@ -773,7 +732,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     pointerEvents: 'none',
                   }}
                 >
@@ -782,8 +741,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 <input
                   type="email"
                   required
-                  placeholder="EMAIL ADDRESS"
+                  placeholder="ĐỊA CHỈ EMAIL"
                   value={regEmail}
+                  className="login-capsule-input"
                   onChange={(e) => {
                     setRegEmail(e.target.value);
                     setError(null);
@@ -792,9 +752,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.32)',
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
+                    background: 'rgba(255, 255, 255, 0.16)',
                     padding: '0 20px 0 46px',
                     color: '#ffffff',
                     fontSize: '0.8rem',
@@ -805,7 +764,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 />
               </div>
 
-              {/* Role Selector Pill */}
+              {/* Chọn vai trò */}
               <div style={{ position: 'relative' }}>
                 <select
                   value={regRole}
@@ -814,9 +773,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.32)',
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
+                    background: 'rgba(30, 27, 75, 0.75)',
                     padding: '0 20px',
                     color: '#ffffff',
                     fontSize: '0.8rem',
@@ -825,13 +783,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     cursor: 'pointer',
                   }}
                 >
-                  <option value="ROLE_USER" style={{ color: '#0f172a', background: '#ffffff' }}>👤 Member / User (Hỏi đáp & Tra cứu)</option>
-                  <option value="ROLE_OWNER" style={{ color: '#0f172a', background: '#ffffff' }}>📁 Project Owner (Tạo dự án & Quản lý)</option>
-                  <option value="ROLE_ADMIN" style={{ color: '#0f172a', background: '#ffffff' }}>🛡️ System Admin (Toàn quyền quản trị)</option>
+                  <option value="ROLE_USER" style={{ color: '#0f172a', background: '#ffffff' }}>👤 Thành viên (Hỏi đáp & Tra cứu tài liệu)</option>
+                  <option value="ROLE_OWNER" style={{ color: '#0f172a', background: '#ffffff' }}>📁 Chủ dự án (Tạo dự án & Tải lên tài liệu)</option>
+                  <option value="ROLE_ADMIN" style={{ color: '#0f172a', background: '#ffffff' }}>🛡️ Quản trị viên (Toàn quyền quản trị)</option>
                 </select>
               </div>
 
-              {/* Password */}
+              {/* Mật khẩu */}
               <div style={{ position: 'relative' }}>
                 <div
                   style={{
@@ -841,7 +799,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     pointerEvents: 'none',
                   }}
                 >
@@ -851,8 +809,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   type={showRegPassword ? 'text' : 'password'}
                   required
                   minLength={6}
-                  placeholder="PASSWORD (MIN 6 CHARS)"
+                  placeholder="MẬT KHẨU (TỐI THIỂU 6 KÝ TỰ)"
                   value={regPassword}
+                  className="login-capsule-input"
                   onChange={(e) => {
                     setRegPassword(e.target.value);
                     setError(null);
@@ -861,9 +820,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.32)',
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
+                    background: 'rgba(255, 255, 255, 0.16)',
                     padding: '0 40px 0 46px',
                     color: '#ffffff',
                     fontSize: '0.8rem',
@@ -882,7 +840,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -892,7 +850,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 </button>
               </div>
 
-              {/* Confirm Password */}
+              {/* Xác nhận mật khẩu */}
               <div style={{ position: 'relative' }}>
                 <div
                   style={{
@@ -902,7 +860,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     pointerEvents: 'none',
                   }}
                 >
@@ -912,8 +870,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   type={showRegPassword ? 'text' : 'password'}
                   required
                   minLength={6}
-                  placeholder="CONFIRM PASSWORD"
+                  placeholder="XÁC NHẬN MẬT KHẨU"
                   value={regConfirmPassword}
+                  className="login-capsule-input"
                   onChange={(e) => {
                     setRegConfirmPassword(e.target.value);
                     setError(null);
@@ -922,9 +881,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.32)',
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
+                    background: 'rgba(255, 255, 255, 0.16)',
                     padding: '0 20px 0 46px',
                     color: '#ffffff',
                     fontSize: '0.8rem',
@@ -935,7 +893,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 />
               </div>
 
-              {/* Register CTA Button */}
+              {/* Nút Tạo tài khoản */}
               <button
                 type="submit"
                 disabled={loading}
@@ -959,11 +917,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   justifyContent: 'center',
                 }}
               >
-                {loading ? 'CREATING ACCOUNT...' : 'REGISTER'}
+                {loading ? 'ĐANG TẠO TÀI KHOẢN...' : 'TẠO TÀI KHOẢN'}
               </button>
 
               <div style={{ textAlign: 'center', marginTop: 4, fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.85)' }}>
-                Already a member?{' '}
+                Đã có tài khoản?{' '}
                 <span
                   onClick={() => {
                     setIsRegister(false);
@@ -971,14 +929,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   }}
                   style={{ fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', color: '#ffffff' }}
                 >
-                  Sign in now
+                  Đăng nhập ngay
                 </span>
               </div>
             </form>
           )}
         </div>
 
-        {/* RIGHT COLUMN: GIANT "WELCOME." HEADLINE & ACTION LINK */}
+        {/* RIGHT COLUMN: GIANT "XIN CHÀO." HEADLINE & ACTION LINK */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <h1
             style={{
@@ -991,14 +949,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               textShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
             }}
           >
-            {isRegister ? 'Join Us.' : 'Welcome.'}
+            {isRegister ? 'Tham gia ngay.' : 'Xin chào.'}
           </h1>
 
           <p
             style={{
               fontSize: '0.88rem',
               lineHeight: 1.6,
-              color: 'rgba(255, 255, 255, 0.82)',
+              color: 'rgba(255, 255, 255, 0.85)',
               maxWidth: 440,
               margin: 0,
             }}
@@ -1011,7 +969,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           <div style={{ fontSize: '0.82rem', color: 'rgba(255, 255, 255, 0.85)', marginTop: 4 }}>
             {!isRegister ? (
               <>
-                Not a member?{' '}
+                Chưa có tài khoản?{' '}
                 <span
                   onClick={() => {
                     setIsRegister(true);
@@ -1027,12 +985,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                 >
-                  Sign up now
+                  Đăng ký ngay
                 </span>
               </>
             ) : (
               <>
-                Already have an account?{' '}
+                Đã có tài khoản?{' '}
                 <span
                   onClick={() => {
                     setIsRegister(false);
@@ -1048,7 +1006,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                 >
-                  Sign in here
+                  Đăng nhập tại đây
                 </span>
               </>
             )}
@@ -1068,7 +1026,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           padding: '16px 48px 24px',
         }}
       >
-        {/* 3 Pagination Dots matching the reference image */}
+        {/* 3 Pagination Dots */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span
             onClick={() => setActiveSlide(0)}
@@ -1108,19 +1066,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           />
         </div>
 
-        {/* Discreet Translucent Demo Accounts Pill for Mentor/Testing convenience */}
+        {/* Demo Accounts Pill in Vietnamese (No Blur) */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            background: 'rgba(15, 23, 42, 0.35)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            background: 'rgba(15, 23, 42, 0.55)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
             borderRadius: 9999,
             padding: '4px 14px',
             fontSize: '0.72rem',
-            color: 'rgba(255, 255, 255, 0.85)',
-            backdropFilter: 'blur(8px)',
+            color: 'rgba(255, 255, 255, 0.9)',
           }}
         >
           <span style={{ fontWeight: 600 }}>Tài khoản mẫu:</span>
@@ -1128,7 +1085,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             type="button"
             onClick={() => handleFillDemo('admin@kbase.com', 'Admin@123')}
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
+              background: 'rgba(255, 255, 255, 0.18)',
               border: 'none',
               borderRadius: 9999,
               padding: '2px 8px',
@@ -1138,13 +1095,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               cursor: 'pointer',
             }}
           >
-            Admin
+            Quản trị viên (Admin)
           </button>
           <button
             type="button"
             onClick={() => handleFillDemo('owner@kbase.com', 'Owner@123')}
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
+              background: 'rgba(255, 255, 255, 0.18)',
               border: 'none',
               borderRadius: 9999,
               padding: '2px 8px',
@@ -1154,13 +1111,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               cursor: 'pointer',
             }}
           >
-            Owner
+            Chủ dự án (Owner)
           </button>
           <button
             type="button"
             onClick={() => handleFillDemo('user@kbase.com', 'User@123')}
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
+              background: 'rgba(255, 255, 255, 0.18)',
               border: 'none',
               borderRadius: 9999,
               padding: '2px 8px',
@@ -1170,7 +1127,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               cursor: 'pointer',
             }}
           >
-            User
+            Thành viên (User)
           </button>
         </div>
       </footer>
