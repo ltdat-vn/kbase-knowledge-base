@@ -121,11 +121,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         justifyContent: 'space-between',
         fontFamily: "'Segoe UI', 'Be Vietnam Pro', -apple-system, sans-serif",
         color: '#ffffff',
-        /* Rich fluid aurora gradient base */
-        background: 'linear-gradient(135deg, #3b0764 0%, #581c87 25%, #7e22ce 50%, #a21caf 75%, #c026d3 100%)',
+        /* Rich fluid purple-blue aurora gradient base */
+        background: 'linear-gradient(135deg, #18052e 0%, #2a085c 18%, #312e81 38%, #4f46e5 55%, #7c3aed 72%, #a21caf 88%, #c026d3 100%)',
       }}
     >
-      {/* 1. FLUID AURORA MESH BACKGROUND (Vibrant Purple, Magenta, Blue Wave) */}
+      {/* 1. FLUID AURORA MESH BACKGROUND WITH 3D PURPLE-BLUE WAVE RIPPLES */}
       <div
         style={{
           position: 'absolute',
@@ -135,103 +135,173 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           overflow: 'hidden',
         }}
       >
-        {/* Ambient Glowing Orbs */}
+        {/* Intense Neon Blue & Deep Indigo Core Glow Orbs */}
         <div
           style={{
             position: 'absolute',
-            top: '-15%',
-            left: '-10%',
-            width: '65vw',
-            height: '65vw',
+            top: '25%',
+            left: '12%',
+            width: '55vw',
+            height: '55vw',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(147, 51, 234, 0.85) 0%, rgba(99, 102, 241, 0.5) 45%, transparent 70%)',
-            filter: 'blur(90px)',
-            opacity: 0.9,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-25%',
-            left: '15%',
-            width: '60vw',
-            height: '60vw',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(217, 70, 239, 0.9) 0%, rgba(168, 85, 247, 0.6) 40%, transparent 70%)',
-            filter: 'blur(100px)',
+            background: 'radial-gradient(circle, rgba(37, 99, 235, 0.95) 0%, rgba(67, 56, 202, 0.8) 30%, rgba(91, 33, 182, 0.4) 60%, transparent 75%)',
+            filter: 'blur(80px)',
             opacity: 0.95,
           }}
         />
         <div
           style={{
             position: 'absolute',
-            top: '10%',
-            right: '-15%',
-            width: '70vw',
-            height: '70vw',
+            top: '-10%',
+            left: '30%',
+            width: '50vw',
+            height: '50vw',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.95) 0%, rgba(192, 38, 211, 0.7) 45%, transparent 70%)',
-            filter: 'blur(110px)',
+            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.85) 0%, rgba(139, 92, 246, 0.6) 40%, transparent 70%)',
+            filter: 'blur(85px)',
+            opacity: 0.85,
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '-15%',
+            left: '-5%',
+            width: '50vw',
+            height: '50vw',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.95) 0%, rgba(192, 38, 211, 0.7) 40%, transparent 70%)',
+            filter: 'blur(90px)',
             opacity: 0.9,
           }}
         />
         <div
           style={{
             position: 'absolute',
-            top: '40%',
-            left: '25%',
-            width: '45vw',
-            height: '45vw',
+            top: '5%',
+            right: '-10%',
+            width: '60vw',
+            height: '60vw',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(37, 99, 235, 0.6) 0%, rgba(79, 70, 229, 0.4) 50%, transparent 70%)',
-            filter: 'blur(90px)',
-            opacity: 0.7,
+            background: 'radial-gradient(circle, rgba(217, 70, 239, 0.9) 0%, rgba(168, 85, 247, 0.65) 45%, transparent 75%)',
+            filter: 'blur(100px)',
+            opacity: 0.9,
           }}
         />
 
-        {/* 3D Liquid Wave Ribbon SVG Path mimicking the reference image */}
+        {/* Layered 3D Liquid Waves with Purple-Blue Blends and Ripples */}
         <svg
           viewBox="0 0 1440 900"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
           style={{
             position: 'absolute',
             inset: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
-            opacity: 0.75,
-            mixBlendMode: 'screen',
+            opacity: 0.92,
           }}
         >
           <defs>
-            <linearGradient id="auroraGrad1" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.85" />
-              <stop offset="35%" stopColor="#7c3aed" stopOpacity="0.9" />
-              <stop offset="70%" stopColor="#d946ef" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.8" />
+            {/* Primary Purple-Blue Wave Gradient */}
+            <linearGradient id="bluePurpleWave1" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.95" />
+              <stop offset="20%" stopColor="#2563eb" stopOpacity="0.95" />
+              <stop offset="42%" stopColor="#4f46e5" stopOpacity="0.95" />
+              <stop offset="65%" stopColor="#7c3aed" stopOpacity="0.95" />
+              <stop offset="85%" stopColor="#c026d3" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#ec4899" stopOpacity="0.85" />
             </linearGradient>
-            <linearGradient id="auroraGrad2" x1="100%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#4c1d95" stopOpacity="0.6" />
-              <stop offset="50%" stopColor="#a21caf" stopOpacity="0.75" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.7" />
+
+            {/* Deep Shadow Fold Gradient (giving the 3D depth inside the wave) */}
+            <linearGradient id="deepWaveShadow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#0f172a" stopOpacity="0.85" />
+              <stop offset="30%" stopColor="#1e1b4b" stopOpacity="0.9" />
+              <stop offset="60%" stopColor="#312e81" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#4c1d95" stopOpacity="0.4" />
             </linearGradient>
-            <filter id="blurFilter" x="-20%" y="-20%" width="140%" height="140%">
+
+            {/* Glowing Neon Blue-Violet Crest Gradient */}
+            <linearGradient id="neonCrestGlow" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.95" />
+              <stop offset="35%" stopColor="#818cf8" stopOpacity="0.95" />
+              <stop offset="70%" stopColor="#c084fc" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.85" />
+            </linearGradient>
+
+            {/* Secondary Ripple Wave Gradient */}
+            <linearGradient id="rippleGrad2" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.7" />
+              <stop offset="35%" stopColor="#6366f1" stopOpacity="0.8" />
+              <stop offset="70%" stopColor="#9333ea" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#d946ef" stopOpacity="0.7" />
+            </linearGradient>
+
+            <filter id="softGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="35" />
+            </filter>
+            <filter id="crispGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="16" />
+            </filter>
+            <filter id="deepBlurFilter" x="-40%" y="-40%" width="180%" height="180%">
               <feGaussianBlur stdDeviation="60" />
             </filter>
           </defs>
 
-          {/* Curved Sweeping Aurora Ribbons */}
+          {/* 1. Deep Midnight Blue-Violet Under-Layer */}
           <path
-            d="M -100,750 C 250,900 350,450 650,300 C 950,150 1200,350 1550,200 L 1550,950 L -100,950 Z"
-            fill="url(#auroraGrad1)"
-            filter="url(#blurFilter)"
+            d="M -100,500 C 180,320 320,720 580,540 C 840,360 1100,520 1550,300 L 1550,950 L -100,950 Z"
+            fill="url(#deepWaveShadow)"
+            filter="url(#deepBlurFilter)"
           />
+
+          {/* 2. Main Iconic Arched 3D Wave Ribbon (wraps over and around the avatar like reference image) */}
           <path
-            d="M -150,500 C 150,200 450,750 750,550 C 1050,350 1250,550 1550,400 L 1550,950 L -150,950 Z"
-            fill="url(#auroraGrad2)"
-            filter="url(#blurFilter)"
-            opacity="0.8"
+            d="M -120,720 C 150,880 260,380 520,240 C 780,100 1020,260 1280,360 C 1420,410 1500,320 1560,250 L 1560,950 L -120,950 Z"
+            fill="url(#bluePurpleWave1)"
+            filter="url(#softGlowFilter)"
+            opacity="0.9"
+          />
+
+          {/* 3. Inner Blue Wave Fold (creates the high-contrast blue ripple in the fold) */}
+          <path
+            d="M 50,820 C 220,680 340,360 560,320 C 760,280 920,460 1150,560 C 1350,650 1480,550 1560,480 L 1560,950 L 50,950 Z"
+            fill="url(#rippleGrad2)"
+            filter="url(#softGlowFilter)"
+            opacity="0.85"
+            style={{ mixBlendMode: 'screen' }}
+          />
+
+          {/* 4. Glowing Crest Ripple Lines (Defined waves with purple-blue shine) */}
+          <path
+            d="M -80,680 C 180,820 280,360 530,220 C 780,80 1040,240 1300,340 C 1440,390 1520,300 1560,240"
+            stroke="url(#neonCrestGlow)"
+            strokeWidth="28"
+            strokeLinecap="round"
+            filter="url(#crispGlowFilter)"
+            opacity="0.75"
+          />
+
+          <path
+            d="M 80,780 C 240,640 360,340 580,300 C 800,260 960,440 1180,540 C 1360,620 1480,540 1560,460"
+            stroke="url(#bluePurpleWave1)"
+            strokeWidth="22"
+            strokeLinecap="round"
+            filter="url(#crispGlowFilter)"
+            opacity="0.65"
+          />
+
+          {/* 5. Lower Left Bright Magenta/Pink Liquid Pool */}
+          <ellipse
+            cx="220"
+            cy="780"
+            rx="320"
+            ry="180"
+            fill="url(#neonCrestGlow)"
+            filter="url(#softGlowFilter)"
+            opacity="0.6"
+            style={{ mixBlendMode: 'screen' }}
           />
         </svg>
       </div>
