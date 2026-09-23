@@ -120,7 +120,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         flexDirection: 'column',
         justifyContent: 'space-between',
         fontFamily: "'Segoe UI', 'Be Vietnam Pro', -apple-system, sans-serif",
-        color: '#ffffff',
+        color: '#1e1b4b',
         /* Pastel Pink to Mint-Turquoise Gradient Background matching user's reference image */
         background: 'linear-gradient(180deg, #e6a3cf 0%, #dfaed5 18%, #d3bce3 38%, #c2cdee 60%, #aee0f0 80%, #9de7e2 100%)',
       }}
@@ -128,20 +128,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
       {/* Global CSS to prevent browser autofill from breaking capsule input style */}
       <style>{`
         .login-capsule-input {
-          background: rgba(255, 255, 255, 0.22) !important;
-          color: #ffffff !important;
+          background: rgba(255, 255, 255, 0.72) !important;
+          color: #0f172a !important;
+          border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
         }
         .login-capsule-input::placeholder {
-          color: rgba(255, 255, 255, 0.85) !important;
+          color: #64748b !important;
         }
         .login-capsule-input:-webkit-autofill,
         .login-capsule-input:-webkit-autofill:hover,
         .login-capsule-input:-webkit-autofill:focus,
         .login-capsule-input:-webkit-autofill:active {
-          -webkit-text-fill-color: #ffffff !important;
-          -webkit-box-shadow: 0 0 0 1000px rgba(180, 140, 200, 0.85) inset !important;
+          -webkit-text-fill-color: #0f172a !important;
+          -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.88) inset !important;
           transition: background-color 5000s ease-in-out 0s;
-          caret-color: #ffffff;
+          caret-color: #0f172a;
         }
       `}</style>
 
@@ -183,7 +184,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 width: 24,
                 height: 24,
                 borderRadius: '50%',
-                border: '3px solid #ffffff',
+                border: '3px solid #1e1b4b',
                 marginRight: -10,
                 opacity: 0.9,
               }}
@@ -193,22 +194,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 width: 24,
                 height: 24,
                 borderRadius: '50%',
-                background: '#ffffff',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                background: '#1e1b4b',
+                boxShadow: '0 2px 8px rgba(30, 27, 75, 0.15)',
               }}
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-            <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '0.08em', color: '#ffffff' }}>
+            <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '0.08em', color: '#1e1b4b' }}>
               KBASE
             </span>
-            <span style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.2em', color: 'rgba(255, 255, 255, 0.75)', marginTop: 2 }}>
+            <span style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.2em', color: '#475569', marginTop: 2 }}>
               HỆ THỐNG TRI THỨC
             </span>
           </div>
         </div>
 
-        {/* Center: Navigation Links in Vietnamese */}
+        {/* Center: Navigation Links in Deep Slate */}
         <nav
           style={{
             display: 'flex',
@@ -222,17 +223,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         >
           <span
             onClick={() => setIsRegister(false)}
-            style={{ color: 'rgba(255, 255, 255, 0.9)', cursor: 'pointer', transition: 'color 0.15s ease' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)')}
+            style={{ color: '#334155', cursor: 'pointer', transition: 'color 0.15s ease' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#0f172a')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#334155')}
           >
             GIỚI THIỆU
           </span>
           <span
             onClick={() => setIsRegister(true)}
-            style={{ color: 'rgba(255, 255, 255, 0.8)', cursor: 'pointer', transition: 'color 0.15s ease' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)')}
+            style={{ color: '#334155', cursor: 'pointer', transition: 'color 0.15s ease' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#0f172a')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#334155')}
           >
             TÍNH NĂNG
           </span>
@@ -241,7 +242,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             target="_blank"
             rel="noreferrer"
             style={{
-              color: 'rgba(255, 255, 255, 0.8)',
+              color: '#334155',
               textDecoration: 'none',
               cursor: 'pointer',
               display: 'flex',
@@ -249,15 +250,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               gap: 4,
               transition: 'color 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)')}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#0f172a')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#334155')}
           >
             <span>TÀI LIỆU API</span>
             <ExternalLink size={12} />
           </a>
         </nav>
 
-        {/* Right: Sign In Button & Menu */}
+        {/* Right: Deep Navy Sign In Button & Menu */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button
             type="button"
@@ -265,23 +266,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             style={{
               padding: '8px 24px',
               borderRadius: 9999,
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              background: 'rgba(15, 23, 42, 0.75)',
+              border: 'none',
+              background: '#1e1b4b',
               color: '#ffffff',
               fontSize: '0.78rem',
               fontWeight: 800,
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              boxShadow: '0 4px 12px rgba(30, 27, 75, 0.25)',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.9)';
+              e.currentTarget.style.background = '#0f172a';
               e.currentTarget.style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.75)';
+              e.currentTarget.style.background = '#1e1b4b';
               e.currentTarget.style.transform = 'none';
             }}
           >
@@ -293,7 +294,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             style={{
               background: 'none',
               border: 'none',
-              color: '#ffffff',
+              color: '#1e1b4b',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -331,22 +332,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             alignItems: 'center',
           }}
         >
-          {/* Circular Avatar Icon (Crisp - No Blur) */}
+          {/* Circular Avatar Icon (Milk Glass & Indigo Accent) */}
           <div
             style={{
               width: 86,
               height: 86,
               borderRadius: '50%',
-              border: '2px solid rgba(255, 255, 255, 0.45)',
-              background: 'rgba(255, 255, 255, 0.12)',
+              border: '2px solid rgba(30, 27, 75, 0.2)',
+              background: 'rgba(255, 255, 255, 0.75)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 26,
-              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 8px 24px rgba(30, 27, 75, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
             }}
           >
-            {isRegister ? <UserPlus size={36} color="#ffffff" /> : <UserIcon size={38} color="#ffffff" strokeWidth={1.75} />}
+            {isRegister ? <UserPlus size={36} color="#1e1b4b" /> : <UserIcon size={38} color="#1e1b4b" strokeWidth={1.75} />}
           </div>
 
           {/* Error Message Box */}
@@ -354,16 +355,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             <div
               style={{
                 width: '100%',
-                background: 'rgba(220, 38, 38, 0.45)',
-                border: '1px solid rgba(254, 202, 202, 0.6)',
+                background: 'rgba(254, 226, 226, 0.95)',
+                border: '1px solid #f87171',
                 borderRadius: 9999,
                 padding: '8px 18px',
-                color: '#ffffff',
+                color: '#b91c1c',
                 fontSize: '0.78rem',
+                fontWeight: 600,
                 marginBottom: 16,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
+                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.12)',
               }}
             >
               <AlertCircle size={15} style={{ flexShrink: 0 }} />
@@ -384,7 +387,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: '#475569',
                     pointerEvents: 'none',
                   }}
                 >
@@ -404,24 +407,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 46,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
-                    background: 'rgba(255, 255, 255, 0.16)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.95)',
+                    background: 'rgba(255, 255, 255, 0.72)',
                     padding: '0 20px 0 48px',
-                    color: '#ffffff',
-                    fontSize: '0.82rem',
+                    color: '#0f172a',
+                    fontSize: '0.84rem',
                     fontWeight: 600,
-                    letterSpacing: '0.06em',
+                    letterSpacing: '0.04em',
                     outline: 'none',
-                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
                     transition: 'all 0.15s ease',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.border = '1.5px solid #ffffff';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                    e.currentTarget.style.border = '1.5px solid #4f46e5';
+                    e.currentTarget.style.background = '#ffffff';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.2)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.38)';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.16)';
+                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.95)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.72)';
+                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(30, 27, 75, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.9)';
                   }}
                 />
               </div>
@@ -436,7 +441,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: '#475569',
                     pointerEvents: 'none',
                   }}
                 >
@@ -456,24 +461,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 46,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
-                    background: 'rgba(255, 255, 255, 0.16)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.95)',
+                    background: 'rgba(255, 255, 255, 0.72)',
                     padding: '0 44px 0 48px',
-                    color: '#ffffff',
-                    fontSize: '0.82rem',
+                    color: '#0f172a',
+                    fontSize: '0.84rem',
                     fontWeight: 600,
-                    letterSpacing: '0.1em',
+                    letterSpacing: '0.08em',
                     outline: 'none',
-                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
                     transition: 'all 0.15s ease',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.border = '1.5px solid #ffffff';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                    e.currentTarget.style.border = '1.5px solid #4f46e5';
+                    e.currentTarget.style.background = '#ffffff';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.2)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.38)';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.16)';
+                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.95)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.72)';
+                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(30, 27, 75, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.9)';
                   }}
                 />
                 <button
@@ -486,7 +493,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: '#64748b',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -496,7 +503,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 </button>
               </div>
 
-              {/* White Pill Primary CTA Button */}
+              {/* Deep Navy High-Contrast CTA Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -505,15 +512,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   height: 48,
                   borderRadius: 9999,
                   border: 'none',
-                  background: '#ffffff',
-                  color: '#a824d6',
+                  background: 'linear-gradient(135deg, #1e293b 0%, #1e1b4b 100%)',
+                  color: '#ffffff',
                   fontSize: '0.92rem',
                   fontWeight: 800,
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
                   cursor: 'pointer',
                   marginTop: 6,
-                  boxShadow: '0 10px 25px -4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15)',
+                  boxShadow: '0 10px 25px -4px rgba(30, 27, 75, 0.25), 0 4px 12px rgba(30, 27, 75, 0.15)',
                   transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
                   display: 'flex',
                   alignItems: 'center',
@@ -521,11 +528,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 14px 30px -4px rgba(0, 0, 0, 0.38)';
+                  e.currentTarget.style.boxShadow = '0 14px 30px -4px rgba(30, 27, 75, 0.35)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = '0 10px 25px -4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 10px 25px -4px rgba(30, 27, 75, 0.25), 0 4px 12px rgba(30, 27, 75, 0.15)';
                 }}
               >
                 {loading ? 'ĐANG ĐĂNG NHẬP...' : 'ĐĂNG NHẬP'}
@@ -539,7 +546,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   justifyContent: 'space-between',
                   marginTop: 6,
                   fontSize: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.85)',
+                  color: '#334155',
                 }}
               >
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
@@ -547,7 +554,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    style={{ accentColor: '#ffffff', cursor: 'pointer' }}
+                    style={{ accentColor: '#1e1b4b', cursor: 'pointer' }}
                   />
                   <span>Ghi nhớ đăng nhập</span>
                 </label>
@@ -556,11 +563,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   style={{
                     fontStyle: 'italic',
                     cursor: 'pointer',
-                    opacity: 0.9,
-                    transition: 'opacity 0.15s ease',
+                    color: '#475569',
+                    transition: 'color 0.15s ease',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#1e1b4b')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#475569')}
                 >
                   Quên mật khẩu?
                 </span>
@@ -579,7 +586,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: '#475569',
                     pointerEvents: 'none',
                   }}
                 >
@@ -599,14 +606,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
-                    background: 'rgba(255, 255, 255, 0.16)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.95)',
+                    background: 'rgba(255, 255, 255, 0.72)',
                     padding: '0 20px 0 46px',
-                    color: '#ffffff',
-                    fontSize: '0.8rem',
+                    color: '#0f172a',
+                    fontSize: '0.82rem',
                     fontWeight: 600,
-                    letterSpacing: '0.06em',
+                    letterSpacing: '0.04em',
                     outline: 'none',
+                    boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06)',
                   }}
                 />
               </div>
@@ -621,7 +629,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: '#475569',
                     pointerEvents: 'none',
                   }}
                 >
@@ -641,14 +649,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
-                    background: 'rgba(255, 255, 255, 0.16)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.95)',
+                    background: 'rgba(255, 255, 255, 0.72)',
                     padding: '0 20px 0 46px',
-                    color: '#ffffff',
-                    fontSize: '0.8rem',
+                    color: '#0f172a',
+                    fontSize: '0.82rem',
                     fontWeight: 600,
-                    letterSpacing: '0.06em',
+                    letterSpacing: '0.04em',
                     outline: 'none',
+                    boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06)',
                   }}
                 />
               </div>
@@ -662,14 +671,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
-                    background: 'rgba(30, 27, 75, 0.75)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.95)',
+                    background: 'rgba(255, 255, 255, 0.85)',
                     padding: '0 20px',
-                    color: '#ffffff',
-                    fontSize: '0.8rem',
+                    color: '#0f172a',
+                    fontSize: '0.82rem',
                     fontWeight: 700,
                     outline: 'none',
                     cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06)',
                   }}
                 >
                   <option value="ROLE_USER" style={{ color: '#0f172a', background: '#ffffff' }}>👤 Thành viên (Hỏi đáp & Tra cứu tài liệu)</option>
@@ -688,7 +698,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: '#475569',
                     pointerEvents: 'none',
                   }}
                 >
@@ -709,14 +719,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
-                    background: 'rgba(255, 255, 255, 0.16)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.95)',
+                    background: 'rgba(255, 255, 255, 0.72)',
                     padding: '0 40px 0 46px',
-                    color: '#ffffff',
-                    fontSize: '0.8rem',
+                    color: '#0f172a',
+                    fontSize: '0.82rem',
                     fontWeight: 600,
-                    letterSpacing: '0.06em',
+                    letterSpacing: '0.04em',
                     outline: 'none',
+                    boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06)',
                   }}
                 />
                 <button
@@ -729,7 +740,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: '#64748b',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -749,7 +760,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     transform: 'translateY(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: '#475569',
                     pointerEvents: 'none',
                   }}
                 >
@@ -770,14 +781,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     width: '100%',
                     height: 42,
                     borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.38)',
-                    background: 'rgba(255, 255, 255, 0.16)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.95)',
+                    background: 'rgba(255, 255, 255, 0.72)',
                     padding: '0 20px 0 46px',
-                    color: '#ffffff',
-                    fontSize: '0.8rem',
+                    color: '#0f172a',
+                    fontSize: '0.82rem',
                     fontWeight: 600,
-                    letterSpacing: '0.06em',
+                    letterSpacing: '0.04em',
                     outline: 'none',
+                    boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06)',
                   }}
                 />
               </div>
@@ -791,15 +803,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   height: 46,
                   borderRadius: 9999,
                   border: 'none',
-                  background: '#ffffff',
-                  color: '#a824d6',
+                  background: 'linear-gradient(135deg, #1e293b 0%, #1e1b4b 100%)',
+                  color: '#ffffff',
                   fontSize: '0.9rem',
                   fontWeight: 800,
                   letterSpacing: '0.12em',
                   textTransform: 'uppercase',
                   cursor: 'pointer',
                   marginTop: 6,
-                  boxShadow: '0 10px 25px -4px rgba(0, 0, 0, 0.3)',
+                  boxShadow: '0 10px 25px -4px rgba(30, 27, 75, 0.25)',
                   transition: 'all 0.15s ease',
                   display: 'flex',
                   alignItems: 'center',
@@ -809,14 +821,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 {loading ? 'ĐANG TẠO TÀI KHOẢN...' : 'TẠO TÀI KHOẢN'}
               </button>
 
-              <div style={{ textAlign: 'center', marginTop: 4, fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.85)' }}>
+              <div style={{ textAlign: 'center', marginTop: 4, fontSize: '0.75rem', color: '#334155' }}>
                 Đã có tài khoản?{' '}
                 <span
                   onClick={() => {
                     setIsRegister(false);
                     setError(null);
                   }}
-                  style={{ fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', color: '#ffffff' }}
+                  style={{ fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', color: '#1e1b4b' }}
                 >
                   Đăng nhập ngay
                 </span>
@@ -832,10 +844,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               fontSize: '4.8rem',
               fontWeight: 800,
               letterSpacing: '-0.035em',
-              color: '#ffffff',
+              color: '#1e1b4b',
               lineHeight: 0.95,
               margin: 0,
-              textShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+              textShadow: '0 2px 10px rgba(30, 27, 75, 0.06)',
             }}
           >
             {isRegister ? 'Tham gia ngay.' : 'Xin chào.'}
@@ -845,7 +857,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             style={{
               fontSize: '0.88rem',
               lineHeight: 1.6,
-              color: 'rgba(255, 255, 255, 0.85)',
+              color: '#334155',
               maxWidth: 440,
               margin: 0,
             }}
@@ -855,7 +867,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               : 'Hệ thống quản lý cơ sở tri thức dự án & trợ lý AI Copilot thông minh. Tải lên tài liệu đa định dạng, phân quyền 3 vai trò và hỏi đáp trích dẫn nguồn gốc chính xác.'}
           </p>
 
-          <div style={{ fontSize: '0.82rem', color: 'rgba(255, 255, 255, 0.85)', marginTop: 4 }}>
+          <div style={{ fontSize: '0.82rem', color: '#334155', marginTop: 4 }}>
             {!isRegister ? (
               <>
                 Chưa có tài khoản?{' '}
@@ -865,13 +877,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     setError(null);
                   }}
                   style={{
-                    color: '#ffffff',
-                    fontWeight: 700,
+                    color: '#1e1b4b',
+                    fontWeight: 800,
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     transition: 'opacity 0.15s ease',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.75')}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                 >
                   Đăng ký ngay
@@ -886,13 +898,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     setError(null);
                   }}
                   style={{
-                    color: '#ffffff',
-                    fontWeight: 700,
+                    color: '#1e1b4b',
+                    fontWeight: 800,
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     transition: 'opacity 0.15s ease',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.75')}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                 >
                   Đăng nhập tại đây
@@ -923,8 +935,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               width: 10,
               height: 10,
               borderRadius: '50%',
-              background: activeSlide === 0 ? '#ffffff' : 'rgba(255, 255, 255, 0.35)',
-              boxShadow: activeSlide === 0 ? '0 0 10px rgba(255, 255, 255, 0.8)' : 'none',
+              background: activeSlide === 0 ? '#1e1b4b' : 'rgba(30, 27, 75, 0.25)',
+              boxShadow: activeSlide === 0 ? '0 0 10px rgba(30, 27, 75, 0.3)' : 'none',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
@@ -935,8 +947,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               width: 10,
               height: 10,
               borderRadius: '50%',
-              background: activeSlide === 1 ? '#ffffff' : 'rgba(255, 255, 255, 0.35)',
-              boxShadow: activeSlide === 1 ? '0 0 10px rgba(255, 255, 255, 0.8)' : 'none',
+              background: activeSlide === 1 ? '#1e1b4b' : 'rgba(30, 27, 75, 0.25)',
+              boxShadow: activeSlide === 1 ? '0 0 10px rgba(30, 27, 75, 0.3)' : 'none',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
@@ -947,42 +959,46 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               width: 10,
               height: 10,
               borderRadius: '50%',
-              background: activeSlide === 2 ? '#ffffff' : 'rgba(255, 255, 255, 0.35)',
-              boxShadow: activeSlide === 2 ? '0 0 10px rgba(255, 255, 255, 0.8)' : 'none',
+              background: activeSlide === 2 ? '#1e1b4b' : 'rgba(30, 27, 75, 0.25)',
+              boxShadow: activeSlide === 2 ? '0 0 10px rgba(30, 27, 75, 0.3)' : 'none',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
           />
         </div>
 
-        {/* Demo Accounts Pill in Vietnamese (No Blur) */}
+        {/* Demo Accounts Pill in Deep Navy Accent */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            background: 'rgba(15, 23, 42, 0.55)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
+            background: 'rgba(255, 255, 255, 0.75)',
+            border: '1px solid rgba(255, 255, 255, 0.95)',
             borderRadius: 9999,
-            padding: '4px 14px',
-            fontSize: '0.72rem',
-            color: 'rgba(255, 255, 255, 0.9)',
+            padding: '5px 16px',
+            fontSize: '0.74rem',
+            color: '#334155',
+            boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06)',
           }}
         >
-          <span style={{ fontWeight: 600 }}>Tài khoản mẫu:</span>
+          <span style={{ fontWeight: 700, color: '#1e1b4b' }}>Tài khoản mẫu:</span>
           <button
             type="button"
             onClick={() => handleFillDemo('admin@kbase.com', 'Admin@123')}
             style={{
-              background: 'rgba(255, 255, 255, 0.18)',
+              background: 'rgba(30, 27, 75, 0.08)',
               border: 'none',
               borderRadius: 9999,
-              padding: '2px 8px',
-              color: '#ffffff',
-              fontSize: '0.7rem',
+              padding: '3px 10px',
+              color: '#1e1b4b',
+              fontSize: '0.72rem',
               fontWeight: 700,
               cursor: 'pointer',
+              transition: 'all 0.15s ease',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(30, 27, 75, 0.16)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(30, 27, 75, 0.08)')}
           >
             Quản trị viên (Admin)
           </button>
@@ -990,15 +1006,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             type="button"
             onClick={() => handleFillDemo('owner@kbase.com', 'Owner@123')}
             style={{
-              background: 'rgba(255, 255, 255, 0.18)',
+              background: 'rgba(30, 27, 75, 0.08)',
               border: 'none',
               borderRadius: 9999,
-              padding: '2px 8px',
-              color: '#ffffff',
-              fontSize: '0.7rem',
+              padding: '3px 10px',
+              color: '#1e1b4b',
+              fontSize: '0.72rem',
               fontWeight: 700,
               cursor: 'pointer',
+              transition: 'all 0.15s ease',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(30, 27, 75, 0.16)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(30, 27, 75, 0.08)')}
           >
             Chủ dự án (Owner)
           </button>
@@ -1006,15 +1025,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
             type="button"
             onClick={() => handleFillDemo('user@kbase.com', 'User@123')}
             style={{
-              background: 'rgba(255, 255, 255, 0.18)',
+              background: 'rgba(30, 27, 75, 0.08)',
               border: 'none',
               borderRadius: 9999,
-              padding: '2px 8px',
-              color: '#ffffff',
-              fontSize: '0.7rem',
+              padding: '3px 10px',
+              color: '#1e1b4b',
+              fontSize: '0.72rem',
               fontWeight: 700,
               cursor: 'pointer',
+              transition: 'all 0.15s ease',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(30, 27, 75, 0.16)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(30, 27, 75, 0.08)')}
           >
             Thành viên (User)
           </button>
