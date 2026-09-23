@@ -121,31 +121,31 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         justifyContent: 'space-between',
         fontFamily: "'Segoe UI', 'Be Vietnam Pro', -apple-system, sans-serif",
         color: '#ffffff',
-        /* Dominant Orchid-Pink gradient base matching user's swatch */
-        background: 'linear-gradient(135deg, #420857 0%, #681084 15%, #8b1da5 30%, #ba48ed 55%, #c55bf2 75%, #cf6cf7 90%, #d946ef 100%)',
+        /* Pastel Pink to Mint-Turquoise Gradient Background matching user's reference image */
+        background: 'linear-gradient(180deg, #e6a3cf 0%, #dfaed5 18%, #d3bce3 38%, #c2cdee 60%, #aee0f0 80%, #9de7e2 100%)',
       }}
     >
       {/* Global CSS to prevent browser autofill from breaking capsule input style */}
       <style>{`
         .login-capsule-input {
-          background: rgba(255, 255, 255, 0.18) !important;
+          background: rgba(255, 255, 255, 0.22) !important;
           color: #ffffff !important;
         }
         .login-capsule-input::placeholder {
-          color: rgba(255, 255, 255, 0.75) !important;
+          color: rgba(255, 255, 255, 0.85) !important;
         }
         .login-capsule-input:-webkit-autofill,
         .login-capsule-input:-webkit-autofill:hover,
         .login-capsule-input:-webkit-autofill:focus,
         .login-capsule-input:-webkit-autofill:active {
           -webkit-text-fill-color: #ffffff !important;
-          -webkit-box-shadow: 0 0 0 1000px rgba(139, 29, 165, 0.9) inset !important;
+          -webkit-box-shadow: 0 0 0 1000px rgba(180, 140, 200, 0.85) inset !important;
           transition: background-color 5000s ease-in-out 0s;
           caret-color: #ffffff;
         }
       `}</style>
 
-      {/* 1. CLEAN 3D ORCHID-PINK VECTOR WAVE BACKGROUND */}
+      {/* 1. SOFT LUMINOUS AMBIENT GLOW OVERLAY FOR PASTEL GRADIENT */}
       <div
         style={{
           position: 'absolute',
@@ -153,120 +153,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           pointerEvents: 'none',
           zIndex: 1,
           overflow: 'hidden',
+          background: 'radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.25) 0%, transparent 55%), radial-gradient(circle at 85% 85%, rgba(157, 231, 226, 0.3) 0%, transparent 60%)',
         }}
-      >
-        <svg
-          viewBox="0 0 1440 900"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-          }}
-        >
-          <defs>
-            {/* Primary Orchid Pink Wave Gradient */}
-            <linearGradient id="waveSilk1" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#4c1d95" stopOpacity="0.95" />
-              <stop offset="18%" stopColor="#6d28d9" stopOpacity="0.95" />
-              <stop offset="38%" stopColor="#9333ea" stopOpacity="0.95" />
-              <stop offset="62%" stopColor="#ba48ed" stopOpacity="0.95" />
-              <stop offset="85%" stopColor="#d946ef" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.92" />
-            </linearGradient>
-
-            {/* Deep Plum Shadow Wave Fold */}
-            <linearGradient id="waveShadow1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#280536" stopOpacity="0.95" />
-              <stop offset="35%" stopColor="#3b0764" stopOpacity="0.92" />
-              <stop offset="70%" stopColor="#581c87" stopOpacity="0.88" />
-              <stop offset="100%" stopColor="#701a75" stopOpacity="0.6" />
-            </linearGradient>
-
-            {/* Inner Glowing Pink Fold */}
-            <linearGradient id="wavePinkFold" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.9" />
-              <stop offset="35%" stopColor="#ba48ed" stopOpacity="0.9" />
-              <stop offset="70%" stopColor="#d946ef" stopOpacity="0.88" />
-              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.8" />
-            </linearGradient>
-
-            {/* Shiny Crest Ridge Highlight */}
-            <linearGradient id="waveCrestLine" x1="0%" y1="50%" x2="100%" y2="50%">
-              <stop offset="0%" stopColor="#f0abfc" stopOpacity="0.95" />
-              <stop offset="35%" stopColor="#f5d0fe" stopOpacity="0.95" />
-              <stop offset="70%" stopColor="#ffffff" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#fbcfe8" stopOpacity="0.9" />
-            </linearGradient>
-
-            {/* Soft Ripple Under-layer */}
-            <linearGradient id="waveFoldHighlight" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#f472b6" stopOpacity="0.75" />
-              <stop offset="50%" stopColor="#ba48ed" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.75" />
-            </linearGradient>
-          </defs>
-
-          {/* 1. Deep Plum Shadow Layer Under Wave Arch */}
-          <path
-            d="M -100,520 C 160,340 300,740 560,560 C 820,380 1080,520 1550,280 L 1550,950 L -100,950 Z"
-            fill="url(#waveShadow1)"
-            opacity="0.95"
-          />
-
-          {/* 2. Main 3D Arched Wave Ribbon */}
-          <path
-            d="M -120,720 C 140,860 250,380 500,240 C 760,100 1020,240 1280,350 C 1420,400 1500,320 1560,240 L 1560,950 L -120,950 Z"
-            fill="url(#waveSilk1)"
-            opacity="0.92"
-          />
-
-          {/* 3. Orchid Pink Inner Wave Ripple Fold */}
-          <path
-            d="M 40,840 C 200,700 320,380 540,320 C 740,260 920,440 1140,540 C 1340,640 1480,540 1560,460 L 1560,950 L 40,950 Z"
-            fill="url(#wavePinkFold)"
-            opacity="0.85"
-          />
-
-          {/* 4. Lower-left Flowing Wave Ripple */}
-          <path
-            d="M -100,820 C 120,750 280,560 480,480 C 700,400 950,560 1220,680 L 1560,820 L 1560,950 L -100,950 Z"
-            fill="url(#waveFoldHighlight)"
-            opacity="0.65"
-          />
-
-          {/* 5. Crisp, Defined Wave Crest Ridge Strokes */}
-          <path
-            d="M -80,680 C 160,810 260,360 510,220 C 760,80 1020,230 1290,340 C 1430,390 1510,300 1560,230"
-            stroke="url(#waveCrestLine)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.92"
-          />
-
-          <path
-            d="M 60,800 C 220,660 340,360 560,305 C 760,250 940,430 1160,530 C 1340,610 1480,530 1560,450"
-            stroke="url(#wavePinkFold)"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.88"
-          />
-
-          <path
-            d="M -100,800 C 140,730 290,545 490,465 C 710,385 960,545 1230,665"
-            stroke="url(#waveCrestLine)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.75"
-          />
-        </svg>
-      </div>
+      />
 
       {/* 2. TOP HEADER NAVIGATION BAR */}
       <header
