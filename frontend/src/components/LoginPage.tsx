@@ -841,13 +841,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <h1
             style={{
-              fontSize: '3.4rem',
-              fontWeight: 600,
-              letterSpacing: '-0.02em',
+              fontSize: '4.4rem',
+              fontWeight: 800,
+              letterSpacing: '-0.03em',
               color: '#1e1b4b',
-              lineHeight: 1.05,
+              lineHeight: 1.0,
               margin: 0,
-              textShadow: '0 2px 10px rgba(30, 27, 75, 0.06)',
+              textShadow: '0 2px 12px rgba(30, 27, 75, 0.08)',
             }}
           >
             {isRegister ? 'Tham gia ngay.' : 'Xin chào.'}
