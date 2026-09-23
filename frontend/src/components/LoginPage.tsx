@@ -121,31 +121,31 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         justifyContent: 'space-between',
         fontFamily: "'Segoe UI', 'Be Vietnam Pro', -apple-system, sans-serif",
         color: '#ffffff',
-        /* Rich silky purple-blue gradient base */
-        background: 'linear-gradient(135deg, #18052e 0%, #22074d 20%, #2e1065 42%, #4338ca 62%, #6d28d9 78%, #9333ea 90%, #c026d3 100%)',
+        /* Dominant Orchid-Pink gradient base matching user's swatch */
+        background: 'linear-gradient(135deg, #420857 0%, #681084 15%, #8b1da5 30%, #ba48ed 55%, #c55bf2 75%, #cf6cf7 90%, #d946ef 100%)',
       }}
     >
       {/* Global CSS to prevent browser autofill from breaking capsule input style */}
       <style>{`
         .login-capsule-input {
-          background: rgba(255, 255, 255, 0.16) !important;
+          background: rgba(255, 255, 255, 0.18) !important;
           color: #ffffff !important;
         }
         .login-capsule-input::placeholder {
-          color: rgba(255, 255, 255, 0.72) !important;
+          color: rgba(255, 255, 255, 0.75) !important;
         }
         .login-capsule-input:-webkit-autofill,
         .login-capsule-input:-webkit-autofill:hover,
         .login-capsule-input:-webkit-autofill:focus,
         .login-capsule-input:-webkit-autofill:active {
           -webkit-text-fill-color: #ffffff !important;
-          -webkit-box-shadow: 0 0 0 1000px rgba(67, 24, 114, 0.88) inset !important;
+          -webkit-box-shadow: 0 0 0 1000px rgba(139, 29, 165, 0.9) inset !important;
           transition: background-color 5000s ease-in-out 0s;
           caret-color: #ffffff;
         }
       `}</style>
 
-      {/* 1. CLEAN 3D PURPLE-BLUE VECTOR WAVE BACKGROUND (NO FROSTED GLASS BLUR) */}
+      {/* 1. CLEAN 3D ORCHID-PINK VECTOR WAVE BACKGROUND */}
       <div
         style={{
           position: 'absolute',
@@ -168,77 +168,77 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           }}
         >
           <defs>
-            {/* Primary Blue -> Purple -> Magenta Silk Gradient */}
+            {/* Primary Orchid Pink Wave Gradient */}
             <linearGradient id="waveSilk1" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.95" />
-              <stop offset="22%" stopColor="#2563eb" stopOpacity="0.95" />
-              <stop offset="46%" stopColor="#4f46e5" stopOpacity="0.95" />
-              <stop offset="68%" stopColor="#7c3aed" stopOpacity="0.95" />
-              <stop offset="88%" stopColor="#c026d3" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#ec4899" stopOpacity="0.9" />
+              <stop offset="0%" stopColor="#4c1d95" stopOpacity="0.95" />
+              <stop offset="18%" stopColor="#6d28d9" stopOpacity="0.95" />
+              <stop offset="38%" stopColor="#9333ea" stopOpacity="0.95" />
+              <stop offset="62%" stopColor="#ba48ed" stopOpacity="0.95" />
+              <stop offset="85%" stopColor="#d946ef" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.92" />
             </linearGradient>
 
-            {/* Deep 3D Shadow Wave Fold */}
+            {/* Deep Plum Shadow Wave Fold */}
             <linearGradient id="waveShadow1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0f172a" stopOpacity="0.95" />
-              <stop offset="35%" stopColor="#1e1b4b" stopOpacity="0.92" />
-              <stop offset="70%" stopColor="#2e1065" stopOpacity="0.88" />
-              <stop offset="100%" stopColor="#3b0764" stopOpacity="0.6" />
+              <stop offset="0%" stopColor="#280536" stopOpacity="0.95" />
+              <stop offset="35%" stopColor="#3b0764" stopOpacity="0.92" />
+              <stop offset="70%" stopColor="#581c87" stopOpacity="0.88" />
+              <stop offset="100%" stopColor="#701a75" stopOpacity="0.6" />
             </linearGradient>
 
-            {/* High-Contrast Electric Blue Ripple Fold */}
-            <linearGradient id="waveCyanBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.9" />
-              <stop offset="35%" stopColor="#2563eb" stopOpacity="0.88" />
-              <stop offset="70%" stopColor="#6366f1" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#9333ea" stopOpacity="0.75" />
+            {/* Inner Glowing Pink Fold */}
+            <linearGradient id="wavePinkFold" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.9" />
+              <stop offset="35%" stopColor="#ba48ed" stopOpacity="0.9" />
+              <stop offset="70%" stopColor="#d946ef" stopOpacity="0.88" />
+              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.8" />
             </linearGradient>
 
             {/* Shiny Crest Ridge Highlight */}
             <linearGradient id="waveCrestLine" x1="0%" y1="50%" x2="100%" y2="50%">
-              <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.95" />
-              <stop offset="35%" stopColor="#818cf8" stopOpacity="0.95" />
-              <stop offset="70%" stopColor="#c084fc" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.9" />
+              <stop offset="0%" stopColor="#f0abfc" stopOpacity="0.95" />
+              <stop offset="35%" stopColor="#f5d0fe" stopOpacity="0.95" />
+              <stop offset="70%" stopColor="#ffffff" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#fbcfe8" stopOpacity="0.9" />
             </linearGradient>
 
             {/* Soft Ripple Under-layer */}
             <linearGradient id="waveFoldHighlight" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#d946ef" stopOpacity="0.65" />
-              <stop offset="50%" stopColor="#818cf8" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.75" />
+              <stop offset="0%" stopColor="#f472b6" stopOpacity="0.75" />
+              <stop offset="50%" stopColor="#ba48ed" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.75" />
             </linearGradient>
           </defs>
 
-          {/* 1. Deep Midnight Shadow Layer Under Wave Arch */}
+          {/* 1. Deep Plum Shadow Layer Under Wave Arch */}
           <path
             d="M -100,520 C 160,340 300,740 560,560 C 820,380 1080,520 1550,280 L 1550,950 L -100,950 Z"
             fill="url(#waveShadow1)"
             opacity="0.95"
           />
 
-          {/* 2. Main 3D Arched Wave Ribbon (wraps over and around the avatar like reference design) */}
+          {/* 2. Main 3D Arched Wave Ribbon */}
           <path
             d="M -120,720 C 140,860 250,380 500,240 C 760,100 1020,240 1280,350 C 1420,400 1500,320 1560,240 L 1560,950 L -120,950 Z"
             fill="url(#waveSilk1)"
             opacity="0.92"
           />
 
-          {/* 3. Electric Blue Inner Wave Ripple Fold */}
+          {/* 3. Orchid Pink Inner Wave Ripple Fold */}
           <path
             d="M 40,840 C 200,700 320,380 540,320 C 740,260 920,440 1140,540 C 1340,640 1480,540 1560,460 L 1560,950 L 40,950 Z"
-            fill="url(#waveCyanBlue)"
-            opacity="0.82"
+            fill="url(#wavePinkFold)"
+            opacity="0.85"
           />
 
           {/* 4. Lower-left Flowing Wave Ripple */}
           <path
             d="M -100,820 C 120,750 280,560 480,480 C 700,400 950,560 1220,680 L 1560,820 L 1560,950 L -100,950 Z"
             fill="url(#waveFoldHighlight)"
-            opacity="0.6"
+            opacity="0.65"
           />
 
-          {/* 5. Crisp, Defined Wave Crest Ridge Strokes (No Blur - Smooth & Clean) */}
+          {/* 5. Crisp, Defined Wave Crest Ridge Strokes */}
           <path
             d="M -80,680 C 160,810 260,360 510,220 C 760,80 1020,230 1290,340 C 1430,390 1510,300 1560,230"
             stroke="url(#waveCrestLine)"
@@ -250,7 +250,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
 
           <path
             d="M 60,800 C 220,660 340,360 560,305 C 760,250 940,430 1160,530 C 1340,610 1480,530 1560,450"
-            stroke="url(#waveCyanBlue)"
+            stroke="url(#wavePinkFold)"
             strokeWidth="2.5"
             strokeLinecap="round"
             fill="none"
@@ -617,7 +617,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   borderRadius: 9999,
                   border: 'none',
                   background: '#ffffff',
-                  color: '#9333ea',
+                  color: '#a824d6',
                   fontSize: '0.92rem',
                   fontWeight: 800,
                   letterSpacing: '0.14em',
@@ -903,7 +903,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   borderRadius: 9999,
                   border: 'none',
                   background: '#ffffff',
-                  color: '#9333ea',
+                  color: '#a824d6',
                   fontSize: '0.9rem',
                   fontWeight: 800,
                   letterSpacing: '0.12em',
