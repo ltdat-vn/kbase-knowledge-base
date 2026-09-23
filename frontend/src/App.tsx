@@ -123,6 +123,16 @@ export const App: React.FC = () => {
     );
   });
 
+  // Full-screen immersive login page when logged out
+  if (!currentUser && !loading) {
+    return (
+      <LoginPage
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
+    );
+  }
+
   return (
     <div className="saas-layout">
       {/* 1. LEFT ICON RAIL (68px) */}
@@ -161,15 +171,7 @@ export const App: React.FC = () => {
 
         {/* Scrollable Main Body */}
         <main style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
-          {/* A. LOGGED OUT LOGIN VIEW */}
-          {!currentUser && !loading && (
-            <LoginPage
-              onLogin={handleLogin}
-              onRegister={handleRegister}
-            />
-          )}
-
-          {/* B. LOGGED IN WORKSPACE */}
+          {/* LOGGED IN WORKSPACE */}
           {currentUser && (
             <>
               {/* TAB 1: PROJECTS */}
