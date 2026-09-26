@@ -41,6 +41,7 @@ interface ProjectDetailViewProps {
   onOpenAiChat?: () => void;
   isPinned?: boolean;
   onTogglePin?: () => void;
+  onDeleteProject?: () => void;
 }
 
 export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
@@ -51,6 +52,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   onOpenAiChat,
   isPinned,
   onTogglePin,
+  onDeleteProject,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'docs' | 'members'>('docs');
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
@@ -284,6 +286,27 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           >
             <Plus size={16} /> Tải Tệp Mới
           </button>
+          {(project.currentUserRole === 'OWNER' || currentUser?.role === 'ROLE_ADMIN') && onDeleteProject && (
+            <button
+              onClick={onDeleteProject}
+              className="btn btn-secondary btn-sm"
+              style={{
+                height: 38,
+                borderRadius: 9999,
+                padding: '0 14px',
+                borderColor: '#fecaca',
+                background: '#fff1f2',
+                color: '#e11d48',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontWeight: 600,
+              }}
+              title="Xóa dự án này"
+            >
+              <Trash2 size={15} /> Xóa Dự Án
+            </button>
+          )}
         </div>
       </div>
 

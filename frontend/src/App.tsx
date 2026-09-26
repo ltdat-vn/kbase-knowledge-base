@@ -22,6 +22,7 @@ import {
   Search,
   CheckCircle2,
   Pin,
+  Trash2,
 } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -175,6 +176,25 @@ export const App: React.FC = () => {
     });
   };
 
+  const handleDeleteProject = async (id: number, name: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa dự án "${name}" không?`)) {
+      return;
+    }
+    try {
+      await projectApi.delete(id);
+      setProjects((prev) => prev.filter((p) => p.id !== id));
+      if (selectedProject?.id === id) {
+        setSelectedProject(null);
+      }
+      setPinnedProjectIds((prev) => prev.filter((pid) => pid !== id));
+      setToastMessage(`Đã xóa dự án "${name}" thành công!`);
+      setTimeout(() => setToastMessage(null), 3000);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Không thể xóa dự án này.');
+    }
+  };
+
   // Helper to sort list with pinned items first (preserving pin order)
   const sortProjectsWithPinned = (list: Project[]) => {
     return [...list].sort((a, b) => {
@@ -268,6 +288,7 @@ export const App: React.FC = () => {
                       onOpenAiChat={() => setIsAiDrawerOpen(true)}
                       isPinned={pinnedProjectIds.includes(selectedProject.id)}
                       onTogglePin={() => togglePinProject(selectedProject.id)}
+                      onDeleteProject={() => handleDeleteProject(selectedProject.id, selectedProject.name)}
                     />
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
@@ -363,24 +384,54 @@ export const App: React.FC = () => {
                                         <span className="window-dot" style={{ background: '#10b981' }} />
                                       </div>
 
-                                      <button
-                                        type="button"
-                                        onClick={(e) => togglePinProject(p.id, e)}
-                                        className={`btn-pin-toggle ${isPinned ? 'is-pinned' : ''}`}
-                                        title={isPinned ? 'Bỏ ghim dự án' : 'Ghim dự án lên đầu'}
-                                        style={{
-                                          width: 24,
-                                          height: 24,
-                                        }}
-                                      >
-                                        <Pin
-                                          size={13}
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => togglePinProject(p.id, e)}
+                                          className={`btn-pin-toggle ${isPinned ? 'is-pinned' : ''}`}
+                                          title={isPinned ? 'Bỏ ghim dự án' : 'Ghim dự án lên đầu'}
                                           style={{
-                                            transform: isPinned ? 'rotate(45deg)' : 'none',
-                                            fill: isPinned ? '#2563eb' : 'none',
+                                            width: 24,
+                                            height: 24,
                                           }}
-                                        />
-                                      </button>
+                                        >
+                                          <Pin
+                                            size={13}
+                                            style={{
+                                              transform: isPinned ? 'rotate(45deg)' : 'none',
+                                              fill: isPinned ? '#2563eb' : 'none',
+                                            }}
+                                          />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => handleDeleteProject(p.id, p.name, e)}
+                                          style={{
+                                            width: 24,
+                                            height: 24,
+                                            borderRadius: 6,
+                                            border: 'none',
+                                            background: 'transparent',
+                                            color: '#94a3b8',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            transition: 'all 0.15s ease',
+                                          }}
+                                          onMouseEnter={(e) => {
+                                            e.currentTarget.style.color = '#e11d48';
+                                            e.currentTarget.style.background = '#fff1f2';
+                                          }}
+                                          onMouseLeave={(e) => {
+                                            e.currentTarget.style.color = '#94a3b8';
+                                            e.currentTarget.style.background = 'transparent';
+                                          }}
+                                          title="Xóa dự án"
+                                        >
+                                          <Trash2 size={13} />
+                                        </button>
+                                      </div>
                                     </div>
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
@@ -566,6 +617,22 @@ export const App: React.FC = () => {
                                             title={isPinned ? 'Bỏ ghim dự án' : 'Ghim dự án lên đầu'}
                                           >
                                             <Pin size={12} style={{ transform: isPinned ? 'rotate(45deg)' : 'none', fill: isPinned ? '#2563eb' : 'none' }} />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={(e) => handleDeleteProject(p.id, p.name, e)}
+                                            className="btn btn-secondary btn-sm"
+                                            style={{
+                                              padding: '4px 8px',
+                                              borderRadius: 6,
+                                              fontSize: '0.75rem',
+                                              borderColor: '#fecaca',
+                                              background: '#fff1f2',
+                                              color: '#e11d48',
+                                            }}
+                                            title="Xóa dự án"
+                                          >
+                                            <Trash2 size={12} />
                                           </button>
                                           <button
                                             onClick={(e) => {
