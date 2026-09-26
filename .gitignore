@@ -25,4 +25,6 @@ pgsql/
 ai-service/venv/
 __pycache__/
 *.pyc
-
+# Documents and Reports
+*.pdf
+*.docx
