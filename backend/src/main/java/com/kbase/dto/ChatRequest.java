@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatRequest {
-    @NotNull(message = "Project ID is required")
     private Long projectId;
 
     @NotBlank(message = "Question is required")

@@ -389,3 +389,106 @@ button, input, select, textarea {
 .spin {
   animation: spin 1s linear infinite;
 }
+
+/* Pinned Project Styles */
+.btn-pin-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn-pin-toggle:hover {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.btn-pin-toggle.is-pinned {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.btn-pin-toggle.is-pinned:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.folder-preview-card.pinned-card {
+  border-color: #bfdbfe;
+  background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.08);
+}
+
+.modern-table tr.pinned-row td {
+  background-color: #fafcff;
+}
+
+.modern-table tr.pinned-row:hover td {
+  background-color: #f0f6ff;
+}
+
+.badge-pinned {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-notification {
+  animation: toastFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Document Table Row Clickable Hover Styles */
+.doc-table-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.doc-table-row:hover td {
+  background-color: #f1f7fe !important;
+}
+
+.doc-table-row:hover .doc-title-link {
+  color: #2563eb !important;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+

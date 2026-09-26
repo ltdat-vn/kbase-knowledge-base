@@ -14,6 +14,8 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     List<Document> findByProjectIdOrderByCreatedAtDesc(Long projectId);
 
+    List<Document> findByProjectIdInOrderByCreatedAtDesc(List<Long> projectIds);
+
     List<Document> findByProjectIdAndFileCategoryOrderByCreatedAtDesc(Long projectId, FileCategory fileCategory);
 
     @Query("SELECT d FROM Document d WHERE d.project.id = :projectId AND " +

@@ -10,6 +10,7 @@ import {
   ChevronRight,
   FolderGit2,
   FolderPlus,
+  Bot,
 } from 'lucide-react';
 
 interface TopHeaderProps {
@@ -145,9 +146,21 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
+            position: 'relative',
           }}
         >
-          {isAiDrawerOpen ? <PanelRightClose size={17} /> : <PanelRightOpen size={17} />}
+          <Bot size={17} />
+          <span
+            style={{
+              position: 'absolute',
+              top: 6,
+              right: 6,
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: '#10b981',
+            }}
+          />
         </button>
 
         {/* If not logged in: Sign In / Sign Up */}

@@ -8,6 +8,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 import io
 import re
+import os
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
 
 app = FastAPI(
     title="KBase AI Microservice",
@@ -79,11 +82,37 @@ def ask_question(request: ChatRequest):
     top_refs = scored_refs[:3]
 
     if not top_refs:
-        answer = f"I reviewed {len(docs)} documents in project #{request.project_id}, but found no matching information for '{question}'."
+        answer = f"Tôi đã xem qua {len(docs)} tài liệu, nhưng không tìm thấy thông tin nào liên quan đến: '{question}'."
     else:
-        answer = f"Based on analysis of **{top_refs[0].document_title}**, here is the synthesized answer:\n\n"
-        answer += f"> {top_refs[0].snippet}\n\n"
-        answer += "Please refer to the source references below for full context."
+        # Xây dựng ngữ cảnh context cho OpenAI
+        context_text = ""
+        for idx, ref in enumerate(top_refs):
+            context_text += f"[{idx+1}] Tài liệu: {ref.document_title}\nTrích xuất: {ref.snippet}\n\n"
+            
+        # Gọi OpenAI ChatGPT
+        api_key = os.getenv("OPENAI_API_KEY", "")
+        if not api_key:
+            answer = "⚠️ LỖI: Chưa cấu hình OPENAI_API_KEY trong máy chủ Python. Vui lòng thêm biến môi trường OPENAI_API_KEY."
+        else:
+            try:
+                llm = ChatOpenAI(api_key=api_key, model="gpt-4o-mini", temperature=0.3)
+                prompt = f"""
+Bạn là Trợ lý AI chuyên môn của hệ thống KBase. Dựa vào các tài liệu ngữ cảnh dưới đây, hãy trả lời câu hỏi của người dùng bằng Tiếng Việt.
+TUYỆT ĐỐI KHÔNG dùng định dạng markdown phức tạp (không dùng dấu #, *, `). Chỉ dùng gạch ngang (-) để liệt kê nếu cần.
+Nếu không có thông tin trong tài liệu, hãy nói "Tôi không tìm thấy thông tin trong tài liệu".
+
+[NGỮ CẢNH TÀI LIỆU]
+{context_text}
+"""
+                messages = [
+                    SystemMessage(content=prompt),
+                    HumanMessage(content=question)
+                ]
+                
+                response = llm.invoke(messages)
+                answer = response.content
+            except Exception as e:
+                answer = f"Lỗi khi gọi OpenAI: {str(e)}"
 
     return ChatResponse(
         question=question,

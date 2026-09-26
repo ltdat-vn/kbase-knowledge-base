@@ -33,7 +33,7 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
   return (
     <aside
       style={{
-        width: 68,
+        width: 72,
         height: '100vh',
         background: '#ffffff',
         borderRight: '1px solid #eaecf0',
@@ -53,22 +53,38 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
           onClick={() => setActiveTab('projects')}
           title="KBase - Cơ Sở Tri Thức"
           style={{
-            width: 42,
-            height: 42,
-            borderRadius: 12,
-            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ffffff',
-            boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)',
             cursor: 'pointer',
             transition: 'transform 0.15s ease',
+            width: 42,
+            height: 42,
           }}
           onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
           onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
         >
-          <Sparkles size={22} color="#ffffff" />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                border: '3px solid #1e1b4b',
+                marginRight: -8,
+                opacity: 0.9,
+              }}
+            />
+            <div
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#1e1b4b',
+                boxShadow: '0 2px 8px rgba(30, 27, 75, 0.15)',
+              }}
+            />
+          </div>
         </div>
 
         {/* Separator */}
@@ -188,28 +204,57 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
       </div>
 
       {/* Bottom Group: User Profile / Logout */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, width: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%', padding: '0 4px' }}>
         {user ? (
           <>
-            {/* User Avatar Badge */}
+            {/* User Avatar Badge & Full Name */}
             <div
-              title={`${user.fullName} (${user.role === 'ROLE_ADMIN' ? 'Quản Trị' : user.role === 'ROLE_OWNER' ? 'Chủ Dự Án' : 'Thành Viên'})`}
+              title={`${user.fullName} (${user.role === 'ROLE_ADMIN' ? 'Quản Trị' : user.role === 'ROLE_OWNER' ? 'Chủ Dự Án' : 'Thành Viên'}) - ${user.email}`}
               style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: user.role === 'ROLE_ADMIN' ? '#f3e8ff' : user.role === 'ROLE_OWNER' ? '#e0f2fe' : '#ecfdf5',
-                color: user.role === 'ROLE_ADMIN' ? '#7e22ce' : user.role === 'ROLE_OWNER' ? '#0369a1' : '#047857',
-                fontWeight: 700,
-                fontSize: '0.85rem',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid rgba(0,0,0,0.06)',
+                gap: 4,
+                width: '100%',
                 cursor: 'pointer',
               }}
             >
-              {user.fullName.substring(0, 1).toUpperCase()}
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: user.role === 'ROLE_ADMIN' ? '#f3e8ff' : user.role === 'ROLE_OWNER' ? '#e0f2fe' : '#ecfdf5',
+                  color: user.role === 'ROLE_ADMIN' ? '#7e22ce' : user.role === 'ROLE_OWNER' ? '#0369a1' : '#047857',
+                  fontWeight: 700,
+                  fontSize: '0.88rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                }}
+              >
+                {user.fullName.substring(0, 1).toUpperCase()}
+              </div>
+
+              {/* Tên người đang đăng nhập */}
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  color: '#334155',
+                  textAlign: 'center',
+                  width: '100%',
+                  padding: '0 2px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  lineHeight: 1.2,
+                }}
+              >
+                {user.fullName}
+              </span>
             </div>
 
             {/* Logout Button */}

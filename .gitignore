@@ -21,3 +21,8 @@ Thumbs.db
 # Local PostgreSQL portable binaries & cluster data
 pgsql/
 
+# Python Virtualenv & Cache
+ai-service/venv/
+__pycache__/
+*.pyc
+

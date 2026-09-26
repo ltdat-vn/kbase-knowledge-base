@@ -28,6 +28,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectDto createProject(CreateProjectRequest request, User currentUser) {
+        if (currentUser.getRole() != Role.ROLE_ADMIN && currentUser.getRole() != Role.ROLE_OWNER) {
+            throw new AccessDeniedException("Chỉ Quản trị viên (Admin) hoặc Chủ sở hữu (Owner) mới có quyền tạo dự án mới");
+        }
+
         Project project = Project.builder()
                 .name(request.getName())
                 .description(request.getDescription())

@@ -4,6 +4,7 @@ import com.kbase.dto.ChatRequest;
 import com.kbase.dto.ChatResponse;
 import com.kbase.model.Document;
 import com.kbase.model.Project;
+import com.kbase.model.ProjectMember;
 import com.kbase.model.Role;
 import com.kbase.model.User;
 import com.kbase.repository.DocumentRepository;
@@ -23,6 +24,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -40,32 +42,82 @@ public class AiChatServiceImpl implements AiChatService {
     @Value("${kbase.ai.gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${kbase.ai.gemini.model:gemini-3.6-flash}")
+    @Value("${kbase.ai.gemini.model:gemini-3.5-flash}")
     private String geminiModel;
+
+    private static final List<String> GEMINI_CANDIDATE_MODELS = List.of(
+            "gemini-3.5-flash",
+            "gemini-flash-lite-latest",
+            "gemini-3.5-flash-lite",
+            "gemini-3.6-flash"
+    );
 
     private static final Pattern WORD_SPLITTER = Pattern.compile("[\\s,;:.?!()\"'\\[\\]{}]+");
     private static final Set<String> STOP_WORDS = Set.of(
             "the", "is", "at", "which", "on", "a", "an", "and", "or", "in", "for", "to",
             "what", "how", "where", "who", "when", "why", "of", "with", "as", "by", "from",
-            "la", "va", "cua", "cac", "cho", "trong", "co", "nhu", "the_nao", "la_gi", "nhung"
+            "la", "va", "cua", "cac", "cho", "trong", "co", "nhu", "the_nao", "la_gi", "nhung",
+            "tai", "lieu", "tai_lieu", "file", "tep", "tep_tin", "du_an", "gom", "nhung_gi"
     );
 
     @Override
     public ChatResponse askQuestion(ChatRequest request, User currentUser) {
         Long projectId = request.getProjectId();
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dự án với mã ID: " + projectId));
+        boolean isAllProjects = (projectId == null || projectId <= 0);
 
-        checkProjectAccess(project, currentUser);
+        List<Project> accessibleProjects = (currentUser.getRole() == Role.ROLE_ADMIN)
+                ? projectRepository.findAllOrderByUpdatedAtDesc()
+                : projectRepository.findAccessibleProjects(currentUser.getId());
 
-        List<Document> documents = documentRepository.findByProjectIdOrderByCreatedAtDesc(projectId);
+        Project project = null;
+        List<Document> documents = new ArrayList<>();
+
+        if (!isAllProjects) {
+            project = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dự án với mã ID: " + projectId));
+            checkProjectAccess(project, currentUser);
+            documents = documentRepository.findByProjectIdOrderByCreatedAtDesc(projectId);
+        } else {
+            // Chế độ bao quát toàn bộ hệ thống / tất cả dự án
+            if (!accessibleProjects.isEmpty()) {
+                List<Long> pids = accessibleProjects.stream().map(Project::getId).toList();
+                documents = documentRepository.findByProjectIdInOrderByCreatedAtDesc(pids);
+            }
+        }
+
+        String question = request.getQuestion();
+        String scopeName = (project != null) ? project.getName() : "Toàn bộ hệ thống KBase";
+
+        // 1. Nhận diện các câu hỏi về số lượng dự án, danh sách dự án trong hệ thống/không gian làm việc
+        if (isProjectOverviewQuery(question)) {
+            return handleProjectOverviewQuery(request, currentUser, project);
+        }
+
+        // 2. Nhận diện các câu hỏi chào hỏi hoặc hỏi về tính năng/khả năng của trợ lý AI
+        if (isGreetingQuery(question)) {
+            return handleGreetingQuery(request, project, accessibleProjects);
+        }
+
+        // 3. Nhận diện các câu hỏi hỏi về danh sách / số lượng tài liệu
+        if (isDocumentListQuery(question)) {
+            return handleDocumentListQuery(request, project, documents, accessibleProjects);
+        }
+
         if (documents.isEmpty()) {
-            return ChatResponse.builder()
-                    .question(request.getQuestion())
-                    .answer("Chưa có tài liệu nào được tải lên dự án '" + project.getName() + "'. Vui lòng tải lên tài liệu để tôi có thể phân tích và trả lời câu hỏi của bạn.")
-                    .projectId(projectId)
-                    .references(Collections.emptyList())
-                    .build();
+            if (geminiApiKey != null && !geminiApiKey.isBlank()) {
+                String contextText = buildGeminiContext(project, Collections.emptyList(), Collections.emptyList(), accessibleProjects);
+                String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, scopeName);
+                if (geminiAnswer != null && !geminiAnswer.isBlank()) {
+                    log.info("Trả lời câu hỏi thông tin chung không có tài liệu bằng Gemini");
+                    return ChatResponse.builder()
+                            .question(request.getQuestion())
+                            .answer(geminiAnswer)
+                            .projectId(project != null ? project.getId() : 0L)
+                            .references(Collections.emptyList())
+                            .build();
+                }
+            }
+            return handleEmptyDocuments(request, project, accessibleProjects);
         }
 
         // Tách từ khóa câu hỏi
@@ -127,9 +179,13 @@ public class AiChatServiceImpl implements AiChatService {
         int topCount = Math.min(scoredDocs.size(), 3);
         for (int i = 0; i < topCount; i++) {
             ScoredDoc sd = scoredDocs.get(i);
+            String docTitle = sd.doc.getTitle();
+            if (isAllProjects && sd.doc.getProject() != null) {
+                docTitle = "[" + sd.doc.getProject().getName() + "] " + docTitle;
+            }
             references.add(ChatResponse.SourceReference.builder()
                     .documentId(sd.doc.getId())
-                    .documentTitle(sd.doc.getTitle())
+                    .documentTitle(docTitle)
                     .originalFilename(sd.doc.getOriginalFilename())
                     .snippet(sd.snippet)
                     .score(Math.round(sd.score * 10.0) / 10.0)
@@ -138,14 +194,14 @@ public class AiChatServiceImpl implements AiChatService {
 
         // 1. Thử gọi Google Gemini nếu có API key
         if (geminiApiKey != null && !geminiApiKey.isBlank()) {
-            String contextText = buildGeminiContext(documents, scoredDocs);
-            String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, project.getName());
+            String contextText = buildGeminiContext(project, documents, scoredDocs, accessibleProjects);
+            String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, scopeName);
             if (geminiAnswer != null && !geminiAnswer.isBlank()) {
                 log.info("Trả lời câu hỏi thành công bằng Google Gemini model {}", geminiModel);
                 return ChatResponse.builder()
                         .question(request.getQuestion())
                         .answer(geminiAnswer)
-                        .projectId(projectId)
+                        .projectId(project != null ? project.getId() : 0L)
                         .references(references)
                         .build();
             }
@@ -157,27 +213,29 @@ public class AiChatServiceImpl implements AiChatService {
         if (scoredDocs.isEmpty()) {
             answerBuilder.append("Tôi đã tra cứu qua ")
                     .append(documents.size())
-                    .append(" tài liệu trong dự án '")
-                    .append(project.getName())
-                    .append("', nhưng không tìm thấy thông tin khớp trực tiếp cho câu hỏi: \"")
+                    .append(" tài liệu trong ")
+                    .append(project != null ? "dự án '" + project.getName() + "'" : "toàn bộ hệ thống")
+                    .append(", nhưng không tìm thấy thông tin khớp trực tiếp cho câu hỏi: \"")
                     .append(request.getQuestion())
-                    .append("\".\n\nDưới đây là một số tài liệu hiện có trong dự án bạn có thể tham khảo:\n");
+                    .append("\".\n\nDưới đây là một số tài liệu bạn có thể tham khảo:\n");
 
             int count = 0;
             for (Document d : documents) {
                 if (count++ >= 5) break;
-                answerBuilder.append("• **").append(d.getTitle()).append("** (Định dạng: ").append(d.getFileCategory()).append(")\n");
+                String pPrefix = (project == null && d.getProject() != null) ? "[" + d.getProject().getName() + "] " : "";
+                answerBuilder.append("• **").append(pPrefix).append(d.getTitle()).append("** (Định dạng: ").append(d.getFileCategory()).append(")\n");
             }
         } else {
-            answerBuilder.append("Dựa trên các tài liệu trong dự án **").append(project.getName()).append("**, dưới đây là câu trả lời được tổng hợp:\n\n");
+            answerBuilder.append("Dựa trên các tài liệu trong **").append(scopeName).append("**, dưới đây là câu trả lời được tổng hợp:\n\n");
 
-            // Tổng hợp thông tin từ tài liệu khớp nhất
             ScoredDoc topMatch = scoredDocs.get(0);
-            answerBuilder.append("Thông tin quan trọng tìm thấy trong **[").append(topMatch.doc.getTitle()).append("]**:\n");
+            String topProj = (project == null && topMatch.doc.getProject() != null) ? "[" + topMatch.doc.getProject().getName() + "] " : "";
+            answerBuilder.append("Thông tin quan trọng tìm thấy trong **").append(topProj).append("[").append(topMatch.doc.getTitle()).append("]**:\n");
             answerBuilder.append("> ").append(topMatch.snippet.replaceAll("\n+", " ").trim()).append("\n\n");
 
             if (scoredDocs.size() > 1) {
-                answerBuilder.append("Ngữ cảnh bổ sung từ **[").append(scoredDocs.get(1).doc.getTitle()).append("]**:\n");
+                String secondProj = (project == null && scoredDocs.get(1).doc.getProject() != null) ? "[" + scoredDocs.get(1).doc.getProject().getName() + "] " : "";
+                answerBuilder.append("Ngữ cảnh bổ sung từ **").append(secondProj).append("[").append(scoredDocs.get(1).doc.getTitle()).append("]**:\n");
                 answerBuilder.append("> ").append(scoredDocs.get(1).snippet.replaceAll("\n+", " ").trim()).append("\n\n");
             }
 
@@ -187,18 +245,66 @@ public class AiChatServiceImpl implements AiChatService {
         return ChatResponse.builder()
                 .question(request.getQuestion())
                 .answer(cleanMarkdownFormatting(answerBuilder.toString()))
-                .projectId(projectId)
+                .projectId(project != null ? project.getId() : 0L)
                 .references(references)
                 .build();
     }
 
-    private String buildGeminiContext(List<Document> allDocs, List<ScoredDoc> scoredDocs) {
+    private String buildGeminiContext(Project project, List<Document> allDocs, List<ScoredDoc> scoredDocs, List<Project> accessibleProjects) {
         StringBuilder sb = new StringBuilder();
+
+        if (project != null) {
+            // --- THÔNG TIN CHUNG VỀ DỰ ÁN ---
+            sb.append("--- THÔNG TIN CHUNG VỀ DỰ ÁN ---\n");
+            sb.append("- Tên dự án: ").append(project.getName()).append("\n");
+            if (project.getDescription() != null && !project.getDescription().isBlank()) {
+                sb.append("- Mô tả: ").append(project.getDescription()).append("\n");
+            }
+            sb.append("- Chủ dự án: ").append(project.getOwner().getFullName()).append(" (").append(project.getOwner().getEmail()).append(")\n");
+            
+            List<ProjectMember> members = projectMemberRepository.findByProjectId(project.getId());
+            if (!members.isEmpty()) {
+                sb.append("- Danh sách thành viên tham gia (không bao gồm chủ dự án):\n");
+                for (ProjectMember m : members) {
+                    sb.append("  + ").append(m.getUser().getFullName()).append(" (").append(m.getUser().getEmail()).append(") - Vai trò: ").append(m.getRole()).append("\n");
+                }
+            } else {
+                sb.append("- Danh sách thành viên: Hiện chưa có thành viên nào khác ngoài Chủ dự án.\n");
+            }
+            sb.append("\n");
+        } else {
+            // --- PHẠM VI TRA CỨU: TOÀN BỘ HỆ THỐNG KBASE (TẤT CẢ DỰ ÁN) ---
+            sb.append("--- PHẠM VI TRA CỨU: TOÀN BỘ HỆ THỐNG KBASE (TẤT CẢ DỰ ÁN) ---\n");
+            sb.append("Hệ thống hiện có ").append(accessibleProjects.size()).append(" dự án người dùng có quyền truy cập:\n");
+            for (Project p : accessibleProjects) {
+                sb.append("- Dự án: ").append(p.getName());
+                if (p.getDescription() != null && !p.getDescription().isBlank()) {
+                    sb.append(" (Mô tả: ").append(p.getDescription()).append(")");
+                }
+                sb.append("\n");
+            }
+            sb.append("\n");
+        }
+
+        // --- DANH SÁCH TÀI LIỆU ---
+        if (!allDocs.isEmpty()) {
+            sb.append("--- DANH SÁCH TÀI LIỆU TRONG HỆ THỐNG ---\n");
+            for (Document doc : allDocs) {
+                String pName = (doc.getProject() != null) ? doc.getProject().getName() : "Chung";
+                sb.append("• Tên tài liệu: ").append(doc.getTitle())
+                  .append(" [Thuộc dự án: ").append(pName).append("]")
+                  .append(" (Tên tệp: ").append(doc.getOriginalFilename()).append(", Thể loại: ").append(doc.getFileCategory()).append(")\n");
+            }
+            sb.append("\n");
+        }
+
         if (!scoredDocs.isEmpty()) {
+            sb.append("--- NỘI DUNG TÀI LIỆU LIÊN QUAN ĐẾN CÂU HỎI ---\n");
             int limit = Math.min(scoredDocs.size(), 3);
             for (int i = 0; i < limit; i++) {
                 Document doc = scoredDocs.get(i).doc;
-                sb.append("--- TÀI LIỆU: ").append(doc.getTitle()).append(" (Tên tệp: ").append(doc.getOriginalFilename()).append(") ---\n");
+                String pName = (doc.getProject() != null) ? doc.getProject().getName() : "Chung";
+                sb.append("TÀI LIỆU: ").append(doc.getTitle()).append(" [Thuộc dự án: ").append(pName).append("] (Tên tệp: ").append(doc.getOriginalFilename()).append(")\n");
                 if (doc.getTextContent() != null && !doc.getTextContent().isBlank()) {
                     String snippet = doc.getTextContent();
                     if (snippet.length() > 3000) snippet = snippet.substring(0, 3000) + "...";
@@ -206,12 +312,6 @@ public class AiChatServiceImpl implements AiChatService {
                 } else if (doc.getSummary() != null) {
                     sb.append(doc.getSummary()).append("\n\n");
                 }
-            }
-        } else {
-            for (Document doc : allDocs) {
-                sb.append("• ").append(doc.getTitle()).append(" - ").append(doc.getOriginalFilename());
-                if (doc.getSummary() != null) sb.append(": ").append(doc.getSummary());
-                sb.append("\n");
             }
         }
         return sb.toString();
@@ -221,17 +321,17 @@ public class AiChatServiceImpl implements AiChatService {
         try {
             String prompt = String.format("""
                     Bạn là Trợ lý AI chuyên gia của hệ thống KBase.
-                    Hãy trả lời câu hỏi của người dùng bằng Tiếng Việt một cách tự nhiên, rõ ràng, mạch lạc dựa trên ngữ cảnh tài liệu dự án "%s" dưới đây.
+                    Hãy trả lời câu hỏi của người dùng bằng Tiếng Việt một cách tự nhiên, rõ ràng, mạch lạc dựa trên ngữ cảnh thông tin và tài liệu dự án "%s" dưới đây.
                     
                     Quy tắc trình bày:
                     1. TUYỆT ĐỐI KHÔNG sử dụng các ký hiệu markdown như '###', '##', '#', '**', '*', '`'.
                     2. Không dùng dấu thăng '#' để làm tiêu đề. Hãy xuống dòng và viết hoa chữ cái đầu tiêu đề bình thường.
                     3. Không dùng dấu sao kép '**' để in đậm.
                     4. Khi liệt kê các ý, dùng dấu gạch đầu dòng '-' đơn giản hoặc số thứ tự 1, 2, 3, tuyệt đối không dùng dấu sao '*'.
-                    5. Dựa sát vào thông tin có trong ngữ cảnh tài liệu. Nếu tài liệu không đề cập đến nội dung câu hỏi, hãy nói rõ là tài liệu dự án hiện chưa có thông tin này.
+                    5. Dựa sát vào thông tin có trong ngữ cảnh được cung cấp (bao gồm thông tin chung dự án và tài liệu). Nếu không có thông tin để trả lời, hãy nói rõ là dự án hiện chưa có thông tin này.
                     
                     ---
-                    [NGỮ CẢNH TÀI LIỆU DỰ ÁN]:
+                    [NGỮ CẢNH THÔNG TIN VÀ TÀI LIỆU DỰ ÁN]:
                     %s
                     ---
                     [CÂU HỎI]:
@@ -244,29 +344,46 @@ public class AiChatServiceImpl implements AiChatService {
 
             String jsonPayload = objectMapper.writeValueAsString(requestBody);
 
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiApiKey;
+            List<String> modelsToTry = new ArrayList<>();
+            if (geminiModel != null && !geminiModel.isBlank()) {
+                modelsToTry.add(geminiModel.trim());
+            }
+            for (String cm : GEMINI_CANDIDATE_MODELS) {
+                if (!modelsToTry.contains(cm)) {
+                    modelsToTry.add(cm);
+                }
+            }
 
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(10))
                     .build();
 
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Content-Type", "application/json")
-                    .timeout(Duration.ofSeconds(20))
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
-                    .build();
+            for (String currentModel : modelsToTry) {
+                try {
+                    String url = "https://generativelanguage.googleapis.com/v1beta/models/" + currentModel + ":generateContent?key=" + geminiApiKey;
 
-            HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    HttpRequest httpRequest = HttpRequest.newBuilder()
+                            .uri(URI.create(url))
+                            .header("Content-Type", "application/json")
+                            .timeout(Duration.ofSeconds(20))
+                            .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
+                            .build();
 
-            if (response.statusCode() == 200) {
-                JsonNode rootNode = objectMapper.readTree(response.body());
-                JsonNode textNode = rootNode.at("/candidates/0/content/parts/0/text");
-                if (!textNode.isMissingNode() && !textNode.asText().isBlank()) {
-                    return cleanMarkdownFormatting(textNode.asText());
+                    HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+                    if (response.statusCode() == 200) {
+                        JsonNode rootNode = objectMapper.readTree(response.body());
+                        JsonNode textNode = rootNode.at("/candidates/0/content/parts/0/text");
+                        if (!textNode.isMissingNode() && !textNode.asText().isBlank()) {
+                            log.info("Trả lời câu hỏi thành công bằng Google Gemini model {}", currentModel);
+                            return cleanMarkdownFormatting(textNode.asText());
+                        }
+                    } else {
+                        log.warn("Gemini model {} phản hồi mã lỗi: {}, tự động chuyển model dự phòng...", currentModel, response.statusCode());
+                    }
+                } catch (Exception e) {
+                    log.warn("Lỗi khi kết nối Google Gemini model {}: {}, thử model tiếp theo...", currentModel, e.getMessage());
                 }
-            } else {
-                log.warn("Gemini API phản hồi mã lỗi: {}, nội dung: {}", response.statusCode(), response.body());
             }
         } catch (Exception e) {
             log.warn("Lỗi khi kết nối Google Gemini API, tự động chuyển về chế độ nội bộ: {}", e.getMessage());
@@ -307,6 +424,287 @@ public class AiChatServiceImpl implements AiChatService {
         if (start > 0) snippet = "..." + snippet;
         if (end < fullText.length()) snippet = snippet + "...";
         return snippet;
+    }
+
+    private boolean isProjectOverviewQuery(String question) {
+        if (question == null || question.isBlank()) return false;
+        String q = removeAccents(question.toLowerCase().trim());
+
+        boolean hasProjectKeyword = q.contains("du an") || q.contains("project") || q.contains("khong gian");
+        
+        // Loại trừ các câu hỏi đang hỏi về thành viên, chủ dự án, hay con người cụ thể trong dự án
+        if (hasProjectKeyword && (q.matches(".*\\bthanh vien\\b.*") || q.matches(".*\\bnguoi\\b.*") || q.matches(".*\\bchu\\b.*") || q.matches(".*\\bai\\b.*"))) {
+            return false;
+        }
+
+        if (hasProjectKeyword) {
+            return q.contains("bao nhieu") ||
+                   q.contains("may du an") ||
+                   q.contains("co may") ||
+                   q.contains("may cai") ||
+                   q.contains("danh sach") ||
+                   q.contains("cac du an") ||
+                   q.contains("nhung du an") ||
+                   q.contains("co nhung") ||
+                   q.contains("du an nao") ||
+                   q.contains("tong so") ||
+                   q.contains("so luong") ||
+                   q.contains("ke ten") ||
+                   q.contains("liet ke") ||
+                   q.contains("hien co") ||
+                   q.contains("cua toi") ||
+                   q.contains("trong he thong") ||
+                   q.contains("tat ca") ||
+                   q.contains("list") ||
+                   q.contains("how many") ||
+                   q.contains("which") ||
+                   q.contains("what");
+        }
+
+        return q.equals("co bao nhieu") ||
+               q.contains("co bao nhieu project") ||
+               q.contains("danh sach project");
+    }
+
+    private boolean isGreetingQuery(String question) {
+        if (question == null || question.isBlank()) return false;
+        String q = removeAccents(question.toLowerCase().trim());
+        return q.matches("^(xin chao|chao|chao ban|hello|hi|hey|alo|halo)(\\s.*)?$") ||
+               q.contains("ban la ai") ||
+               q.contains("ban co the lam gi") ||
+               q.contains("ban lam duoc gi") ||
+               q.contains("chuc nang cua ban");
+    }
+
+    private boolean isDocumentListQuery(String question) {
+        if (question == null || question.isBlank()) return false;
+        String q = removeAccents(question.toLowerCase().trim());
+
+        boolean hasDocKeyword = q.contains("tai lieu") || q.contains("tep tin") || q.contains("file") || q.contains("tep") || q.contains("van ban") || q.contains("document");
+        if (!hasDocKeyword) return false;
+
+        // Loại trừ nếu câu hỏi đang hỏi sâu về nội dung bên trong một tài liệu cụ thể
+        if (q.contains("noi ve") || q.contains("ve gi") || q.contains("nhu the nao") || q.contains("giai thich") || q.contains("huong dan su dung")) {
+            return false;
+        }
+
+        // Nhận diện câu hỏi liệt kê, số lượng, danh sách tài liệu
+        return q.contains("gom nhung") ||
+               q.contains("co nhung") ||
+               q.contains("nhung tai lieu nao") ||
+               q.contains("tai lieu nao") ||
+               q.contains("file nao") ||
+               q.contains("danh sach") ||
+               q.contains("liet ke") ||
+               q.contains("ke ten") ||
+               q.contains("bao nhieu") ||
+               q.contains("co may") ||
+               q.contains("may tai lieu") ||
+               q.contains("may file") ||
+               q.contains("tai lieu gi") ||
+               q.contains("file gi") ||
+               q.contains("tep gi") ||
+               q.contains("co tai lieu gi") ||
+               q.contains("co file gi") ||
+               q.contains("tat ca tai lieu") ||
+               q.contains("cac tai lieu") ||
+               q.contains("nhung tai lieu") ||
+               q.contains("list") ||
+               q.contains("what document") ||
+               q.contains("which document") ||
+               q.contains("how many document");
+    }
+
+    private ChatResponse handleDocumentListQuery(ChatRequest request, Project project, List<Document> documents, List<Project> accessibleProjects) {
+        StringBuilder sb = new StringBuilder();
+        int count = documents.size();
+
+        if (count == 0) {
+            String msg = (project != null)
+                    ? "Dự án '" + project.getName() + "' hiện tại chưa có tài liệu nào được tải lên.\n\n💡 Bạn có thể vào tab 'Tài liệu' để tải tệp lên dự án này."
+                    : "Toàn bộ hệ thống hiện tại chưa có tài liệu nào được tải lên.\n\n💡 Hãy tải tài liệu vào các dự án để tôi có thể hỗ trợ bạn.";
+            return ChatResponse.builder()
+                    .question(request.getQuestion())
+                    .answer(cleanMarkdownFormatting(msg))
+                    .projectId(project != null ? project.getId() : 0L)
+                    .references(Collections.emptyList())
+                    .build();
+        }
+
+        if (project != null) {
+            sb.append("Dự án '").append(project.getName()).append("' hiện có ").append(count).append(" tài liệu được lưu trữ:\n\n");
+        } else {
+            sb.append("Toàn bộ hệ thống KBase hiện có ").append(count).append(" tài liệu được lưu trữ qua ")
+              .append(accessibleProjects.size()).append(" dự án:\n\n");
+        }
+
+        List<ChatResponse.SourceReference> references = new ArrayList<>();
+
+        for (int i = 0; i < documents.size(); i++) {
+            Document d = documents.get(i);
+            String categoryName = getCategoryDisplayName(d.getFileCategory());
+            String sizeStr = formatFileSize(d.getFileSize());
+            String projName = (d.getProject() != null) ? d.getProject().getName() : "Chung";
+
+            sb.append(i + 1).append(". ").append(d.getTitle()).append("\n");
+            if (project == null) {
+                sb.append("   - Thuộc dự án: ").append(projName).append("\n");
+            }
+            sb.append("   - Tên tệp gốc: ").append(d.getOriginalFilename()).append("\n");
+            sb.append("   - Phân loại: ").append(categoryName).append(" | Dung lượng: ").append(sizeStr).append("\n");
+            if (d.getSummary() != null && !d.getSummary().isBlank()) {
+                sb.append("   - Tóm tắt: ").append(d.getSummary()).append("\n");
+            }
+            sb.append("\n");
+
+            references.add(ChatResponse.SourceReference.builder()
+                    .documentId(d.getId())
+                    .documentTitle((project == null ? "[" + projName + "] " : "") + d.getTitle())
+                    .originalFilename(d.getOriginalFilename())
+                    .snippet("Tệp: " + d.getOriginalFilename() + " (" + categoryName + ", " + sizeStr + ")")
+                    .score(10.0)
+                    .build());
+        }
+
+        sb.append("💡 Bạn có thể bấm vào các thẻ tài liệu trích dẫn bên dưới để xem nội dung hoặc tải tệp về máy.");
+
+        return ChatResponse.builder()
+                .question(request.getQuestion())
+                .answer(cleanMarkdownFormatting(sb.toString()))
+                .projectId(project != null ? project.getId() : 0L)
+                .references(references)
+                .build();
+    }
+
+    private String getCategoryDisplayName(com.kbase.model.FileCategory category) {
+        if (category == null) return "Khác";
+        return switch (category) {
+            case DOCUMENT -> "Tài liệu văn bản (Word, PDF)";
+            case SPREADSHEET -> "Bảng tính (Excel)";
+            case PRESENTATION -> "Thuyết trình (PowerPoint)";
+            case IMAGE -> "Hình ảnh";
+            case VIDEO -> "Video";
+            case TEXT -> "Văn bản / Mã nguồn";
+            default -> "Tệp tin khác";
+        };
+    }
+
+    private String formatFileSize(Long bytes) {
+        if (bytes == null || bytes <= 0) return "0 KB";
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
+        return String.format("%.1f MB", bytes / (1024.0 * 1024.0));
+    }
+
+    private String removeAccents(String text) {
+        if (text == null) return "";
+        String normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .replace('đ', 'd').replace('Đ', 'D');
+    }
+
+    private ChatResponse handleProjectOverviewQuery(ChatRequest request, User currentUser, Project currentSelectedProject) {
+        List<Project> accessibleProjects = (currentUser.getRole() == Role.ROLE_ADMIN)
+                ? projectRepository.findAllOrderByUpdatedAtDesc()
+                : projectRepository.findAccessibleProjects(currentUser.getId());
+
+        int totalProjects = accessibleProjects.size();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Hiện tại bạn có quyền truy cập vào ").append(totalProjects).append(" không gian dự án trong hệ thống KBase:\n\n");
+
+        for (int i = 0; i < accessibleProjects.size(); i++) {
+            Project p = accessibleProjects.get(i);
+            long docCount = documentRepository.countByProjectId(p.getId());
+            int memberCount = projectMemberRepository.findByProjectId(p.getId()).size() + 1;
+
+            sb.append(i + 1).append(". ").append(p.getName()).append("\n");
+            if (p.getDescription() != null && !p.getDescription().isBlank()) {
+                sb.append("   - Mô tả: ").append(p.getDescription()).append("\n");
+            }
+            sb.append("   - Số tài liệu: ").append(docCount).append(" tệp | Thành viên: ").append(memberCount).append(" người\n\n");
+        }
+
+        sb.append("💡 Lưu ý về phạm vi hỏi đáp của Trợ Lý AI:\n");
+        if (currentSelectedProject == null) {
+            sb.append("- Khung chat hiện đang ở chế độ **Bao quát toàn bộ hệ thống** (Tất cả dự án). Bạn có thể hỏi bất kỳ câu hỏi nào từ bất kỳ tài liệu nào trong tất cả các dự án trên!\n");
+            sb.append("- Nếu bạn muốn thu hẹp phạm vi vào riêng một dự án, bạn có thể chọn dự án cụ thể ở menu góc trên bên phải khung chat nhé.");
+        } else {
+            sb.append("- Khung chat hiện tại đang chọn ngữ cảnh dự án: '").append(currentSelectedProject.getName()).append("'.\n");
+            long currentDocCount = documentRepository.countByProjectId(currentSelectedProject.getId());
+            if (currentDocCount == 0) {
+                sb.append("- Dự án này hiện chưa có tài liệu nào tải lên. Bạn có thể chọn '🌐 Tất cả dự án' ở menu góc trên bên phải để tra cứu toàn bộ hệ thống nhé!");
+            } else {
+                sb.append("- Dự án này hiện có ").append(currentDocCount).append(" tài liệu. Bạn có thể hỏi bất kỳ câu hỏi nào về nội dung của các tài liệu trong dự án này.");
+            }
+        }
+
+        return ChatResponse.builder()
+                .question(request.getQuestion())
+                .answer(cleanMarkdownFormatting(sb.toString()))
+                .projectId(currentSelectedProject != null ? currentSelectedProject.getId() : 0L)
+                .references(Collections.emptyList())
+                .build();
+    }
+
+    private ChatResponse handleGreetingQuery(ChatRequest request, Project currentSelectedProject, List<Project> accessibleProjects) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Xin chào! Tôi là Trợ Lý AI KBase, sẵn sàng hỗ trợ bạn tra cứu và phân tích tài liệu kỹ thuật trong hệ thống.\n\n");
+
+        if (currentSelectedProject == null) {
+            long totalDocs = accessibleProjects.stream().mapToLong(p -> documentRepository.countByProjectId(p.getId())).sum();
+            sb.append("🌐 Chế độ tra cứu hiện tại: **Bao quát toàn bộ hệ thống** (Đang kết nối qua ").append(accessibleProjects.size()).append(" dự án, tổng cộng ").append(totalDocs).append(" tài liệu).\n\n");
+            sb.append("👉 Bạn có thể hỏi bất kỳ câu hỏi nào về các dự án hoặc nội dung của tất cả tài liệu trong hệ thống!\n");
+            sb.append("💡 (Nếu muốn hỏi riêng một dự án cụ thể, bạn có thể chọn tên dự án ở menu góc trên bên phải khung chat).");
+            return ChatResponse.builder()
+                    .question(request.getQuestion())
+                    .answer(cleanMarkdownFormatting(sb.toString()))
+                    .projectId(0L)
+                    .references(Collections.emptyList())
+                    .build();
+        }
+
+        sb.append("Khung chat hiện tại đang chọn dự án: '").append(currentSelectedProject.getName()).append("'.\n");
+
+        long currentDocCount = documentRepository.countByProjectId(currentSelectedProject.getId());
+        if (currentDocCount == 0) {
+            sb.append("Dự án này hiện chưa có tài liệu nào được tải lên.\n\n");
+            sb.append("👉 Bạn có thể:\n");
+            sb.append("1. Tải tài liệu (.pdf, .docx, .txt, ...) lên dự án này ở tab 'Tài liệu'.\n");
+
+            List<Project> projectsWithDocs = accessibleProjects.stream()
+                    .filter(p -> documentRepository.countByProjectId(p.getId()) > 0)
+                    .toList();
+            if (!projectsWithDocs.isEmpty()) {
+                sb.append("2. Hoặc chọn '🌐 Tất cả dự án' (ở menu góc trên bên phải) để tôi tra cứu toàn bộ tài liệu trong hệ thống!\n");
+            }
+        } else {
+            sb.append("Dự án này hiện có ").append(currentDocCount).append(" tài liệu. Bạn có thể đặt câu hỏi về các tài liệu này bất cứ lúc nào!");
+        }
+
+        return ChatResponse.builder()
+                .question(request.getQuestion())
+                .answer(cleanMarkdownFormatting(sb.toString()))
+                .projectId(currentSelectedProject.getId())
+                .references(Collections.emptyList())
+                .build();
+    }
+
+    private ChatResponse handleEmptyDocuments(ChatRequest request, Project currentSelectedProject, List<Project> accessibleProjects) {
+        StringBuilder sb = new StringBuilder();
+        if (currentSelectedProject != null) {
+            sb.append("Dự án '").append(currentSelectedProject.getName()).append("' hiện tại chưa có tài liệu nào được tải lên hệ thống.\n\n");
+            sb.append("💡 Bạn có thể chọn chế độ '🌐 Tất cả dự án' ở góc trên bên phải khung chat để tôi tra cứu toàn bộ tài liệu hiện có trong hệ thống nhé!");
+        } else {
+            sb.append("Toàn bộ hệ thống hiện tại chưa có tài liệu nào được tải lên.\n\n");
+            sb.append("💡 Hãy tải tài liệu (.pdf, .docx, .txt...) vào các dự án để tôi có thể phân tích và trả lời câu hỏi của bạn.");
+        }
+
+        return ChatResponse.builder()
+                .question(request.getQuestion())
+                .answer(cleanMarkdownFormatting(sb.toString()))
+                .projectId(currentSelectedProject != null ? currentSelectedProject.getId() : 0L)
+                .references(Collections.emptyList())
+                .build();
     }
 
     private void checkProjectAccess(Project project, User user) {

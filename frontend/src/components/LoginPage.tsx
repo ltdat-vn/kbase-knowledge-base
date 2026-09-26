@@ -262,31 +262,34 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button
             type="button"
-            onClick={() => setIsRegister(false)}
+            onClick={() => setIsRegister(!isRegister)}
             style={{
               padding: '7px 20px',
               borderRadius: 9999,
-              border: 'none',
-              background: '#1e1b4b',
-              color: '#ffffff',
+              border: '1.5px solid rgba(255, 255, 255, 0.8)',
+              background: 'rgba(255, 255, 255, 0.75)',
+              color: '#1e1b4b',
               fontSize: '0.72rem',
-              fontWeight: 600,
+              fontWeight: 700,
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(30, 27, 75, 0.25)',
+              boxShadow: '0 4px 12px rgba(30, 27, 75, 0.05)',
+              backdropFilter: 'blur(8px)',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#0f172a';
+              e.currentTarget.style.background = '#ffffff';
               e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(30, 27, 75, 0.1)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#1e1b4b';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.75)';
               e.currentTarget.style.transform = 'none';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 27, 75, 0.05)';
             }}
           >
-            ĐĂNG NHẬP
+            {isRegister ? 'ĐĂNG NHẬP' : 'ĐĂNG KÝ NGAY'}
           </button>
 
           <button
@@ -376,8 +379,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
 
           {/* A. LOGIN FORM */}
           {!isRegister ? (
-            <form onSubmit={handleLoginSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {/* Input 1: Username / Email */}
+            <form onSubmit={handleLoginSubmit} autoComplete="off" style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Dummy hidden inputs to absorb browser autofill heuristics */}
+              <input type="text" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} tabIndex={-1} autoComplete="off" />
+              <input type="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} tabIndex={-1} autoComplete="new-password" />
+
+              {/* Input 1: Email */}
               <div style={{ position: 'relative' }}>
                 <div
                   style={{
@@ -391,12 +398,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                     pointerEvents: 'none',
                   }}
                 >
-                  <UserIcon size={17} />
+                  <Mail size={17} />
                 </div>
                 <input
                   type="email"
+                  name="kbase_login_email"
+                  autoComplete="off"
                   required
-                  placeholder="TÊN ĐĂNG NHẬP / EMAIL"
+                  placeholder="EMAIL"
                   value={loginEmail}
                   className="login-capsule-input"
                   onChange={(e) => {
@@ -449,6 +458,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 </div>
                 <input
                   type={showLoginPassword ? 'text' : 'password'}
+                  name="kbase_login_password"
+                  autoComplete="new-password"
                   required
                   placeholder="MẬT KHẨU"
                   value={loginPassword}
@@ -512,7 +523,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   height: 44,
                   borderRadius: 9999,
                   border: 'none',
-                  background: 'linear-gradient(135deg, #1e293b 0%, #1e1b4b 100%)',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #d946ef 100%)',
                   color: '#ffffff',
                   fontSize: '0.82rem',
                   fontWeight: 600,
@@ -520,7 +531,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   textTransform: 'uppercase',
                   cursor: 'pointer',
                   marginTop: 6,
-                  boxShadow: '0 10px 25px -4px rgba(30, 27, 75, 0.25), 0 4px 12px rgba(30, 27, 75, 0.15)',
+                  boxShadow: '0 10px 25px -4px rgba(217, 70, 239, 0.35), 0 4px 12px rgba(79, 70, 229, 0.2)',
                   transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
                   display: 'flex',
                   alignItems: 'center',
@@ -528,11 +539,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 14px 30px -4px rgba(30, 27, 75, 0.35)';
+                  e.currentTarget.style.boxShadow = '0 14px 30px -4px rgba(217, 70, 239, 0.45), 0 6px 15px rgba(79, 70, 229, 0.25)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = '0 10px 25px -4px rgba(30, 27, 75, 0.25), 0 4px 12px rgba(30, 27, 75, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 10px 25px -4px rgba(217, 70, 239, 0.35), 0 4px 12px rgba(79, 70, 229, 0.2)';
                 }}
               >
                 {loading ? 'ĐANG ĐĂNG NHẬP...' : 'ĐĂNG NHẬP'}
@@ -570,6 +581,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   onMouseLeave={(e) => (e.currentTarget.style.color = '#475569')}
                 >
                   Quên mật khẩu?
+                </span>
+              </div>
+
+              {/* Chưa có tài khoản */}
+              <div style={{ textAlign: 'center', marginTop: 16, fontSize: '0.75rem', color: '#334155' }}>
+                Chưa có tài khoản?{' '}
+                <span
+                  onClick={() => {
+                    setIsRegister(true);
+                    setError(null);
+                  }}
+                  style={{
+                    color: '#1e1b4b',
+                    fontWeight: 800,
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Đăng ký ngay
                 </span>
               </div>
             </form>
@@ -803,7 +833,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   height: 44,
                   borderRadius: 9999,
                   border: 'none',
-                  background: 'linear-gradient(135deg, #1e293b 0%, #1e1b4b 100%)',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #d946ef 100%)',
                   color: '#ffffff',
                   fontSize: '0.82rem',
                   fontWeight: 600,
@@ -811,11 +841,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                   textTransform: 'uppercase',
                   cursor: 'pointer',
                   marginTop: 6,
-                  boxShadow: '0 10px 25px -4px rgba(30, 27, 75, 0.25)',
-                  transition: 'all 0.15s ease',
+                  boxShadow: '0 10px 25px -4px rgba(217, 70, 239, 0.35), 0 4px 12px rgba(79, 70, 229, 0.2)',
+                  transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 14px 30px -4px rgba(217, 70, 239, 0.45), 0 6px 15px rgba(79, 70, 229, 0.25)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = '0 10px 25px -4px rgba(217, 70, 239, 0.35), 0 4px 12px rgba(79, 70, 229, 0.2)';
                 }}
               >
                 {loading ? 'ĐANG TẠO TÀI KHOẢN...' : 'TẠO TÀI KHOẢN'}
@@ -844,6 +882,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
               fontSize: '4.4rem',
               fontWeight: 800,
               letterSpacing: '-0.03em',
+              background: 'linear-gradient(135deg, #4f46e5 0%, #d946ef 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
               color: '#1e1b4b',
               lineHeight: 1.0,
               margin: 0,
@@ -864,54 +905,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           >
             {isRegister
               ? 'Tạo tài khoản KBase để khám phá không gian làm việc chuyên nghiệp, chia sẻ tài liệu bảo mật và cùng làm việc với các thành viên trong nhóm.'
-              : 'Hệ thống quản lý cơ sở tri thức dự án & trợ lý AI Copilot thông minh. Tải lên tài liệu đa định dạng, phân quyền 3 vai trò và hỏi đáp trích dẫn nguồn gốc chính xác.'}
+              : 'Hệ thống quản lý cơ sở tri thức dự án & trợ lý Gemini AI Copilot thông minh. Tải lên tài liệu đa định dạng, phân quyền 3 vai trò và hỏi đáp trích dẫn nguồn gốc chính xác.'}
           </p>
 
-          <div style={{ fontSize: '0.82rem', color: '#334155', marginTop: 4 }}>
-            {!isRegister ? (
-              <>
-                Chưa có tài khoản?{' '}
-                <span
-                  onClick={() => {
-                    setIsRegister(true);
-                    setError(null);
-                  }}
-                  style={{
-                    color: '#1e1b4b',
-                    fontWeight: 800,
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.75')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-                >
-                  Đăng ký ngay
-                </span>
-              </>
-            ) : (
-              <>
-                Đã có tài khoản?{' '}
-                <span
-                  onClick={() => {
-                    setIsRegister(false);
-                    setError(null);
-                  }}
-                  style={{
-                    color: '#1e1b4b',
-                    fontWeight: 800,
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.75')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-                >
-                  Đăng nhập tại đây
-                </span>
-              </>
-            )}
-          </div>
+
         </div>
       </main>
 
@@ -927,45 +924,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           padding: '16px 48px 24px',
         }}
       >
-        {/* 3 Pagination Dots */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span
-            onClick={() => setActiveSlide(0)}
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              background: activeSlide === 0 ? '#1e1b4b' : 'rgba(30, 27, 75, 0.25)',
-              boxShadow: activeSlide === 0 ? '0 0 10px rgba(30, 27, 75, 0.3)' : 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          />
-          <span
-            onClick={() => setActiveSlide(1)}
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              background: activeSlide === 1 ? '#1e1b4b' : 'rgba(30, 27, 75, 0.25)',
-              boxShadow: activeSlide === 1 ? '0 0 10px rgba(30, 27, 75, 0.3)' : 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          />
-          <span
-            onClick={() => setActiveSlide(2)}
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              background: activeSlide === 2 ? '#1e1b4b' : 'rgba(30, 27, 75, 0.25)',
-              boxShadow: activeSlide === 2 ? '0 0 10px rgba(30, 27, 75, 0.3)' : 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          />
-        </div>
+
 
         {/* Demo Accounts Pill in Deep Navy Accent */}
         <div

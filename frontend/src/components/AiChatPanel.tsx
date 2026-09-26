@@ -65,10 +65,10 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
   }, [messages, loading]);
 
   useEffect(() => {
-    if (initialProjectId) {
+    if (initialProjectId !== undefined && initialProjectId !== null) {
       setSelectedProjectId(initialProjectId);
-    } else if (projects.length > 0 && !selectedProjectId) {
-      setSelectedProjectId(projects[0].id);
+    } else if (selectedProjectId === undefined || selectedProjectId === null) {
+      setSelectedProjectId(0);
     }
   }, [initialProjectId, projects]);
 
@@ -78,7 +78,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
 
   const handleSend = async (questionText?: string) => {
     const q = questionText || inputQuestion.trim();
-    if (!q || !selectedProjectId || loading) return;
+    if (!q || loading) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -92,12 +92,16 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
     setLoading(true);
 
     try {
-      const response: ChatResponse = await chatApi.askQuestion(selectedProjectId, q);
+      const pid = selectedProjectId ?? 0;
+      const response: ChatResponse = await chatApi.askQuestion(pid, q);
+      const isSystemWide = pid === 0;
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
         text: response.answer,
-        thought: 'Đã phân tích các tài liệu liên quan trong dự án bằng Gemini 3.6 Flash và trích dẫn bằng chứng.',
+        thought: isSystemWide
+          ? 'Đã đối chiếu thông tin qua toàn bộ các dự án trong hệ thống KBase và trích dẫn nguồn.'
+          : 'Đã phân tích các tài liệu liên quan trong dự án bằng Gemini AI và trích dẫn bằng chứng.',
         references: response.references,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
@@ -178,21 +182,6 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
               >
                 Trợ Lý AI
               </span>
-              <span
-                style={{
-                  fontSize: '0.68rem',
-                  padding: '1px 7px',
-                  borderRadius: 9999,
-                  background: '#ecfdf5',
-                  color: '#059669',
-                  border: '1px solid #a7f3d0',
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                }}
-              >
-                Gemini RAG
-              </span>
             </div>
             <span
               style={{
@@ -203,41 +192,53 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
                 textOverflow: 'ellipsis',
                 maxWidth: 160,
               }}
-              title={currentProject ? currentProject.name : 'Chưa chọn dự án'}
+              title={
+                !selectedProjectId || selectedProjectId === 0
+                  ? 'Phạm vi: Toàn bộ hệ thống (Tất cả dự án)'
+                  : currentProject
+                  ? `Dự án: ${currentProject.name}`
+                  : 'Chưa chọn dự án'
+              }
             >
-              {currentProject ? currentProject.name : 'Chưa chọn dự án'}
+              {!selectedProjectId || selectedProjectId === 0
+                ? '🌐 Toàn bộ dự án'
+                : currentProject
+                ? `📁 ${currentProject.name}`
+                : 'Chưa chọn dự án'}
             </span>
           </div>
         </div>
 
         {/* Right Side Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          {/* Project selector if multiple projects */}
-          {projects.length > 1 && (
-            <select
-              value={selectedProjectId || ''}
-              onChange={(e) => setSelectedProjectId(Number(e.target.value))}
-              style={{
-                fontSize: '0.75rem',
-                padding: '4px 8px',
-                borderRadius: 6,
-                border: '1px solid #e2e8f0',
-                background: '#f8fafc',
-                color: '#334155',
-                maxWidth: 110,
-                outline: 'none',
-                cursor: 'pointer',
-                textOverflow: 'ellipsis',
-              }}
-              title="Chọn dự án để hỏi"
-            >
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          )}
+          {/* Project selector with All Projects option */}
+          <select
+            value={selectedProjectId ?? 0}
+            onChange={(e) => setSelectedProjectId(Number(e.target.value))}
+            style={{
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              padding: '4px 8px',
+              borderRadius: 6,
+              border: '1px solid #cbd5e1',
+              background: (!selectedProjectId || selectedProjectId === 0) ? '#eff6ff' : '#f8fafc',
+              color: (!selectedProjectId || selectedProjectId === 0) ? '#1d4ed8' : '#1e293b',
+              maxWidth: 165,
+              outline: 'none',
+              cursor: 'pointer',
+              textOverflow: 'ellipsis',
+            }}
+            title="Chọn phạm vi tra cứu của Trợ lý AI"
+          >
+            <option value={0}>
+              🌐 Tất cả dự án ({projects.reduce((acc, p) => acc + (p.documentCount || 0), 0)} tệp)
+            </option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                📁 {p.name} ({p.documentCount || 0} tệp)
+              </option>
+            ))}
+          </select>
 
           {/* Clear history */}
           <button
@@ -530,7 +531,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
           <button
             key={i}
             onClick={() => handleSend(prompt)}
-            disabled={loading || !selectedProjectId}
+            disabled={loading}
             className="btn btn-secondary btn-sm"
             style={{
               fontSize: '0.72rem',
@@ -593,11 +594,11 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
           <input
             type="text"
             placeholder={
-              selectedProjectId
-                ? `Hỏi bất kỳ điều gì về ${currentProject?.name || 'dự án'}...`
-                : 'Chọn một dự án để bắt đầu hỏi...'
+              !selectedProjectId || selectedProjectId === 0
+                ? 'Hỏi bất kỳ điều gì về tất cả tài liệu trong hệ thống...'
+                : `Hỏi bất kỳ điều gì về ${currentProject?.name || 'dự án'}...`
             }
-            disabled={!selectedProjectId || loading}
+            disabled={loading}
             value={inputQuestion}
             onChange={(e) => setInputQuestion(e.target.value)}
             style={{
@@ -614,7 +615,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
           {/* Black Circular Send Button with ArrowUp */}
           <button
             type="submit"
-            disabled={!selectedProjectId || !inputQuestion.trim() || loading}
+            disabled={!inputQuestion.trim() || loading}
             style={{
               width: 32,
               height: 32,
@@ -625,8 +626,8 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: !selectedProjectId || !inputQuestion.trim() || loading ? 'not-allowed' : 'pointer',
-              opacity: !selectedProjectId || !inputQuestion.trim() || loading ? 0.4 : 1,
+              cursor: !inputQuestion.trim() || loading ? 'not-allowed' : 'pointer',
+              opacity: !inputQuestion.trim() || loading ? 0.4 : 1,
               transition: 'all 0.15s ease',
               flexShrink: 0,
             }}

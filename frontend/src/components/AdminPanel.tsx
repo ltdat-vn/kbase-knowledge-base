@@ -131,7 +131,7 @@ export const AdminPanel: React.FC = () => {
               <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
                 Tổng Người Dùng
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: 2 }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 700, fontFamily: 'Inter, sans-serif', color: '#0f172a', marginTop: 2 }}>
                 {stats.totalUsers}
               </div>
             </div>
@@ -145,7 +145,7 @@ export const AdminPanel: React.FC = () => {
               <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
                 Tổng Dự Án
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: 2 }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 700, fontFamily: 'Inter, sans-serif', color: '#0f172a', marginTop: 2 }}>
                 {stats.totalProjects}
               </div>
             </div>
@@ -159,7 +159,7 @@ export const AdminPanel: React.FC = () => {
               <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
                 Tệp Tài Liệu
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: 2 }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 700, fontFamily: 'Inter, sans-serif', color: '#0f172a', marginTop: 2 }}>
                 {stats.totalDocuments}
               </div>
             </div>
@@ -173,7 +173,7 @@ export const AdminPanel: React.FC = () => {
               <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
                 Dung Lượng Lưu Trữ
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: 2 }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 700, fontFamily: 'Inter, sans-serif', color: '#0f172a', marginTop: 2 }}>
                 {stats.formattedStorage}
               </div>
             </div>

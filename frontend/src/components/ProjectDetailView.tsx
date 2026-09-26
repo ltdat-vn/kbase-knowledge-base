@@ -28,6 +28,9 @@ import {
   AlertCircle,
   HelpCircle,
   Sparkles,
+  Pin,
+  ExternalLink,
+  Loader2,
 } from 'lucide-react';
 
 interface ProjectDetailViewProps {
@@ -36,6 +39,8 @@ interface ProjectDetailViewProps {
   onBack: () => void;
   allProjects: Project[];
   onOpenAiChat?: () => void;
+  isPinned?: boolean;
+  onTogglePin?: () => void;
 }
 
 export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
@@ -44,6 +49,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   onBack,
   allProjects,
   onOpenAiChat,
+  isPinned,
+  onTogglePin,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'docs' | 'members'>('docs');
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
@@ -57,6 +64,30 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
+  const [previewText, setPreviewText] = useState<string | null>(null);
+  const [loadingPreviewText, setLoadingPreviewText] = useState(false);
+
+  useEffect(() => {
+    if (previewDoc) {
+      const ext = previewDoc.originalFilename.split('.').pop()?.toLowerCase() || '';
+      const isTextOrCode = previewDoc.fileCategory === 'TEXT' || ['md', 'txt', 'json', 'js', 'ts', 'tsx', 'jsx', 'py', 'java', 'html', 'css', 'sql', 'xml', 'yml', 'yaml', 'sh', 'bat', 'csv'].includes(ext);
+      if (isTextOrCode) {
+        setLoadingPreviewText(true);
+        fetch(documentApi.getPreviewUrl(previewDoc.id))
+          .then((res) => {
+            if (!res.ok) throw new Error('Failed to load text');
+            return res.text();
+          })
+          .then((text) => setPreviewText(text))
+          .catch(() => setPreviewText('Không thể tải trước nội dung văn bản này.'))
+          .finally(() => setLoadingPreviewText(false));
+      } else {
+        setPreviewText(null);
+      }
+    } else {
+      setPreviewText(null);
+    }
+  }, [previewDoc]);
 
   const loadProjectData = async () => {
     setLoading(true);
@@ -207,6 +238,30 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
             >
               {project.currentUserRole === 'OWNER' ? 'Chủ Dự Án' : project.currentUserRole === 'ADMIN' ? 'Quản Trị' : 'Thành Viên'}
             </span>
+            {onTogglePin && (
+              <button
+                type="button"
+                onClick={onTogglePin}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  padding: '3px 10px',
+                  borderRadius: 9999,
+                  background: isPinned ? '#eff6ff' : '#f8fafc',
+                  border: isPinned ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+                  color: isPinned ? '#2563eb' : '#64748b',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+                title={isPinned ? 'Bỏ ghim dự án này' : 'Ghim dự án này lên đầu'}
+              >
+                <Pin size={12} style={{ transform: isPinned ? 'rotate(45deg)' : 'none', fill: isPinned ? '#2563eb' : 'none' }} />
+                {isPinned ? 'Đã ghim lên đầu' : 'Ghim lên đầu'}
+              </button>
+            )}
           </div>
           <p style={{ color: '#64748b', fontSize: '0.875rem', marginTop: 4 }}>
             {project.description || 'Quản lý tài liệu kỹ thuật, hướng dẫn và tích hợp trợ lý AI cho dự án.'}
@@ -524,14 +579,18 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     {filteredDocuments.map((doc) => {
                       const status = getDocStatus(doc.id);
                       return (
-                        <tr key={doc.id}>
+                        <tr
+                          key={doc.id}
+                          onClick={() => setPreviewDoc(doc)}
+                          className="doc-table-row"
+                        >
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                               <div
                                 style={{
-                                  width: 28,
-                                  height: 28,
-                                  borderRadius: 6,
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: 8,
                                   background: '#f8fafc',
                                   border: '1px solid #e2e8f0',
                                   display: 'flex',
@@ -551,8 +610,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
                                     maxWidth: 280,
+                                    transition: 'color 0.15s ease',
                                   }}
-                                  title={doc.title}
+                                  className="doc-title-link"
+                                  title={`Bấm để xem trực tiếp tài liệu: ${doc.title}`}
                                 >
                                   {doc.title}
                                 </div>
@@ -593,17 +654,21 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                           </td>
 
                           <td style={{ textAlign: 'right' }}>
-                            <div style={{ display: 'inline-flex', gap: 6 }}>
+                            <div style={{ display: 'inline-flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
                               <button
-                                onClick={() => setPreviewDoc(doc)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPreviewDoc(doc);
+                                }}
                                 className="btn btn-secondary btn-sm"
-                                title="Xem trước tài liệu"
+                                title="Xem trực tiếp tài liệu"
                                 style={{ padding: '4px 8px', borderRadius: 6 }}
                               >
                                 <Eye size={13} />
                               </button>
                               <a
                                 href={documentApi.getDownloadUrl(doc.id)}
+                                onClick={(e) => e.stopPropagation()}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="btn btn-secondary btn-sm"
@@ -613,7 +678,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                                 <Download size={13} />
                               </a>
                               <button
-                                onClick={() => handleDeleteDoc(doc.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteDoc(doc.id);
+                                }}
                                 className="btn btn-danger btn-sm"
                                 title="Xóa tài liệu"
                                 style={{ padding: '4px 8px', borderRadius: 6 }}
@@ -636,8 +704,9 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   return (
                     <div
                       key={doc.id}
+                      onClick={() => setPreviewDoc(doc)}
                       className="white-card"
-                      style={{ padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+                      style={{ padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}
                     >
                       <div>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
@@ -713,17 +782,21 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                           {doc.formattedSize}
                         </span>
 
-                        <div style={{ display: 'flex', gap: 6 }}>
+                        <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
                           <button
-                            onClick={() => setPreviewDoc(doc)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewDoc(doc);
+                            }}
                             className="btn btn-secondary btn-sm"
-                            title="Xem trước"
+                            title="Xem trực tiếp"
                             style={{ padding: '4px 8px', borderRadius: 6 }}
                           >
                             <Eye size={13} />
                           </button>
                           <a
                             href={documentApi.getDownloadUrl(doc.id)}
+                            onClick={(e) => e.stopPropagation()}
                             target="_blank"
                             rel="noreferrer"
                             className="btn btn-secondary btn-sm"
@@ -733,7 +806,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                             <Download size={13} />
                           </a>
                           <button
-                            onClick={() => handleDeleteDoc(doc.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteDoc(doc.id);
+                            }}
                             className="btn btn-danger btn-sm"
                             title="Xóa"
                             style={{ padding: '4px 8px', borderRadius: 6 }}
@@ -844,108 +920,323 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       )}
 
       {/* Document Preview Modal */}
-      {previewDoc && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(15, 23, 42, 0.6)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 20,
-          }}
-        >
+      {previewDoc && (() => {
+        const ext = previewDoc.originalFilename.split('.').pop()?.toLowerCase() || '';
+        const isImage = previewDoc.fileCategory === 'IMAGE' || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext);
+        const isPdf = ext === 'pdf';
+        const isVideo = previewDoc.fileCategory === 'VIDEO' || ['mp4', 'webm', 'ogg', 'mov'].includes(ext);
+        const isAudio = ['mp3', 'wav', 'ogg'].includes(ext);
+        const isTextOrCode = previewDoc.fileCategory === 'TEXT' || ['md', 'txt', 'json', 'js', 'ts', 'tsx', 'jsx', 'py', 'java', 'html', 'css', 'sql', 'xml', 'yml', 'yaml', 'sh', 'bat', 'csv'].includes(ext);
+        const previewUrl = documentApi.getPreviewUrl(previewDoc.id);
+
+        return (
           <div
             style={{
-              background: '#ffffff',
-              borderRadius: 16,
-              maxWidth: 700,
-              width: '100%',
-              padding: 24,
-              boxShadow: 'var(--shadow-elevated)',
-              position: 'relative',
-              maxHeight: '85vh',
-              overflowY: 'auto',
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(15, 23, 42, 0.65)',
+              backdropFilter: 'blur(5px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: 20,
             }}
+            onClick={() => setPreviewDoc(null)}
           >
-            <button
-              onClick={() => setPreviewDoc(null)}
+            <div
               style={{
-                position: 'absolute',
-                top: 16,
-                right: 16,
-                background: '#f1f5f9',
-                border: 'none',
-                borderRadius: '50%',
-                width: 32,
-                height: 32,
+                background: '#ffffff',
+                borderRadius: 16,
+                maxWidth: 920,
+                width: '100%',
+                maxHeight: '90vh',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#64748b',
+                flexDirection: 'column',
+                boxShadow: 'var(--shadow-elevated)',
+                overflow: 'hidden',
+                animation: 'modalFadeIn 0.2s ease',
               }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <X size={18} />
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              {/* Modal Header */}
               <div
                 style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  padding: '16px 24px',
+                  borderBottom: '1px solid #eaecf0',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  justifyContent: 'space-between',
+                  background: '#ffffff',
                 }}
               >
-                {getFileIcon(previewDoc.fileCategory)}
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>
-                  {previewDoc.title}
-                </h3>
-                <p style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                  {previewDoc.originalFilename} • {previewDoc.formattedSize}
-                </p>
-              </div>
-            </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {getFileIcon(previewDoc.fileCategory)}
+                  </div>
+                  <div style={{ overflow: 'hidden' }}>
+                    <h3
+                      style={{
+                        fontSize: '1.05rem',
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                      title={previewDoc.title}
+                    >
+                      {previewDoc.title}
+                    </h3>
+                    <p style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                      <span>{previewDoc.originalFilename}</span>
+                      <span>•</span>
+                      <span>{previewDoc.formattedSize}</span>
+                      <span>•</span>
+                      <span>{new Date(previewDoc.createdAt).toLocaleDateString('vi-VN')}</span>
+                    </p>
+                  </div>
+                </div>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: 16, marginBottom: 20 }}>
-              <h4 style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a', marginBottom: 6 }}>
-                Tóm Tắt Nội Dung (RAG Index):
-              </h4>
-              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
-                {previewDoc.summary || 'Chưa có bản tóm tắt nội dung tự động.'}
-              </p>
-            </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <a
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-secondary btn-sm"
+                    title="Mở tài liệu toàn màn hình trong tab mới"
+                    style={{ fontSize: '0.75rem', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 5 }}
+                  >
+                    <ExternalLink size={13} /> Mở tab mới
+                  </a>
+                  <button
+                    onClick={() => setPreviewDoc(null)}
+                    style={{
+                      background: '#f1f5f9',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      color: '#64748b',
+                      transition: 'all 0.15s ease',
+                    }}
+                    title="Đóng"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-              <button
-                onClick={() => setPreviewDoc(null)}
-                className="btn btn-secondary btn-sm"
+              {/* Modal Body / Viewer */}
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: 20,
+                  background: '#f8fafc',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16,
+                }}
               >
-                Đóng
-              </button>
-              <a
-                href={documentApi.getDownloadUrl(previewDoc.id)}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-black-pill"
-                style={{ fontSize: '0.8rem' }}
+                {/* 1. Actual File Content Viewer */}
+                <div style={{ background: '#ffffff', borderRadius: 12, border: '1px solid #eaecf0', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
+                  {isImage ? (
+                    <div
+                      style={{
+                        padding: 16,
+                        textAlign: 'center',
+                        background: '#0f172a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: 280,
+                        maxHeight: '58vh',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <img
+                        src={previewUrl}
+                        alt={previewDoc.title}
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '54vh',
+                          objectFit: 'contain',
+                          borderRadius: 6,
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        }}
+                      />
+                    </div>
+                  ) : isPdf ? (
+                    <div style={{ height: '62vh', width: '100%' }}>
+                      <iframe
+                        src={previewUrl}
+                        title={previewDoc.title}
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                      />
+                    </div>
+                  ) : isVideo ? (
+                    <div style={{ background: '#000000', textAlign: 'center', padding: 8 }}>
+                      <video
+                        src={previewUrl}
+                        controls
+                        autoPlay
+                        style={{ width: '100%', maxHeight: '55vh', outline: 'none', borderRadius: 8 }}
+                      />
+                    </div>
+                  ) : isAudio ? (
+                    <div style={{ padding: 40, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+                      <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
+                        <Film size={28} />
+                      </div>
+                      <audio src={previewUrl} controls style={{ width: '80%' }} />
+                    </div>
+                  ) : isTextOrCode ? (
+                    <div style={{ padding: 16, maxHeight: '55vh', overflowY: 'auto' }}>
+                      {loadingPreviewText ? (
+                        <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>
+                          <Loader2 size={24} className="spin" style={{ margin: '0 auto 8px' }} />
+                          <p style={{ fontSize: '0.82rem' }}>Đang tải nội dung văn bản...</p>
+                        </div>
+                      ) : (
+                        <pre
+                          style={{
+                            margin: 0,
+                            fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+                            fontSize: '0.82rem',
+                            color: '#1e293b',
+                            lineHeight: 1.6,
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            userSelect: 'text',
+                          }}
+                        >
+                          {previewText || 'Tệp trống hoặc không thể hiển thị nội dung.'}
+                        </pre>
+                      )}
+                    </div>
+                  ) : (
+                    /* Default Fallback for Word, Excel, PowerPoint, Zip */
+                    <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+                      <div
+                        style={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: 14,
+                          background: '#f1f5f9',
+                          border: '1px solid #e2e8f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          margin: '0 auto 16px',
+                        }}
+                      >
+                        {getFileIcon(previewDoc.fileCategory)}
+                      </div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#0f172a' }}>
+                        Định dạng tệp: {ext.toUpperCase() || 'Tài liệu'}
+                      </h4>
+                      <p style={{ fontSize: '0.8rem', color: '#64748b', maxWidth: 420, margin: '6px auto 16px' }}>
+                        Trình duyệt không hỗ trợ xem trực tiếp định dạng này. Bạn có thể mở tệp trực tiếp trong tab mới hoặc tải về máy.
+                      </p>
+                      <div style={{ display: 'inline-flex', gap: 10 }}>
+                        <a
+                          href={previewUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-secondary btn-sm"
+                        >
+                          <ExternalLink size={13} /> Mở Trực Tiếp
+                        </a>
+                        <a
+                          href={documentApi.getDownloadUrl(previewDoc.id)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-black-pill btn-sm"
+                        >
+                          <Download size={13} /> Tải Về Máy
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. RAG Summary Section */}
+                {previewDoc.summary && (
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #eaecf0',
+                      borderRadius: 10,
+                      padding: 16,
+                      boxShadow: 'var(--shadow-sm)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                      <Sparkles size={14} color="#7c3aed" />
+                      <h4 style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>
+                        Tóm Tắt Nội Dung AI (RAG Index):
+                      </h4>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+                      {previewDoc.summary}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div
+                style={{
+                  padding: '12px 24px',
+                  borderTop: '1px solid #eaecf0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: '#ffffff',
+                }}
               >
-                <Download size={14} /> Tải Xuống Bản Gốc
-              </a>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                  ID: #{previewDoc.id} • Không gian: {project.name}
+                </span>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => setPreviewDoc(null)}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Đóng
+                  </button>
+                  <a
+                    href={documentApi.getDownloadUrl(previewDoc.id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-black-pill btn-sm"
+                  >
+                    <Download size={14} /> Tải Xuống Bản Gốc
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Upload Modal */}
       <FileUploaderModal
