@@ -118,7 +118,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
         fontFamily: "'Segoe UI', 'Be Vietnam Pro', -apple-system, sans-serif",
         color: '#1e1b4b',
         /* Pastel Pink to Mint-Turquoise Gradient Background matching user's reference image */
@@ -313,18 +312,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
       {/* 3. CENTER HERO MAIN CONTENT (SPLIT COMPOSITION) */}
       <main
         style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           position: 'relative',
           zIndex: 10,
-          maxWidth: 1200,
           width: '100%',
-          margin: '0 auto',
           padding: '20px 48px',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1.15fr',
-          alignItems: 'center',
-          gap: 60,
         }}
       >
+        <div
+          style={{
+            maxWidth: 1140,
+            width: '100%',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1.15fr',
+            alignItems: 'center',
+            gap: 60,
+          }}
+        >
         {/* LEFT COLUMN: CRISP CAPSULE LOGIN FORM */}
         <div
           style={{
@@ -911,6 +918,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
 
         </div>
       </main>
+
+      {/* FOOTER */}
+      <footer
+        style={{
+          position: 'relative',
+          zIndex: 10,
+          padding: '16px 24px',
+          textAlign: 'center',
+          fontSize: '0.78rem',
+          color: '#334155',
+          fontWeight: 500,
+        }}
+      >
+        KBase Platform © 2026 • Quản lý Tri thức & Trợ lý Gemini AI
+      </footer>
 
 
     </div>
