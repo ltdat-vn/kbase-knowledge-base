@@ -905,7 +905,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           >
             {isRegister
               ? 'Tạo tài khoản KBase để khám phá không gian làm việc chuyên nghiệp, chia sẻ tài liệu bảo mật và cùng làm việc với các thành viên trong nhóm.'
-              : 'Hệ thống quản lý cơ sở tri thức dự án & trợ lý Gemini AI Copilot thông minh. Tải lên tài liệu đa định dạng.'}
+              : 'Hệ thống quản lý cơ sở tri thức dự án & trợ lý Gemini AI thông minh. Tải lên tài liệu đa định dạng.'}
           </p>
 
 
