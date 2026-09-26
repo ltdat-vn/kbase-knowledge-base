@@ -917,7 +917,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
 
 
         </div>
-      </main>
+      </div>
+    </main>
 
       {/* FOOTER */}
       <footer
