@@ -168,20 +168,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   onChange={(e) => setFullName(e.target.value)}
                 />
               </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
-                  Vai Trò Tài Khoản *
-                </label>
-                <select
-                  className="input-field"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as UserRole)}
-                >
-                  <option value="ROLE_USER">Người Dùng (User - Tải tài liệu, hỏi đáp AI)</option>
-                  <option value="ROLE_OWNER">Chủ Dự Án (Owner - Tạo dự án, mời thành viên)</option>
-                  <option value="ROLE_ADMIN">Quản Trị Viên (Admin - Toàn quyền quản trị)</option>
-                </select>
-              </div>
+
             </>
           )}
 

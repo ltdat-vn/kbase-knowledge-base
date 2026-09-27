@@ -699,31 +699,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
                 />
               </div>
 
-              {/* Chọn vai trò */}
-              <div style={{ position: 'relative' }}>
-                <select
-                  value={regRole}
-                  onChange={(e) => setRegRole(e.target.value as UserRole)}
-                  style={{
-                    width: '100%',
-                    height: 42,
-                    borderRadius: 9999,
-                    border: '1.5px solid rgba(255, 255, 255, 0.95)',
-                    background: 'rgba(255, 255, 255, 0.85)',
-                    padding: '0 20px',
-                    color: '#0f172a',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    outline: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(30, 27, 75, 0.06)',
-                  }}
-                >
-                  <option value="ROLE_USER" style={{ color: '#0f172a', background: '#ffffff' }}>👤 Thành viên (Hỏi đáp & Tra cứu tài liệu)</option>
-                  <option value="ROLE_OWNER" style={{ color: '#0f172a', background: '#ffffff' }}>📁 Chủ dự án (Tạo dự án & Tải lên tài liệu)</option>
-                  <option value="ROLE_ADMIN" style={{ color: '#0f172a', background: '#ffffff' }}>🛡️ Quản trị viên (Toàn quyền quản trị)</option>
-                </select>
-              </div>
 
               {/* Mật khẩu */}
               <div style={{ position: 'relative' }}>
