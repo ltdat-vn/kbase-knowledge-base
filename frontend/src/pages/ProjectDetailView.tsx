@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Project, DocumentItem, ProjectMember, FileCategory, User } from '../types';
 import { documentApi, projectApi } from '../services/api';
-import { FileUploaderModal } from './FileUploaderModal';
-import { InviteMemberModal } from './InviteMemberModal';
+import { FileUploaderModal, InviteMemberModal } from '../components/modals';
 import {
   ArrowLeft,
   Plus,

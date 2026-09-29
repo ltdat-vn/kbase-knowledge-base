@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Project, User, UserRole } from './types';
 import { authApi, projectApi } from './services/api';
-import { SidebarRail } from './components/SidebarRail';
-import { TopHeader } from './components/TopHeader';
-import { AuthModal } from './components/AuthModal';
-import { CreateProjectModal } from './components/CreateProjectModal';
-import { ProjectDetailView } from './components/ProjectDetailView';
-import { AiChatPanel } from './components/AiChatPanel';
-import { AdminPanel } from './components/AdminPanel';
-import { LoginPage } from './components/LoginPage';
+import { SidebarRail, TopHeader } from './components/layout';
+import { AuthModal, CreateProjectModal } from './components/modals';
+import { AiChatPanel } from './components/ai';
+import { LoginPage, AdminPanel, ProjectDetailView } from './pages';
 import {
   FolderGit2,
   Plus,

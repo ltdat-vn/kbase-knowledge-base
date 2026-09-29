@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Project, ChatResponse, SourceReference } from '../types';
-import { chatApi, documentApi } from '../services/api';
+import { Project, ChatResponse, SourceReference } from '../../types';
+import { chatApi, documentApi } from '../../services/api';
 import {
   Send,
   Sparkles,

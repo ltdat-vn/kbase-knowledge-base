@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
-import { UserPlus, X, AlertCircle } from 'lucide-react';
-import { projectApi } from '../services/api';
-import { ProjectMember } from '../types';
+import { FolderPlus, X, AlertCircle } from 'lucide-react';
+import { projectApi } from '../../services/api';
+import { Project } from '../../types';
 
-interface InviteMemberModalProps {
-  projectId: number;
-  projectName: string;
+interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onMemberAdded: (member: ProjectMember) => void;
+  onCreated: (project: Project) => void;
 }
 
-export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
-  projectId,
-  projectName,
+export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   isOpen,
   onClose,
-  onMemberAdded,
+  onCreated,
 }) => {
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('MEMBER');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,12 +27,13 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
     setLoading(true);
 
     try {
-      const newMember = await projectApi.inviteMember(projectId, email.trim(), role);
-      onMemberAdded(newMember);
+      const proj = await projectApi.create(name, description);
+      onCreated(proj);
       onClose();
-      setEmail('');
+      setName('');
+      setDescription('');
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Không thể mời thành viên. Hãy đảm bảo tài khoản người dùng đã đăng ký trên hệ thống.');
+      setError(err.response?.data?.message || err.message || 'Không thể tạo dự án. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -61,7 +58,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
           background: '#ffffff',
           borderRadius: 16,
           width: '100%',
-          maxWidth: 460,
+          maxWidth: 480,
           padding: 28,
           position: 'relative',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -89,7 +86,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
           <X size={16} />
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <div
             style={{
               width: 36,
@@ -102,14 +99,14 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
               color: '#0f172a',
             }}
           >
-            <UserPlus size={20} />
+            <FolderPlus size={20} />
           </div>
           <div>
             <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a' }}>
-              Mời Thành Viên Vào {projectName}
+              Tạo Không Gian Dự Án Mới
             </h2>
             <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              Thêm đồng đội vào không gian dự án bằng địa chỉ email.
+              Tổ chức tài liệu kỹ thuật, video và tài liệu đặc tả của nhóm.
             </p>
           </div>
         </div>
@@ -133,37 +130,36 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 16 }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
-              Địa Chỉ Email Người Dùng *
+              Tên Dự Án *
             </label>
             <input
-              type="email"
+              type="text"
               required
-              placeholder="Ví dụ: engineer@kbase.com"
+              placeholder="Ví dụ: Nền Tảng Kỹ Thuật Số KBase 2026"
               className="input-field"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
-              Vai Trò Trong Dự Án
+              Mô Tả Dự Án
             </label>
-            <select
+            <textarea
+              rows={3}
+              placeholder="Mô tả mục tiêu, phạm vi dự án, đối tượng áp dụng..."
               className="input-field"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="MEMBER">Thành viên (Tải tài liệu, xem & hỏi đáp trợ lý AI)</option>
-              <option value="VIEWER">Người xem (Chỉ xem & tải tài liệu)</option>
-              <option value="OWNER">Đồng quản trị (Toàn quyền quản lý tài liệu & thành viên)</option>
-            </select>
+              style={{ resize: 'vertical' }}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 10 }}>
             <button
               type="button"
               onClick={onClose}
@@ -175,11 +171,11 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={loading || !email.trim()}
+              disabled={loading || !name.trim()}
               className="btn btn-black-pill"
               style={{ height: 38 }}
             >
-              {loading ? 'Đang gửi lời mời...' : 'Thêm Thành Viên'}
+              {loading ? 'Đang tạo...' : 'Tạo Dự Án Mới'}
             </button>
           </div>
         </form>

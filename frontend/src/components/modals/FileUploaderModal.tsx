@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, X, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
-import { documentApi } from '../services/api';
-import { DocumentItem } from '../types';
+import { documentApi } from '../../services/api';
+import { DocumentItem } from '../../types';
 
 interface FileUploaderModalProps {
   projectId: number;
@@ -77,7 +77,7 @@ export const FileUploaderModal: React.FC<FileUploaderModalProps> = ({
         file,
         title.trim() ? title : file.name,
         summary,
-        (p) => setProgress(p)
+        (p: number) => setProgress(p)
       );
 
       onUploaded(uploadedDoc);

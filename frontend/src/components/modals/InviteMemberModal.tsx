@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
-import { FolderPlus, X, AlertCircle } from 'lucide-react';
-import { projectApi } from '../services/api';
-import { Project } from '../types';
+import { UserPlus, X, AlertCircle } from 'lucide-react';
+import { projectApi } from '../../services/api';
+import { ProjectMember } from '../../types';
 
-interface CreateProjectModalProps {
+interface InviteMemberModalProps {
+  projectId: number;
+  projectName: string;
   isOpen: boolean;
   onClose: () => void;
-  onCreated: (project: Project) => void;
+  onMemberAdded: (member: ProjectMember) => void;
 }
 
-export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
+export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
+  projectId,
+  projectName,
   isOpen,
   onClose,
-  onCreated,
+  onMemberAdded,
 }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('MEMBER');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,13 +31,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     setLoading(true);
 
     try {
-      const proj = await projectApi.create(name, description);
-      onCreated(proj);
+      const newMember = await projectApi.inviteMember(projectId, email.trim(), role);
+      onMemberAdded(newMember);
       onClose();
-      setName('');
-      setDescription('');
+      setEmail('');
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Không thể tạo dự án. Vui lòng thử lại.');
+      setError(err.response?.data?.message || err.message || 'Không thể mời thành viên. Hãy đảm bảo tài khoản người dùng đã đăng ký trên hệ thống.');
     } finally {
       setLoading(false);
     }
@@ -58,7 +61,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           background: '#ffffff',
           borderRadius: 16,
           width: '100%',
-          maxWidth: 480,
+          maxWidth: 460,
           padding: 28,
           position: 'relative',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -86,7 +89,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           <X size={16} />
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
           <div
             style={{
               width: 36,
@@ -99,14 +102,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               color: '#0f172a',
             }}
           >
-            <FolderPlus size={20} />
+            <UserPlus size={20} />
           </div>
           <div>
             <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a' }}>
-              Tạo Không Gian Dự Án Mới
+              Mời Thành Viên Vào {projectName}
             </h2>
             <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              Tổ chức tài liệu kỹ thuật, video và tài liệu đặc tả của nhóm.
+              Thêm đồng đội vào không gian dự án bằng địa chỉ email.
             </p>
           </div>
         </div>
@@ -130,36 +133,37 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 16 }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
-              Tên Dự Án *
+              Địa Chỉ Email Người Dùng *
             </label>
             <input
-              type="text"
+              type="email"
               required
-              placeholder="Ví dụ: Nền Tảng Kỹ Thuật Số KBase 2026"
+              placeholder="Ví dụ: engineer@kbase.com"
               className="input-field"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: 5 }}>
-              Mô Tả Dự Án
+              Vai Trò Trong Dự Án
             </label>
-            <textarea
-              rows={3}
-              placeholder="Mô tả mục tiêu, phạm vi dự án, đối tượng áp dụng..."
+            <select
               className="input-field"
-              style={{ resize: 'vertical' }}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="MEMBER">Thành viên (Tải tài liệu, xem & hỏi đáp trợ lý AI)</option>
+              <option value="VIEWER">Người xem (Chỉ xem & tải tài liệu)</option>
+              <option value="OWNER">Đồng quản trị (Toàn quyền quản lý tài liệu & thành viên)</option>
+            </select>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 10 }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
             <button
               type="button"
               onClick={onClose}
@@ -171,11 +175,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={loading || !name.trim()}
+              disabled={loading || !email.trim()}
               className="btn btn-black-pill"
               style={{ height: 38 }}
             >
-              {loading ? 'Đang tạo...' : 'Tạo Dự Án Mới'}
+              {loading ? 'Đang gửi lời mời...' : 'Thêm Thành Viên'}
             </button>
           </div>
         </form>

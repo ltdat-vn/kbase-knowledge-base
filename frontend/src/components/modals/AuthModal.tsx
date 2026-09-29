@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserRole } from '../types';
+import { UserRole } from '../../types';
 import { LogIn, UserPlus, X, Shield, Briefcase, User as UserIcon, AlertCircle } from 'lucide-react';
 
 interface AuthModalProps {
