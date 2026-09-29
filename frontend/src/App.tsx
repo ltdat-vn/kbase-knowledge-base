@@ -8,15 +8,7 @@ import { LoginPage, AdminPanel, ProjectDetailView } from './pages';
 import {
   FolderGit2,
   Plus,
-  Bot,
-  Users,
-  FileText,
   ArrowRight,
-  Shield,
-  Sparkles,
-  ExternalLink,
-  Search,
-  CheckCircle2,
   Pin,
   Trash2,
 } from 'lucide-react';

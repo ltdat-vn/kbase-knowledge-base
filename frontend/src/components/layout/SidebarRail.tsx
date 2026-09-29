@@ -1,14 +1,12 @@
 import React from 'react';
 import { User } from '../../types';
 import {
-  BookOpen,
   FolderGit2,
   Bot,
   Shield,
   ExternalLink,
   LogOut,
   User as UserIcon,
-  Sparkles,
 } from 'lucide-react';
 
 interface SidebarRailProps {

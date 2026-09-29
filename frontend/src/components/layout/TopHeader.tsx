@@ -2,14 +2,9 @@ import React from 'react';
 import { User } from '../../types';
 import {
   Search,
-  Bell,
-  PanelRightClose,
-  PanelRightOpen,
   Plus,
   ExternalLink,
   ChevronRight,
-  FolderGit2,
-  FolderPlus,
   Bot,
 } from 'lucide-react';
 

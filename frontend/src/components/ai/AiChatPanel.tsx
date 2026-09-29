@@ -2,19 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Project, ChatResponse, SourceReference } from '../../types';
 import { chatApi, documentApi } from '../../services/api';
 import {
-  Send,
   Sparkles,
   FileText,
   Download,
-  Folder,
   Loader2,
   Trash2,
   Paperclip,
   ArrowUp,
   ChevronDown,
   ChevronUp,
-  BrainCircuit,
-  MessageSquare,
   X,
 } from 'lucide-react';
 

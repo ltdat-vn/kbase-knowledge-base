@@ -8,13 +8,8 @@ import {
   EyeOff,
   AlertCircle,
   ExternalLink,
-  Layers,
-  Sparkles,
   Menu,
-  Shield,
-  Briefcase,
   UserPlus,
-  CheckCircle2,
 } from 'lucide-react';
 
 interface LoginPageProps {

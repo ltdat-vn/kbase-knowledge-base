@@ -1,11 +1,16 @@
 package com.kbase.config;
 
-import com.kbase.model.*;
+import com.kbase.model.Document;
+import com.kbase.model.FileCategory;
+import com.kbase.model.Project;
+import com.kbase.model.ProjectMember;
+import com.kbase.model.ProjectRole;
+import com.kbase.model.Role;
+import com.kbase.model.User;
 import com.kbase.repository.DocumentRepository;
 import com.kbase.repository.ProjectMemberRepository;
 import com.kbase.repository.ProjectRepository;
 import com.kbase.repository.UserRepository;
-import com.kbase.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -23,7 +28,6 @@ public class DataInitializer implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final DocumentRepository documentRepository;
-    private final StorageService storageService;
     private final PasswordEncoder passwordEncoder;
 
     @Override

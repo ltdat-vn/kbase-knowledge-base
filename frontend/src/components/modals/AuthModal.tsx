@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserRole } from '../../types';
-import { LogIn, UserPlus, X, Shield, Briefcase, User as UserIcon, AlertCircle } from 'lucide-react';
+import { LogIn, UserPlus, X, AlertCircle } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -19,7 +19,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState<UserRole>('ROLE_USER');
+  const role: UserRole = 'ROLE_USER';
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
