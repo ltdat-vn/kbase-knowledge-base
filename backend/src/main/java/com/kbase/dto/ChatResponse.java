@@ -16,6 +16,7 @@ public class ChatResponse {
     private String question;
     private String answer;
     private Long projectId;
+    private String modelUsed;
     @Builder.Default
     private List<SourceReference> references = new ArrayList<>();
 

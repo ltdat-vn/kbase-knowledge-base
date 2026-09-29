@@ -170,9 +170,9 @@ public class AiChatServiceImpl implements AiChatService {
         boolean hasValidGeminiKey = (geminiApiKey != null && !geminiApiKey.isBlank() && !geminiApiKey.contains("your_gemini_api_key"));
         if (hasValidGeminiKey) {
             String contextText = buildGeminiContext(project, documents, scoredDocs, accessibleProjects, searchTerms);
-            String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, scopeName);
-            if (geminiAnswer != null && !geminiAnswer.isBlank()) {
-                log.info("Trả lời câu hỏi thành công bằng Google Gemini model {}", geminiModel);
+            GeminiApiResult geminiResult = callGeminiApi(request.getQuestion(), contextText, scopeName);
+            if (geminiResult != null && geminiResult.answer() != null && !geminiResult.answer().isBlank()) {
+                log.info("Trả lời câu hỏi thành công bằng Google Gemini model {}", geminiResult.modelUsed());
 
                 // Nếu chưa có references từ scoredDocs nhưng dự án có tài liệu, đính kèm tài liệu vào tham chiếu
                 if (references.isEmpty() && !documents.isEmpty()) {
@@ -195,7 +195,8 @@ public class AiChatServiceImpl implements AiChatService {
 
                 return ChatResponse.builder()
                         .question(request.getQuestion())
-                        .answer(geminiAnswer)
+                        .answer(geminiResult.answer())
+                        .modelUsed(geminiResult.modelUsed())
                         .projectId(project != null ? project.getId() : 0L)
                         .references(references)
                         .build();
@@ -282,6 +283,7 @@ public class AiChatServiceImpl implements AiChatService {
         return ChatResponse.builder()
                 .question(request.getQuestion())
                 .answer(cleanMarkdownFormatting(answerBuilder.toString()))
+                .modelUsed("local-fallback")
                 .projectId(project != null ? project.getId() : 0L)
                 .references(references)
                 .build();
@@ -445,7 +447,9 @@ public class AiChatServiceImpl implements AiChatService {
         return sb.toString().trim();
     }
 
-    private String callGeminiApi(String question, String context, String projectName) {
+    private record GeminiApiResult(String answer, String modelUsed) {}
+
+    private GeminiApiResult callGeminiApi(String question, String context, String projectName) {
         try {
             String prompt = String.format("""
                     Bạn là Trợ lý AI chuyên gia kỹ thuật cao cấp của hệ thống Quản lý tri thức KBase.
@@ -512,7 +516,7 @@ public class AiChatServiceImpl implements AiChatService {
                         JsonNode textNode = rootNode.at("/candidates/0/content/parts/0/text");
                         if (!textNode.isMissingNode() && !textNode.asText().isBlank()) {
                             log.info("Trả lời câu hỏi thành công bằng Google Gemini model {}", currentModel);
-                            return cleanMarkdownFormatting(textNode.asText());
+                            return new GeminiApiResult(cleanMarkdownFormatting(textNode.asText()), currentModel);
                         }
                     } else {
                         log.warn("Gemini model {} phản hồi mã lỗi: {}, tự động chuyển model dự phòng...", currentModel, response.statusCode());

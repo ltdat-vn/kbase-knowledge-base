@@ -95,13 +95,14 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
       const pid = selectedProjectId ?? 0;
       const response: ChatResponse = await chatApi.askQuestion(pid, q);
       const isSystemWide = pid === 0;
+      const modelLabel = response.modelUsed ? `mô hình ${response.modelUsed}` : 'Gemini AI';
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
         text: response.answer,
         thought: isSystemWide
-          ? 'Đã đối chiếu thông tin qua toàn bộ các dự án trong hệ thống KBase và trích dẫn nguồn.'
-          : 'Đã phân tích các tài liệu liên quan trong dự án bằng Gemini AI và trích dẫn bằng chứng.',
+          ? `Đã đối chiếu thông tin qua toàn bộ các dự án trong hệ thống KBase (${modelLabel}) và trích dẫn nguồn.`
+          : `Đã phân tích các tài liệu liên quan trong dự án bằng ${modelLabel} và trích dẫn bằng chứng.`,
         references: response.references,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };

@@ -73,6 +73,7 @@ export interface ChatResponse {
   question: string;
   answer: string;
   projectId: number;
+  modelUsed?: string;
   references: SourceReference[];
 }
 
