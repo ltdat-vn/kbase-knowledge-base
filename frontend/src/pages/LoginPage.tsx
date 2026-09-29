@@ -7,7 +7,6 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  ExternalLink,
   Menu,
   UserPlus,
 } from 'lucide-react';
@@ -231,25 +230,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegister }) => 
           >
             TÍNH NĂNG
           </span>
-          <a
-            href="http://localhost:8080/swagger-ui/index.html"
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              color: '#334155',
-              textDecoration: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              transition: 'color 0.15s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#0f172a')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#334155')}
-          >
-            <span>TÀI LIỆU API</span>
-            <ExternalLink size={12} />
-          </a>
         </nav>
 
         {/* Right: Deep Navy Sign In Button & Menu */}

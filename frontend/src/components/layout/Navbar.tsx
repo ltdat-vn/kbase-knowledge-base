@@ -6,7 +6,6 @@ import {
   Shield,
   FolderGit2,
   Bot,
-  ExternalLink,
   User as UserIcon,
 } from 'lucide-react';
 
@@ -97,17 +96,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right side: Links & User session */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          {/* Swagger link */}
-          <a
-            href="http://localhost:8080/swagger-ui/index.html"
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-secondary btn-sm"
-            title="Mở tài liệu Swagger OpenAPI"
-            style={{ fontSize: '0.78rem', color: '#93c5fd' }}
-          >
-            <ExternalLink size={14} /> Tài Liệu Swagger API
-          </a>
 
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

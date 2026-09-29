@@ -3,7 +3,6 @@ import { User } from '../../types';
 import {
   Search,
   Plus,
-  ExternalLink,
   ChevronRight,
   Bot,
 } from 'lucide-react';
@@ -115,16 +114,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
       {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {/* Swagger Link */}
-        <a
-          href="http://localhost:8080/swagger-ui/index.html"
-          target="_blank"
-          rel="noreferrer"
-          className="btn btn-secondary btn-sm"
-          style={{ height: 34, borderRadius: 9999, fontSize: '0.75rem', fontWeight: 600, color: '#4338ca' }}
-        >
-          <ExternalLink size={13} /> Swagger API
-        </a>
 
         {/* AI Copilot Drawer Toggle Button */}
         <button

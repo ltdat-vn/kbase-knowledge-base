@@ -4,7 +4,6 @@ import {
   FolderGit2,
   Bot,
   Shield,
-  ExternalLink,
   LogOut,
   User as UserIcon,
 } from 'lucide-react';
@@ -170,34 +169,6 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
             </button>
           )}
 
-          {/* Swagger API External Link */}
-          <a
-            href="http://localhost:8080/swagger-ui/index.html"
-            target="_blank"
-            rel="noreferrer"
-            title="Tài Liệu Swagger API"
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 10,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#64748b',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#f1f5f9';
-              e.currentTarget.style.color = '#0f172a';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#64748b';
-            }}
-          >
-            <ExternalLink size={18} />
-          </a>
         </div>
       </div>
 

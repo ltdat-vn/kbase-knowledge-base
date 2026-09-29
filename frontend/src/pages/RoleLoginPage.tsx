@@ -12,7 +12,6 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  ExternalLink,
   AlertCircle,
   Check,
   Info,
@@ -58,7 +57,7 @@ const ROLE_OPTIONS: RoleOption[] = [
       'Quản lý tất cả tài khoản người dùng (Kích hoạt / Khóa tài khoản)',
       'Giám sát thống kê hệ thống (Users, Dự án, Files, Dung lượng)',
       'Toàn quyền quản lý mọi dự án tri thức',
-      'Đầy đủ quyền gọi Admin API và Swagger',
+      'Đầy đủ quyền gọi Admin API và Quản trị',
     ],
   },
   {
@@ -857,15 +856,6 @@ export const RoleLoginPage: React.FC<RoleLoginPageProps> = ({
               Mô hình bảo mật phân quyền Role-Based Access Control (RBAC) được áp dụng tại các tầng Spring Security và UI.
             </p>
           </div>
-          <a
-            href="http://localhost:8080/swagger-ui/index.html"
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-secondary btn-sm"
-            style={{ fontSize: '0.75rem', fontWeight: 600, color: '#4338ca', borderRadius: 9999 }}
-          >
-            <ExternalLink size={13} /> Xem Chi Tiết Swagger API
-          </a>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
