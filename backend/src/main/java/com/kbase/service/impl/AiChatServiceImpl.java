@@ -42,14 +42,15 @@ public class AiChatServiceImpl implements AiChatService {
     @Value("${kbase.ai.gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${kbase.ai.gemini.model:gemini-flash-lite-latest}")
+    @Value("${kbase.ai.gemini.model:gemini-3.8-flash}")
     private String geminiModel;
 
     private static final List<String> GEMINI_CANDIDATE_MODELS = List.of(
+            "gemini-3.8-flash",
+            "gemini-3.7-flash",
+            "gemini-3.5-flash",
             "gemini-flash-lite-latest",
-            "gemini-2.5-flash-lite",
-            "gemini-flash-latest",
-            "gemini-pro-latest"
+            "gemini-flash-latest"
     );
 
     private static final Pattern WORD_SPLITTER = Pattern.compile("[\\s,;:.?!()\"'\\[\\]{}]+");
