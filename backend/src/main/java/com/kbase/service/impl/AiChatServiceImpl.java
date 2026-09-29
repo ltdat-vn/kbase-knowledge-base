@@ -42,14 +42,14 @@ public class AiChatServiceImpl implements AiChatService {
     @Value("${kbase.ai.gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${kbase.ai.gemini.model:gemini-3.5-flash}")
+    @Value("${kbase.ai.gemini.model:gemini-flash-lite-latest}")
     private String geminiModel;
 
     private static final List<String> GEMINI_CANDIDATE_MODELS = List.of(
-            "gemini-3.5-flash",
             "gemini-flash-lite-latest",
-            "gemini-3.5-flash-lite",
-            "gemini-3.6-flash"
+            "gemini-2.5-flash-lite",
+            "gemini-flash-latest",
+            "gemini-pro-latest"
     );
 
     private static final Pattern WORD_SPLITTER = Pattern.compile("[\\s,;:.?!()\"'\\[\\]{}]+");
@@ -192,8 +192,9 @@ public class AiChatServiceImpl implements AiChatService {
                     .build());
         }
 
-        // 1. Thử gọi Google Gemini nếu có API key
-        if (geminiApiKey != null && !geminiApiKey.isBlank()) {
+        // 1. Thử gọi Google Gemini nếu có API key hợp lệ
+        boolean hasValidGeminiKey = (geminiApiKey != null && !geminiApiKey.isBlank() && !geminiApiKey.contains("your_gemini_api_key"));
+        if (hasValidGeminiKey) {
             String contextText = buildGeminiContext(project, documents, scoredDocs, accessibleProjects);
             String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, scopeName);
             if (geminiAnswer != null && !geminiAnswer.isBlank()) {
@@ -226,20 +227,37 @@ public class AiChatServiceImpl implements AiChatService {
                 answerBuilder.append("• **").append(pPrefix).append(d.getTitle()).append("** (Định dạng: ").append(d.getFileCategory()).append(")\n");
             }
         } else {
-            answerBuilder.append("Dựa trên các tài liệu trong **").append(scopeName).append("**, dưới đây là câu trả lời được tổng hợp:\n\n");
-
             ScoredDoc topMatch = scoredDocs.get(0);
-            String topProj = (project == null && topMatch.doc.getProject() != null) ? "[" + topMatch.doc.getProject().getName() + "] " : "";
-            answerBuilder.append("Thông tin quan trọng tìm thấy trong **").append(topProj).append("[").append(topMatch.doc.getTitle()).append("]**:\n");
-            answerBuilder.append("> ").append(topMatch.snippet.replaceAll("\n+", " ").trim()).append("\n\n");
+            String docTitle = topMatch.doc.getTitle();
+            answerBuilder.append("Dựa trên tài liệu **").append(docTitle).append("** trong không gian **").append(scopeName).append("**, dưới đây là các thông tin liên quan đến câu hỏi của bạn:\n\n");
 
-            if (scoredDocs.size() > 1) {
-                String secondProj = (project == null && scoredDocs.get(1).doc.getProject() != null) ? "[" + scoredDocs.get(1).doc.getProject().getName() + "] " : "";
-                answerBuilder.append("Ngữ cảnh bổ sung từ **").append(secondProj).append("[").append(scoredDocs.get(1).doc.getTitle()).append("]**:\n");
-                answerBuilder.append("> ").append(scoredDocs.get(1).snippet.replaceAll("\n+", " ").trim()).append("\n\n");
+            // Format snippet sạch sẽ, xử lý các dấu đầu dòng và ngắt câu rõ ràng
+            String cleanSnippet = topMatch.snippet.replace("●", "\n- ").replace("○", "\n  * ");
+            String[] lines = cleanSnippet.split("\n");
+            for (String l : lines) {
+                String trimmed = l.trim();
+                if (!trimmed.isEmpty()) {
+                    if (trimmed.startsWith("-") || trimmed.startsWith("*") || Character.isDigit(trimmed.charAt(0))) {
+                        answerBuilder.append(trimmed).append("\n");
+                    } else {
+                        answerBuilder.append("- ").append(trimmed).append("\n");
+                    }
+                }
             }
 
-            answerBuilder.append("Bạn có thể xem chi tiết hoặc tải về các tài liệu nguồn trích dẫn ở danh sách bên dưới.");
+            if (scoredDocs.size() > 1) {
+                ScoredDoc secondMatch = scoredDocs.get(1);
+                answerBuilder.append("\n**Thông tin bổ sung từ tài liệu [").append(secondMatch.doc.getTitle()).append("]:**\n");
+                String cleanSnippet2 = secondMatch.snippet.replace("●", "\n- ").replace("○", "\n  * ");
+                for (String l : cleanSnippet2.split("\n")) {
+                    String trimmed = l.trim();
+                    if (!trimmed.isEmpty()) {
+                        answerBuilder.append("- ").append(trimmed).append("\n");
+                    }
+                }
+            }
+
+            answerBuilder.append("\n💡 Bạn có thể xem chi tiết tài liệu đính kèm bên dưới để đọc toàn bộ văn bản.");
         }
 
         return ChatResponse.builder()
@@ -413,16 +431,39 @@ public class AiChatServiceImpl implements AiChatService {
     }
 
     private String extractContextSnippet(String fullText, String term, int radius) {
-        if (fullText == null || term == null) return "";
+        if (fullText == null || term == null || term.isBlank()) return "";
         int idx = fullText.toLowerCase().indexOf(term.toLowerCase());
         if (idx == -1) return "";
 
-        int start = Math.max(0, idx - radius);
-        int end = Math.min(fullText.length(), idx + term.length() + radius);
+        int targetStart = Math.max(0, idx - radius);
+        int start = targetStart;
+        if (start > 0) {
+            int lineBreak = fullText.lastIndexOf("\n", idx);
+            int dotBreak = fullText.lastIndexOf(". ", idx);
+            int bulletBreak = Math.max(fullText.lastIndexOf("●", idx), fullText.lastIndexOf("- "));
+            int bestBreak = Math.max(lineBreak, Math.max(dotBreak >= 0 ? dotBreak + 2 : -1, bulletBreak));
+            if (bestBreak >= targetStart - 60 && bestBreak <= idx) {
+                start = bestBreak;
+            }
+        }
+
+        int targetEnd = Math.min(fullText.length(), idx + term.length() + radius);
+        int end = targetEnd;
+        if (end < fullText.length()) {
+            int lineBreak = fullText.indexOf("\n", idx + term.length());
+            int dotBreak = fullText.indexOf(". ", idx + term.length());
+            int bestBreak = -1;
+            if (lineBreak >= 0 && dotBreak >= 0) bestBreak = Math.min(lineBreak, dotBreak + 1);
+            else if (lineBreak >= 0) bestBreak = lineBreak;
+            else if (dotBreak >= 0) bestBreak = dotBreak + 1;
+
+            if (bestBreak >= idx && bestBreak <= targetEnd + 80) {
+                end = bestBreak;
+            }
+        }
 
         String snippet = fullText.substring(start, end).trim();
-        if (start > 0) snippet = "..." + snippet;
-        if (end < fullText.length()) snippet = snippet + "...";
+        snippet = snippet.replaceAll("^[.\\s,;]+", "");
         return snippet;
     }
 
