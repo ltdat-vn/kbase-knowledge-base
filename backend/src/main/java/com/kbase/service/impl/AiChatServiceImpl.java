@@ -47,9 +47,10 @@ public class AiChatServiceImpl implements AiChatService {
 
     private static final List<String> GEMINI_CANDIDATE_MODELS = List.of(
             "gemini-3.8-flash",
-            "gemini-3.7-flash",
-            "gemini-3.5-flash",
             "gemini-flash-lite-latest",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-3.7-flash",
             "gemini-flash-latest"
     );
 
@@ -166,7 +167,7 @@ public class AiChatServiceImpl implements AiChatService {
         // =========================================================================
         boolean hasValidGeminiKey = (geminiApiKey != null && !geminiApiKey.isBlank() && !geminiApiKey.contains("your_gemini_api_key"));
         if (hasValidGeminiKey) {
-            String contextText = buildGeminiContext(project, documents, scoredDocs, accessibleProjects);
+            String contextText = buildGeminiContext(project, documents, scoredDocs, accessibleProjects, searchTerms);
             String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, scopeName);
             if (geminiAnswer != null && !geminiAnswer.isBlank()) {
                 log.info("Trả lời câu hỏi thành công bằng Google Gemini model {}", geminiModel);
@@ -284,7 +285,7 @@ public class AiChatServiceImpl implements AiChatService {
                 .build();
     }
 
-    private String buildGeminiContext(Project project, List<Document> allDocs, List<ScoredDoc> scoredDocs, List<Project> accessibleProjects) {
+    private String buildGeminiContext(Project project, List<Document> allDocs, List<ScoredDoc> scoredDocs, List<Project> accessibleProjects, Set<String> searchTerms) {
         StringBuilder sb = new StringBuilder();
 
         if (project != null) {
@@ -360,10 +361,25 @@ public class AiChatServiceImpl implements AiChatService {
                 String pName = (doc.getProject() != null) ? doc.getProject().getName() : "Chung";
                 sb.append("TÀI LIỆU: ").append(doc.getTitle()).append(" [Dự án: ").append(pName).append("] (Tệp: ").append(doc.getOriginalFilename()).append(")\n");
                 if (doc.getTextContent() != null && !doc.getTextContent().isBlank()) {
-                    String snippet = doc.getTextContent();
-                    if (snippet.length() > 3000) snippet = snippet.substring(0, 3000) + "...";
-                    sb.append(snippet).append("\n\n");
-                } else if (doc.getSummary() != null && !doc.getSummary().isBlank()) {
+                    String fullText = doc.getTextContent();
+                    if (fullText.length() <= 70000) {
+                        sb.append(fullText).append("\n\n");
+                    } else {
+                        // Tài liệu lớn hơn 70.000 ký tự: Luôn lấy mục lục & trích xuất sâu các chương mục khớp từ khóa
+                        sb.append("[PHẦN MỤC LỤC VÀ TỔNG QUAN TÀI LIỆU]:\n")
+                          .append(fullText.substring(0, Math.min(fullText.length(), 6000)))
+                          .append("\n[...]\n");
+
+                        String relevant = extractRelevantSections(fullText, searchTerms, 60000);
+                        if (!relevant.isBlank()) {
+                            sb.append("[CÁC CHƯƠNG MỤC NỘI DUNG CHI TIẾT KHỚP VỚI CÂU HỎI]:\n")
+                              .append(relevant)
+                              .append("\n\n");
+                        } else {
+                            sb.append(fullText.substring(6000, Math.min(fullText.length(), 70000))).append("\n\n");
+                        }
+                    }
+                } else if (doc.getSummary() != null) {
                     sb.append(doc.getSummary()).append("\n\n");
                 }
             }
@@ -371,21 +387,82 @@ public class AiChatServiceImpl implements AiChatService {
         return sb.toString();
     }
 
+    private String extractRelevantSections(String fullText, Set<String> searchTerms, int maxChars) {
+        if (fullText == null || searchTerms == null || searchTerms.isEmpty()) {
+            return "";
+        }
+
+        String lowerText = fullText.toLowerCase();
+        List<int[]> ranges = new ArrayList<>();
+
+        for (String term : searchTerms) {
+            if (term.length() < 3) continue;
+            int idx = 0;
+            while ((idx = lowerText.indexOf(term, idx)) != -1) {
+                int start = Math.max(0, idx - 1500);
+                int end = Math.min(fullText.length(), idx + term.length() + 3500);
+                ranges.add(new int[]{start, end});
+                idx += term.length() + 300;
+            }
+        }
+
+        if (ranges.isEmpty()) {
+            return "";
+        }
+
+        ranges.sort(Comparator.comparingInt(a -> a[0]));
+
+        List<int[]> merged = new ArrayList<>();
+        int[] current = ranges.get(0);
+        for (int i = 1; i < ranges.size(); i++) {
+            int[] next = ranges.get(i);
+            if (next[0] <= current[1] + 300) {
+                current[1] = Math.max(current[1], next[1]);
+            } else {
+                merged.add(current);
+                current = next;
+            }
+        }
+        merged.add(current);
+
+        StringBuilder sb = new StringBuilder();
+        int totalChars = 0;
+        for (int[] r : merged) {
+            int len = r[1] - r[0];
+            if (totalChars + len > maxChars) {
+                int allowed = maxChars - totalChars;
+                if (allowed > 500) {
+                    sb.append(fullText, r[0], r[0] + allowed).append("\n[...]\n");
+                }
+                break;
+            }
+            sb.append(fullText, r[0], r[1]).append("\n[...]\n");
+            totalChars += len;
+        }
+
+        return sb.toString().trim();
+    }
+
     private String callGeminiApi(String question, String context, String projectName) {
         try {
             String prompt = String.format("""
-                    Bạn là Trợ lý AI thông minh chuyên nghiệp của hệ thống Quản lý tri thức KBase.
-                    Nhiệm vụ: Hãy phân tích thấu đáo câu hỏi của người dùng và trả lời một cách CHÍNH XÁC, THÔNG MINH, TỰ NHIÊN như một trợ lý AI thực thụ, dựa trên ngữ cảnh dữ liệu dưới đây.
+                    Bạn là Trợ lý AI chuyên gia kỹ thuật cao cấp của hệ thống Quản lý tri thức KBase.
+                    Nhiệm vụ: Hãy phân tích thấu đáo câu hỏi của người dùng và trả lời một cách CHUYÊN SÂU, TOÀN DIỆN, CHI TIẾT và CHÍNH XÁC dựa trên nội dung tài liệu và ngữ cảnh dưới đây.
                     
-                    Không gian hiện tại: %s
+                    Ngữ cảnh không gian: %s
                     
-                    Nguyên tắc trả lời:
-                    1. Trả lời bằng Tiếng Việt tự nhiên, trực tiếp vào trọng tâm câu hỏi của người dùng.
-                    2. Nếu người dùng hỏi về số lượng tài liệu (ví dụ: 'có mấy tài liệu', 'có bao nhiêu tài liệu'), hãy trả lời chính xác số lượng tài liệu hiện có và liệt kê tên các tài liệu đó một cách gọn gàng, rõ ràng.
-                    3. Nếu người dùng hỏi về nội dung, kiến thức bên trong tài liệu, hãy tổng hợp và giải thích rõ ràng dựa trên phần nội dung văn bản tài liệu được cung cấp.
-                    4. Nếu người dùng hỏi về thông tin dự án, chủ sở hữu, thành viên, hoặc danh sách các dự án trong hệ thống, hãy trả lời chính xác dựa theo thông tin trong ngữ cảnh.
-                    5. Tuyệt đối không trả lời rập khuôn, máy móc hoặc tự suy diễn thông tin sai lệch ngoài ngữ cảnh.
-                    6. Định dạng câu trả lời gọn gàng, mạch lạc: Sử dụng gạch đầu dòng '-' hoặc số thứ tự '1.', '2.'. Tuyệt đối không dùng ký hiệu markdown thăng '#' làm tiêu đề.
+                    Quy tắc trả lời:
+                    1. Trả lời bằng Tiếng Việt tự nhiên, chuẩn mực kỹ thuật, đi thẳng vào trọng tâm câu hỏi.
+                    2. Nếu người dùng hỏi về một tính năng, dịch vụ (Service), module hoặc quy trình (ví dụ: 'service auction', 'bidding', 'đấu giá', 'thanh toán', 'xác thực'):
+                       - Hãy đọc kỹ toàn bộ các phần chức năng liên quan trong tài liệu được cung cấp.
+                       - Trình bày chi tiết, có cấu trúc rõ ràng:
+                         + Mục tiêu và vai trò của dịch vụ (Overview / Purpose).
+                         + Các chức năng chính (Key Features / Sub-functions, ví dụ: Quản lý đấu giá, Đặt giá thầu Bidding, Thanh toán kết thúc phiên Auction Settlement...).
+                         + Quy tắc nghiệp vụ (Business Rules, điều kiện tạo, kiểm tra tính hợp lệ, bước giá bid increment...).
+                         + Vòng đời & trạng thái (Auction Lifecycle, các trạng thái diễn ra).
+                       - Tuyệt đối không trả lời qua loa, chung chung hay dừng lại ở mức suy đoán nếu trong tài liệu đã có thông tin.
+                    3. Nếu người dùng hỏi về số lượng tài liệu hoặc tổng quan dự án, hãy trả lời chính xác số lượng và tên các tài liệu đó.
+                    4. Định dạng dễ đọc: Sử dụng tiêu đề phân mục in đậm hoặc viết hoa, gạch đầu dòng '-' hoặc số thứ tự '1.', '2.'. Tuyệt đối không dùng ký hiệu markdown thăng '#' làm tiêu đề.
                     
                     ---
                     [NGỮ CẢNH DỮ LIỆU KBASE]:
@@ -412,7 +489,7 @@ public class AiChatServiceImpl implements AiChatService {
             }
 
             HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(4))
+                    .connectTimeout(Duration.ofSeconds(6))
                     .build();
 
             for (String currentModel : modelsToTry) {
@@ -422,7 +499,7 @@ public class AiChatServiceImpl implements AiChatService {
                     HttpRequest httpRequest = HttpRequest.newBuilder()
                             .uri(URI.create(url))
                             .header("Content-Type", "application/json")
-                            .timeout(Duration.ofSeconds(6))
+                            .timeout(Duration.ofSeconds(25))
                             .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
                             .build();
 

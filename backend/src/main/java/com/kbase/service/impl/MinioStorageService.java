@@ -116,12 +116,12 @@ public class MinioStorageService implements StorageService {
                 try (PDDocument doc = Loader.loadPDF(file.getBytes())) {
                     PDFTextStripper stripper = new PDFTextStripper();
                     String text = stripper.getText(doc);
-                    return text.length() > 50000 ? text.substring(0, 50000) : text;
+                    return text.length() > 500000 ? text.substring(0, 500000) : text;
                 }
             } else if (isTextFile(ext)) {
                 byte[] bytes = file.getBytes();
                 String text = new String(bytes, StandardCharsets.UTF_8);
-                return text.length() > 50000 ? text.substring(0, 50000) : text;
+                return text.length() > 500000 ? text.substring(0, 500000) : text;
             }
         } catch (Exception e) {
             return "";
