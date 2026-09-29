@@ -87,39 +87,7 @@ public class AiChatServiceImpl implements AiChatService {
         }
 
         String question = request.getQuestion();
-        String scopeName = (project != null) ? project.getName() : "Toàn bộ hệ thống KBase";
-
-        // 1. Nhận diện các câu hỏi về số lượng dự án, danh sách dự án trong hệ thống/không gian làm việc
-        if (isProjectOverviewQuery(question)) {
-            return handleProjectOverviewQuery(request, currentUser, project);
-        }
-
-        // 2. Nhận diện các câu hỏi chào hỏi hoặc hỏi về tính năng/khả năng của trợ lý AI
-        if (isGreetingQuery(question)) {
-            return handleGreetingQuery(request, project, accessibleProjects);
-        }
-
-        // 3. Nhận diện các câu hỏi hỏi về danh sách / số lượng tài liệu
-        if (isDocumentListQuery(question)) {
-            return handleDocumentListQuery(request, project, documents, accessibleProjects);
-        }
-
-        if (documents.isEmpty()) {
-            if (geminiApiKey != null && !geminiApiKey.isBlank()) {
-                String contextText = buildGeminiContext(project, Collections.emptyList(), Collections.emptyList(), accessibleProjects);
-                String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, scopeName);
-                if (geminiAnswer != null && !geminiAnswer.isBlank()) {
-                    log.info("Trả lời câu hỏi thông tin chung không có tài liệu bằng Gemini");
-                    return ChatResponse.builder()
-                            .question(request.getQuestion())
-                            .answer(geminiAnswer)
-                            .projectId(project != null ? project.getId() : 0L)
-                            .references(Collections.emptyList())
-                            .build();
-                }
-            }
-            return handleEmptyDocuments(request, project, accessibleProjects);
-        }
+        String scopeName = (project != null) ? "Dự án " + project.getName() : "Toàn bộ hệ thống KBase";
 
         // Tách từ khóa câu hỏi
         String rawQuestion = request.getQuestion().toLowerCase();
@@ -193,13 +161,35 @@ public class AiChatServiceImpl implements AiChatService {
                     .build());
         }
 
-        // 1. Thử gọi Google Gemini nếu có API key hợp lệ
+        // =========================================================================
+        // 1. ƯU TIÊN HÀNG ĐẦU: TRẢ LỜI BẰNG GOOGLE GEMINI AI NẾU CÓ API KEY
+        // =========================================================================
         boolean hasValidGeminiKey = (geminiApiKey != null && !geminiApiKey.isBlank() && !geminiApiKey.contains("your_gemini_api_key"));
         if (hasValidGeminiKey) {
             String contextText = buildGeminiContext(project, documents, scoredDocs, accessibleProjects);
             String geminiAnswer = callGeminiApi(request.getQuestion(), contextText, scopeName);
             if (geminiAnswer != null && !geminiAnswer.isBlank()) {
                 log.info("Trả lời câu hỏi thành công bằng Google Gemini model {}", geminiModel);
+
+                // Nếu chưa có references từ scoredDocs nhưng dự án có tài liệu, đính kèm tài liệu vào tham chiếu
+                if (references.isEmpty() && !documents.isEmpty()) {
+                    int refLimit = Math.min(documents.size(), 3);
+                    for (int i = 0; i < refLimit; i++) {
+                        Document d = documents.get(i);
+                        String docTitle = d.getTitle();
+                        if (isAllProjects && d.getProject() != null) {
+                            docTitle = "[" + d.getProject().getName() + "] " + docTitle;
+                        }
+                        references.add(ChatResponse.SourceReference.builder()
+                                .documentId(d.getId())
+                                .documentTitle(docTitle)
+                                .originalFilename(d.getOriginalFilename())
+                                .snippet("Tệp tài liệu: " + d.getOriginalFilename() + " (" + getCategoryDisplayName(d.getFileCategory()) + ")")
+                                .score(10.0)
+                                .build());
+                    }
+                }
+
                 return ChatResponse.builder()
                         .question(request.getQuestion())
                         .answer(geminiAnswer)
@@ -209,7 +199,32 @@ public class AiChatServiceImpl implements AiChatService {
             }
         }
 
-        // 2. Fallback sang bộ máy phân tích nội bộ (Local RAG)
+        // =========================================================================
+        // 2. CHẾ ĐỘ DỰ PHÒNG NỘI BỘ (FALLBACK KHI GEMINI CHƯA CÓ KEY HOẶC SỰ CỐ MẠNG)
+        // =========================================================================
+        log.warn("Gemini không khả dụng hoặc chưa có key, chuyển sang bộ máy phân tích nội bộ (Local Fallback)");
+
+        // 2.1 Nhận diện câu hỏi danh sách/số lượng tài liệu (ưu tiên trước câu hỏi tổng quan dự án)
+        if (isDocumentListQuery(question)) {
+            return handleDocumentListQuery(request, project, documents, accessibleProjects);
+        }
+
+        // 2.2 Nhận diện câu hỏi tổng quan các dự án trong hệ thống
+        if (isProjectOverviewQuery(question)) {
+            return handleProjectOverviewQuery(request, currentUser, project);
+        }
+
+        // 2.3 Nhận diện câu hỏi chào hỏi
+        if (isGreetingQuery(question)) {
+            return handleGreetingQuery(request, project, accessibleProjects);
+        }
+
+        // 2.4 Nếu không có tài liệu nào trong phạm vi
+        if (documents.isEmpty()) {
+            return handleEmptyDocuments(request, project, accessibleProjects);
+        }
+
+        // 2.5 Fallback sang bộ máy phân tích nội bộ (Local RAG)
         StringBuilder answerBuilder = new StringBuilder();
 
         if (scoredDocs.isEmpty()) {
@@ -273,62 +288,82 @@ public class AiChatServiceImpl implements AiChatService {
         StringBuilder sb = new StringBuilder();
 
         if (project != null) {
-            // --- THÔNG TIN CHUNG VỀ DỰ ÁN ---
-            sb.append("--- THÔNG TIN CHUNG VỀ DỰ ÁN ---\n");
+            // --- THÔNG TIN KHÔNG GIAN DỰ ÁN HIỆN TẠI ---
+            sb.append("--- THÔNG TIN KHÔNG GIAN DỰ ÁN HIỆN TẠI ---\n");
             sb.append("- Tên dự án: ").append(project.getName()).append("\n");
             if (project.getDescription() != null && !project.getDescription().isBlank()) {
                 sb.append("- Mô tả: ").append(project.getDescription()).append("\n");
             }
-            sb.append("- Chủ dự án: ").append(project.getOwner().getFullName()).append(" (").append(project.getOwner().getEmail()).append(")\n");
+            sb.append("- Chủ dự án (Owner): ").append(project.getOwner().getFullName()).append(" (").append(project.getOwner().getEmail()).append(")\n");
             
             List<ProjectMember> members = projectMemberRepository.findByProjectId(project.getId());
             if (!members.isEmpty()) {
-                sb.append("- Danh sách thành viên tham gia (không bao gồm chủ dự án):\n");
+                sb.append("- Thành viên tham gia (").append(members.size()).append(" người):\n");
                 for (ProjectMember m : members) {
                     sb.append("  + ").append(m.getUser().getFullName()).append(" (").append(m.getUser().getEmail()).append(") - Vai trò: ").append(m.getRole()).append("\n");
                 }
             } else {
-                sb.append("- Danh sách thành viên: Hiện chưa có thành viên nào khác ngoài Chủ dự án.\n");
+                sb.append("- Thành viên tham gia: Hiện chưa có thành viên nào khác ngoài Chủ dự án.\n");
             }
-            sb.append("\n");
+            sb.append("- Tổng số tài liệu hiện có trong dự án '").append(project.getName()).append("': ").append(allDocs.size()).append(" tài liệu.\n\n");
         } else {
             // --- PHẠM VI TRA CỨU: TOÀN BỘ HỆ THỐNG KBASE (TẤT CẢ DỰ ÁN) ---
             sb.append("--- PHẠM VI TRA CỨU: TOÀN BỘ HỆ THỐNG KBASE (TẤT CẢ DỰ ÁN) ---\n");
-            sb.append("Hệ thống hiện có ").append(accessibleProjects.size()).append(" dự án người dùng có quyền truy cập:\n");
+            sb.append("Người dùng hiện có quyền truy cập vào ").append(accessibleProjects.size()).append(" không gian dự án:\n");
             for (Project p : accessibleProjects) {
-                sb.append("- Dự án: ").append(p.getName());
+                long dCount = documentRepository.countByProjectId(p.getId());
+                sb.append("- Dự án: ").append(p.getName()).append(" (Tổng số tài liệu: ").append(dCount).append(" tệp)");
                 if (p.getDescription() != null && !p.getDescription().isBlank()) {
-                    sb.append(" (Mô tả: ").append(p.getDescription()).append(")");
+                    sb.append(" - ").append(p.getDescription());
+                }
+                sb.append("\n");
+            }
+            sb.append("- Tổng số tài liệu trên toàn bộ hệ thống: ").append(allDocs.size()).append(" tài liệu.\n\n");
+        }
+
+        // --- DANH SÁCH CHI TIẾT TÀI LIỆU ---
+        if (!allDocs.isEmpty()) {
+            String scopeTitle = (project != null) ? "DỰ ÁN '" + project.getName() + "'" : "TOÀN BỘ HỆ THỐNG";
+            sb.append("--- DANH SÁCH CHI TIẾT TÀI LIỆU TRONG ").append(scopeTitle).append(" (Tổng cộng: ").append(allDocs.size()).append(" tài liệu) ---\n");
+            for (int i = 0; i < allDocs.size(); i++) {
+                Document doc = allDocs.get(i);
+                String pName = (doc.getProject() != null) ? doc.getProject().getName() : "Chung";
+                sb.append((i + 1)).append(". Tiêu đề: ").append(doc.getTitle())
+                  .append(" | Tên tệp gốc: ").append(doc.getOriginalFilename())
+                  .append(" | Dự án: ").append(pName)
+                  .append(" | Định dạng: ").append(getCategoryDisplayName(doc.getFileCategory()))
+                  .append(" | Dung lượng: ").append(formatFileSize(doc.getFileSize()));
+                if (doc.getSummary() != null && !doc.getSummary().isBlank()) {
+                    sb.append(" | Tóm tắt: ").append(doc.getSummary());
                 }
                 sb.append("\n");
             }
             sb.append("\n");
+        } else {
+            sb.append("--- DANH SÁCH TÀI LIỆU: Hiện chưa có tài liệu nào trong phạm vi này ---\n\n");
         }
 
-        // --- DANH SÁCH TÀI LIỆU ---
-        if (!allDocs.isEmpty()) {
-            sb.append("--- DANH SÁCH TÀI LIỆU TRONG HỆ THỐNG ---\n");
-            for (Document doc : allDocs) {
-                String pName = (doc.getProject() != null) ? doc.getProject().getName() : "Chung";
-                sb.append("• Tên tài liệu: ").append(doc.getTitle())
-                  .append(" [Thuộc dự án: ").append(pName).append("]")
-                  .append(" (Tên tệp: ").append(doc.getOriginalFilename()).append(", Thể loại: ").append(doc.getFileCategory()).append(")\n");
-            }
-            sb.append("\n");
-        }
-
+        // --- CHI TIẾT NỘI DUNG TÀI LIỆU (CHO CÂU HỎI VỀ KIẾN THỨC/NỘI DUNG) ---
+        List<Document> docsWithContent = new ArrayList<>();
         if (!scoredDocs.isEmpty()) {
-            sb.append("--- NỘI DUNG TÀI LIỆU LIÊN QUAN ĐẾN CÂU HỎI ---\n");
             int limit = Math.min(scoredDocs.size(), 3);
             for (int i = 0; i < limit; i++) {
-                Document doc = scoredDocs.get(i).doc;
+                docsWithContent.add(scoredDocs.get(i).doc);
+            }
+        } else if (!allDocs.isEmpty() && allDocs.size() <= 3) {
+            docsWithContent.addAll(allDocs);
+        }
+
+        if (!docsWithContent.isEmpty()) {
+            sb.append("--- CHI TIẾT NỘI DUNG TÀI LIỆU LIÊN QUAN ĐẾN CÂU HỎI ---\n");
+            for (Document doc : docsWithContent) {
                 String pName = (doc.getProject() != null) ? doc.getProject().getName() : "Chung";
-                sb.append("TÀI LIỆU: ").append(doc.getTitle()).append(" [Thuộc dự án: ").append(pName).append("] (Tên tệp: ").append(doc.getOriginalFilename()).append(")\n");
+                sb.append("TÀI LIỆU: ").append(doc.getTitle()).append(" [Dự án: ").append(pName).append("] (Tệp: ").append(doc.getOriginalFilename()).append(")\n");
                 if (doc.getTextContent() != null && !doc.getTextContent().isBlank()) {
                     String snippet = doc.getTextContent();
                     if (snippet.length() > 3000) snippet = snippet.substring(0, 3000) + "...";
                     sb.append(snippet).append("\n\n");
-                } else if (doc.getSummary() != null) {
+                } else if (doc.getSummary() != null && !doc.getSummary().isBlank()) {
                     sb.append(doc.getSummary()).append("\n\n");
                 }
             }
@@ -339,21 +374,24 @@ public class AiChatServiceImpl implements AiChatService {
     private String callGeminiApi(String question, String context, String projectName) {
         try {
             String prompt = String.format("""
-                    Bạn là Trợ lý AI chuyên gia của hệ thống KBase.
-                    Hãy trả lời câu hỏi của người dùng bằng Tiếng Việt một cách tự nhiên, rõ ràng, mạch lạc dựa trên ngữ cảnh thông tin và tài liệu dự án "%s" dưới đây.
+                    Bạn là Trợ lý AI thông minh chuyên nghiệp của hệ thống Quản lý tri thức KBase.
+                    Nhiệm vụ: Hãy phân tích thấu đáo câu hỏi của người dùng và trả lời một cách CHÍNH XÁC, THÔNG MINH, TỰ NHIÊN như một trợ lý AI thực thụ, dựa trên ngữ cảnh dữ liệu dưới đây.
                     
-                    Quy tắc trình bày:
-                    1. TUYỆT ĐỐI KHÔNG sử dụng các ký hiệu markdown như '###', '##', '#', '**', '*', '`'.
-                    2. Không dùng dấu thăng '#' để làm tiêu đề. Hãy xuống dòng và viết hoa chữ cái đầu tiêu đề bình thường.
-                    3. Không dùng dấu sao kép '**' để in đậm.
-                    4. Khi liệt kê các ý, dùng dấu gạch đầu dòng '-' đơn giản hoặc số thứ tự 1, 2, 3, tuyệt đối không dùng dấu sao '*'.
-                    5. Dựa sát vào thông tin có trong ngữ cảnh được cung cấp (bao gồm thông tin chung dự án và tài liệu). Nếu không có thông tin để trả lời, hãy nói rõ là dự án hiện chưa có thông tin này.
+                    Không gian hiện tại: %s
+                    
+                    Nguyên tắc trả lời:
+                    1. Trả lời bằng Tiếng Việt tự nhiên, trực tiếp vào trọng tâm câu hỏi của người dùng.
+                    2. Nếu người dùng hỏi về số lượng tài liệu (ví dụ: 'có mấy tài liệu', 'có bao nhiêu tài liệu'), hãy trả lời chính xác số lượng tài liệu hiện có và liệt kê tên các tài liệu đó một cách gọn gàng, rõ ràng.
+                    3. Nếu người dùng hỏi về nội dung, kiến thức bên trong tài liệu, hãy tổng hợp và giải thích rõ ràng dựa trên phần nội dung văn bản tài liệu được cung cấp.
+                    4. Nếu người dùng hỏi về thông tin dự án, chủ sở hữu, thành viên, hoặc danh sách các dự án trong hệ thống, hãy trả lời chính xác dựa theo thông tin trong ngữ cảnh.
+                    5. Tuyệt đối không trả lời rập khuôn, máy móc hoặc tự suy diễn thông tin sai lệch ngoài ngữ cảnh.
+                    6. Định dạng câu trả lời gọn gàng, mạch lạc: Sử dụng gạch đầu dòng '-' hoặc số thứ tự '1.', '2.'. Tuyệt đối không dùng ký hiệu markdown thăng '#' làm tiêu đề.
                     
                     ---
-                    [NGỮ CẢNH THÔNG TIN VÀ TÀI LIỆU DỰ ÁN]:
+                    [NGỮ CẢNH DỮ LIỆU KBASE]:
                     %s
                     ---
-                    [CÂU HỎI]:
+                    [CÂU HỎI CỦA NGƯỜI DÙNG]:
                     %s
                     """, projectName, context, question);
 
@@ -374,7 +412,7 @@ public class AiChatServiceImpl implements AiChatService {
             }
 
             HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(10))
+                    .connectTimeout(Duration.ofSeconds(4))
                     .build();
 
             for (String currentModel : modelsToTry) {
@@ -384,7 +422,7 @@ public class AiChatServiceImpl implements AiChatService {
                     HttpRequest httpRequest = HttpRequest.newBuilder()
                             .uri(URI.create(url))
                             .header("Content-Type", "application/json")
-                            .timeout(Duration.ofSeconds(20))
+                            .timeout(Duration.ofSeconds(6))
                             .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
                             .build();
 
@@ -471,6 +509,11 @@ public class AiChatServiceImpl implements AiChatService {
     private boolean isProjectOverviewQuery(String question) {
         if (question == null || question.isBlank()) return false;
         String q = removeAccents(question.toLowerCase().trim());
+
+        // Loại trừ nếu câu hỏi đang hỏi về tài liệu, tệp tin
+        if (q.contains("tai lieu") || q.contains("tep") || q.contains("file") || q.contains("document") || q.contains("van ban")) {
+            return false;
+        }
 
         boolean hasProjectKeyword = q.contains("du an") || q.contains("project") || q.contains("khong gian");
         

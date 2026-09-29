@@ -52,7 +52,7 @@ export const AiChatPanel: React.FC<AiChatPanelProps> = ({
     {
       id: 'welcome',
       sender: 'bot',
-      text: 'Xin chào! Tôi là Trợ Lý AI KBase được tích hợp mô hình Gemini 3.6 Flash. Bạn có thể hỏi bất kỳ câu hỏi nào về các tài liệu, hướng dẫn kỹ thuật hoặc thông số kiến trúc đã lưu trữ trong dự án.',
+      text: 'Xin chào! Tôi là Trợ Lý AI KBase được tích hợp mô hình Gemini 3.8 Flash. Bạn có thể hỏi bất kỳ câu hỏi nào về các tài liệu, hướng dẫn kỹ thuật hoặc thông số kiến trúc đã lưu trữ trong dự án.',
       thought: 'Hệ thống đã kết nối trực tiếp với cơ sở dữ liệu PostgreSQL và tải bộ chỉ mục văn bản RAG cho dự án.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
