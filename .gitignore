@@ -28,3 +28,10 @@ __pycache__/
 # Documents and Reports
 *.pdf
 *.docx
+
+# Environment variables files (Sensitive - Do not commit to GitHub)
+.env
+.env.local
+backend/.env
+ai-service/.env
+

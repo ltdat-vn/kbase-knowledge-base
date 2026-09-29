@@ -38,7 +38,7 @@ kbase:
     mock-fallback: true
     gemini:
       api-key: ${GEMINI_API_KEY:}
-      model: gemini-3.8-flash
+      model: ${GEMINI_MODEL:gemini-3.8-flash}
 
 ---
 # Dev Profile with H2
